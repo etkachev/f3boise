@@ -4,7 +4,7 @@ use actix_web::{
 };
 use dotenv::dotenv;
 use f3_api_rs::oauth_client::get_oauth_client;
-use f3_api_rs::web_api_routes::challenge_event_api::challenge_event_api;
+use f3_api_rs::web_api_routes::slack_events::slack_events;
 use f3_api_rs::web_api_state::{AppState, LOCAL_URL, PORT_NUMBER, SLACK_SERVER};
 use oauth2::reqwest::http_client;
 use oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, Scope, TokenResponse};
@@ -103,6 +103,7 @@ async fn main() -> std::io::Result<()> {
         let auth_token = env::var("BOT_OAUTH_TOKEN").expect("No auth token set in env");
         let signing_secret =
             env::var("SLACK_SIGNING_SECRET").expect("No Signing secret set in env");
+        let verify_token = env::var("DEPRECATED_VERIFY_TOKEN").expect("No Verify token set in env");
         let client = get_oauth_client();
         let api_base_url = format!("https://{}/api", SLACK_SERVER);
 
@@ -113,6 +114,7 @@ async fn main() -> std::io::Result<()> {
                 oauth: client,
                 bot_auth_token: auth_token,
                 signing_secret,
+                verify_token,
             }))
             .wrap(middleware::Compress::default())
             .wrap(SessionMiddleware::new(
@@ -123,7 +125,7 @@ async fn main() -> std::io::Result<()> {
             .service(auth)
             .service(login)
             .service(logout)
-            .service(challenge_event_api)
+            .service(slack_events)
     })
     .bind((LOCAL_URL, PORT_NUMBER))?
     .run()

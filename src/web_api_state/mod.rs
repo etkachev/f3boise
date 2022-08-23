@@ -9,4 +9,6 @@ pub struct AppState {
     pub api_base_url: String,
     pub signing_secret: String,
     pub bot_auth_token: String,
+    /// Deprecated verify token
+    pub verify_token: String,
 }

@@ -1,1 +1,1 @@
-pub mod challenge_event_api;
+pub mod slack_events;
