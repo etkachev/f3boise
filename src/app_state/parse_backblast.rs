@@ -4,7 +4,7 @@ use crate::app_state::{
 };
 use crate::users::f3_user::F3User;
 use chrono::NaiveDate;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub fn parse_back_blast(text: &str, users: &HashMap<String, F3User>) -> BackBlastData {
     let text = text.trim();
@@ -21,15 +21,16 @@ pub fn parse_back_blast(text: &str, users: &HashMap<String, F3User>) -> BackBlas
             if let Some((prefix, rest_of_line)) =
                 text_line.split_once(|c| c == ' ' || c == ':' || c == '-')
             {
-                println!("{}", prefix);
                 match prefix.trim().to_lowercase().as_str() {
-                    "q" => {
+                    "q" | "qs" => {
                         let users = parse_users_list(rest_of_line, users);
                         back_blast.qs = users;
+                        continue;
                     }
                     "pax" => {
                         let users = parse_users_list(rest_of_line, users);
                         back_blast.set_pax(users);
+                        continue;
                     }
                     _ => {
                         // maybe date
@@ -41,7 +42,6 @@ pub fn parse_back_blast(text: &str, users: &HashMap<String, F3User>) -> BackBlas
                 }
             } else {
                 // maybe date or time
-                println!("{}", text_line);
                 if let Some(date) = parse_date(text_line) {
                     back_blast.date = date;
                     continue;
@@ -57,7 +57,6 @@ pub fn parse_back_blast(text: &str, users: &HashMap<String, F3User>) -> BackBlas
                         }
                     }
                 }
-                println!("DUDE:::::{}", text_line);
             }
         }
     }
@@ -84,22 +83,22 @@ fn clean_name(name: &str) -> String {
     name.to_string()
 }
 
-fn parse_users_list(text: &str, users: &HashMap<String, F3User>) -> Vec<String> {
+fn parse_users_list(text: &str, users: &HashMap<String, F3User>) -> HashSet<String> {
     let text = text.trim();
-    let split_names: Vec<String> = text
+    let split_names = text
         .split(|c| c == ' ' || c == ',')
         .into_iter()
         .filter(|c| !c.trim().is_empty())
+        .filter(|c| c.starts_with("@") || c.starts_with("<@"))
         .map(|name| clean_name(name))
-        .map(|name| {
+        .fold(HashSet::<String>::new(), |mut acc, name| {
             if let Some(matching_slack_user) = users.get(name.as_str()) {
-                matching_slack_user.name.to_string()
+                acc.insert(matching_slack_user.name.to_string());
             } else {
-                name
+                acc.insert(name.to_string());
             }
-        })
-        .collect();
-    println!("{:?}", split_names);
+            acc
+        });
     split_names
 }
 
@@ -107,6 +106,7 @@ fn parse_users_list(text: &str, users: &HashMap<String, F3User>) -> Vec<String> 
 mod tests {
     use super::*;
     use chrono::NaiveDate;
+
     #[test]
     fn variant_one() {
         let text = "#backblast #bleach\n\n08-20-22\n\n0600-0700\n\nQ: Stinger\n\nPAX: @Timney <@U03SR452HL7>\n\nConditions: nice\n\nFocus on the workout was a modified version of the Elk Fit workout. High intensity with short recovery periods with heavy weights.\n\nWarm up: waterfall, couch stretch, Michael Phelps\n\nThe Thang:\n1 mile run for time.\n\nFirst Phase - Tabata\nBent over row with SB - 20sec x 8 sets (10s rest)\nPush ups with ruck - 20sec x 8 sets (10s rest)\nOverhead press - 20sec x 8 sets (10s rest)\nTricep dips - 20sec x 8 sets (10s rest)\nGood mornings - 20sec x 8 sets (10s rest)\nWeighted sit-ups - 20sec x 8 sets (10s rest)";
@@ -114,7 +114,7 @@ mod tests {
         let users = HashMap::<String, F3User>::from([(
             "U03SR452HL7".to_string(),
             F3User {
-                id: "U03SR452HL7".to_string(),
+                id: Some("U03SR452HL7".to_string()),
                 name: "Backslash".to_string(),
                 email: "backslash@gmail.com".to_string(),
             },
@@ -124,11 +124,17 @@ mod tests {
             parsed,
             BackBlastData::new(
                 AO::Bleach,
-                vec!["Stinger".to_string()],
-                vec!["Timney".to_string(), "Backslash".to_string()],
-                NaiveDate::from_ymd(2022, 8, 20)
+                HashSet::from(["Stinger".to_string()]),
+                HashSet::from(["Timney".to_string(), "Backslash".to_string()]),
+                NaiveDate::from_ymd(2022, 8, 20),
             )
         );
+    }
+
+    #[test]
+    fn cleaning_names() {
+        let cleaned = clean_name("@Timney");
+        assert_eq!(cleaned, "Timney".to_string());
     }
 
     #[test]
@@ -137,12 +143,15 @@ mod tests {
         let users = HashMap::<String, F3User>::from([(
             "U03SR452HL7".to_string(),
             F3User {
-                id: "U03SR452HL7".to_string(),
+                id: Some("U03SR452HL7".to_string()),
                 name: "Backslash".to_string(),
                 email: "backslash@gmail.com".to_string(),
             },
         )]);
         let parsed = parse_users_list(text, &users);
-        assert_eq!(parsed, vec!["Timney".to_string(), "Backslash".to_string()]);
+        assert_eq!(
+            parsed,
+            HashSet::from(["Timney".to_string(), "Backslash".to_string()])
+        );
     }
 }

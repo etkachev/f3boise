@@ -1,3 +1,5 @@
+use crate::slack_api::channels::public_channels::PublicChannels;
+
 /// Different AO options.
 #[derive(PartialEq, Debug)]
 pub enum AO {
@@ -8,6 +10,7 @@ pub enum AO {
     IronMountain,
     Ruckership,
     Backyard,
+    BowlerPark,
     DR,
     Unknown(String),
 }
@@ -28,9 +31,28 @@ impl From<String> for AO {
             "rebel" => AO::Rebel,
             "iron-mountain" | "ironmountain" => AO::IronMountain,
             "ruckership" | "rucker-ship" => AO::Ruckership,
+            "bowler-park" => AO::BowlerPark,
             "backyard" => AO::Backyard,
             "dr" => AO::DR,
             _ => AO::Unknown(ao.to_string()),
+        }
+    }
+}
+
+impl From<PublicChannels> for AO {
+    fn from(channel: PublicChannels) -> Self {
+        match channel {
+            PublicChannels::Rebel => AO::Rebel,
+            PublicChannels::Ruckership => AO::Ruckership,
+            PublicChannels::Backyard => AO::Backyard,
+            PublicChannels::IronMountain => AO::IronMountain,
+            PublicChannels::Bleach => AO::Bleach,
+            PublicChannels::Gem => AO::Gem,
+            PublicChannels::OldGlory => AO::OldGlory,
+            PublicChannels::BowlerPark => AO::BowlerPark,
+            PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
+            PublicChannels::DR => AO::DR,
+            PublicChannels::Unknown(unknown) => AO::Unknown(unknown),
         }
     }
 }

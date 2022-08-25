@@ -1,6 +1,5 @@
-pub mod history_request;
-pub mod history_response;
-pub mod list_request;
-pub mod list_response;
+pub mod history;
+pub mod list;
 pub mod public_channels;
+pub mod reactions_add;
 pub mod types;

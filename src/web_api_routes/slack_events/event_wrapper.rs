@@ -1,4 +1,6 @@
 use super::channel_message::ChannelMessageEvent;
+use crate::web_api_routes::slack_events::reaction_added::ReactionAddedData;
+use crate::web_api_routes::slack_events::team_join::TeamJoinData;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_with::{formats::Flexible, TimestampSeconds};
@@ -22,6 +24,8 @@ pub struct EventWrapper {
 #[serde(rename_all = "snake_case")]
 pub enum EventTypes {
     Message(ChannelMessageEvent),
+    TeamJoin(TeamJoinData),
+    ReactionAdded(ReactionAddedData),
     Unknown,
 }
 

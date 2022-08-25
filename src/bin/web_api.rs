@@ -5,11 +5,14 @@ use actix_web::{
 use dotenv::dotenv;
 use f3_api_rs::oauth_client::get_oauth_client;
 use f3_api_rs::web_api_routes::slack_events::slack_events;
-use f3_api_rs::web_api_state::{AppState, LOCAL_URL, PORT_NUMBER, SLACK_SERVER};
+use f3_api_rs::web_api_state::{
+    MutableWebState, WebAppState, LOCAL_URL, PORT_NUMBER, SLACK_SERVER,
+};
 use oauth2::reqwest::http_client;
 use oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, Scope, TokenResponse};
 use serde::Deserialize;
 use std::env;
+use std::sync::Mutex;
 
 fn get_key() -> Key {
     Key::generate()
@@ -35,8 +38,9 @@ async fn index(session: Session) -> impl Responder {
 }
 
 #[get("/login")]
-async fn login(data: web::Data<AppState>) -> impl Responder {
+async fn login(data: web::Data<MutableWebState>) -> impl Responder {
     // Create a PKCE code verifier and SHA-256 encode it as a code challenge.
+    let data = data.app.lock().unwrap();
     let (pkce_code_challenge, _pkce_code_verifier) = PkceCodeChallenge::new_random_sha256();
     // Generate the authorization URL to which we'll redirect the user.
     let (auth_url, _csrf_token) = &data
@@ -69,10 +73,11 @@ struct AuthRequest {
 #[get("/auth")]
 async fn auth(
     session: Session,
-    data: web::Data<AppState>,
+    data: web::Data<MutableWebState>,
     params: web::Query<AuthRequest>,
 ) -> impl Responder {
     let code = AuthorizationCode::new(params.code.clone());
+    let data = data.app.lock().unwrap();
     let token = &data
         .oauth
         .exchange_code(code)
@@ -97,25 +102,32 @@ async fn auth(
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        dotenv().ok();
+    dotenv().ok();
 
-        let auth_token = env::var("BOT_OAUTH_TOKEN").expect("No auth token set in env");
-        let signing_secret =
-            env::var("SLACK_SIGNING_SECRET").expect("No Signing secret set in env");
-        let verify_token = env::var("DEPRECATED_VERIFY_TOKEN").expect("No Verify token set in env");
-        let client = get_oauth_client();
-        let api_base_url = format!("https://{}/api", SLACK_SERVER);
+    let auth_token = env::var("BOT_OAUTH_TOKEN").expect("No auth token set in env");
+    let signing_secret = env::var("SLACK_SIGNING_SECRET").expect("No Signing secret set in env");
+    let verify_token = env::var("DEPRECATED_VERIFY_TOKEN").expect("No Verify token set in env");
+    let client = get_oauth_client();
+    let api_base_url = format!("https://{}/api", SLACK_SERVER);
+    let mut data_app = f3_api_rs::app_state::AppState::new(auth_token.to_string());
+    data_app.initialize_data().await;
+    let web_app = WebAppState {
+        api_base_url,
+        oauth: client,
+        bot_auth_token: auth_token,
+        signing_secret,
+        verify_token,
+        data_state: data_app,
+    };
 
+    let web_app_data = web::Data::new(MutableWebState {
+        app: Mutex::new(web_app),
+    });
+
+    HttpServer::new(move || {
         println!("Starting on port: {}", PORT_NUMBER);
         App::new()
-            .app_data(web::Data::new(AppState {
-                api_base_url,
-                oauth: client,
-                bot_auth_token: auth_token,
-                signing_secret,
-                verify_token,
-            }))
+            .app_data(web_app_data.clone())
             .wrap(middleware::Compress::default())
             .wrap(SessionMiddleware::new(
                 CookieSessionStore::default(),
