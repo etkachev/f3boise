@@ -1,6 +1,7 @@
 use crate::slack_api::users::users_list::response::SlackUserData;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct F3User {
     pub id: Option<String>,
     pub name: String,
@@ -31,8 +32,7 @@ impl F3User {
                 .email
                 .as_ref()
                 .map(|email| email.to_string())
-                .unwrap_or_else(|| "UNKNOWN".to_string())
-                .to_string(),
+                .unwrap_or_else(|| "UNKNOWN".to_string()),
         }
     }
 }

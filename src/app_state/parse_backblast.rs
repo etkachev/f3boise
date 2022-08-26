@@ -12,7 +12,7 @@ pub fn parse_back_blast(text: &str, users: &HashMap<String, F3User>) -> BackBlas
     for (index, text_line) in text.lines().enumerate() {
         // parse first line for backblast name
         if index == 0 {
-            if let Some(stripped) = text_line.strip_prefix(BACK_BLAST_TAG) {
+            if let Some(stripped) = text_line.to_lowercase().strip_prefix(BACK_BLAST_TAG) {
                 let stripped = stripped.trim();
                 back_blast.ao = AO::from(stripped.to_string());
             }
@@ -77,9 +77,9 @@ fn parse_date(date: &str) -> Option<NaiveDate> {
 }
 
 fn clean_name(name: &str) -> String {
-    let name = name.strip_prefix('<').unwrap_or_else(|| name);
-    let name = name.strip_suffix('>').unwrap_or_else(|| name);
-    let name = name.strip_prefix('@').unwrap_or_else(|| name);
+    let name = name.strip_prefix('<').unwrap_or(name);
+    let name = name.strip_suffix('>').unwrap_or(name);
+    let name = name.strip_prefix('@').unwrap_or(name);
     name.to_string()
 }
 
@@ -89,8 +89,8 @@ fn parse_users_list(text: &str, users: &HashMap<String, F3User>) -> HashSet<Stri
         .split(|c| c == ' ' || c == ',')
         .into_iter()
         .filter(|c| !c.trim().is_empty())
-        .filter(|c| c.starts_with("@") || c.starts_with("<@"))
-        .map(|name| clean_name(name))
+        .filter(|c| c.starts_with('@') || c.starts_with("<@"))
+        .map(clean_name)
         .fold(HashSet::<String>::new(), |mut acc, name| {
             if let Some(matching_slack_user) = users.get(name.as_str()) {
                 acc.insert(matching_slack_user.name.to_string());
@@ -109,7 +109,7 @@ mod tests {
 
     #[test]
     fn variant_one() {
-        let text = "#backblast #bleach\n\n08-20-22\n\n0600-0700\n\nQ: Stinger\n\nPAX: @Timney <@U03SR452HL7>\n\nConditions: nice\n\nFocus on the workout was a modified version of the Elk Fit workout. High intensity with short recovery periods with heavy weights.\n\nWarm up: waterfall, couch stretch, Michael Phelps\n\nThe Thang:\n1 mile run for time.\n\nFirst Phase - Tabata\nBent over row with SB - 20sec x 8 sets (10s rest)\nPush ups with ruck - 20sec x 8 sets (10s rest)\nOverhead press - 20sec x 8 sets (10s rest)\nTricep dips - 20sec x 8 sets (10s rest)\nGood mornings - 20sec x 8 sets (10s rest)\nWeighted sit-ups - 20sec x 8 sets (10s rest)";
+        let text = "#backblast #bleach\n\n08-20-22\n\n0600-0700\n\nQ: @Stinger\n\nPAX: @Timney <@U03SR452HL7>\n\nConditions: nice\n\nFocus on the workout was a modified version of the Elk Fit workout. High intensity with short recovery periods with heavy weights.\n\nWarm up: waterfall, couch stretch, Michael Phelps\n\nThe Thang:\n1 mile run for time.\n\nFirst Phase - Tabata\nBent over row with SB - 20sec x 8 sets (10s rest)\nPush ups with ruck - 20sec x 8 sets (10s rest)\nOverhead press - 20sec x 8 sets (10s rest)\nTricep dips - 20sec x 8 sets (10s rest)\nGood mornings - 20sec x 8 sets (10s rest)\nWeighted sit-ups - 20sec x 8 sets (10s rest)";
 
         let users = HashMap::<String, F3User>::from([(
             "U03SR452HL7".to_string(),
@@ -127,6 +127,27 @@ mod tests {
                 HashSet::from(["Stinger".to_string()]),
                 HashSet::from(["Timney".to_string(), "Backslash".to_string()]),
                 NaiveDate::from_ymd(2022, 8, 20),
+            )
+        );
+    }
+
+    #[test]
+    fn variant_two() {
+        let text = "#Backblast #rebel\n8.22.22\nQ: @Slice and @Doppler\nPax: @Daft @Bacon Bacon Bacon @Focker @Lawsuit";
+        let users = HashMap::<String, F3User>::from([]);
+        let parsed = parse_back_blast(text, &users);
+        assert_eq!(
+            parsed,
+            BackBlastData::new(
+                AO::Rebel,
+                HashSet::from(["Slice".to_string(), "Doppler".to_string()]),
+                HashSet::from([
+                    "Daft".to_string(),
+                    "Bacon".to_string(),
+                    "Focker".to_string(),
+                    "Lawsuit".to_string()
+                ]),
+                NaiveDate::from_ymd(2022, 8, 22)
             )
         );
     }

@@ -1,5 +1,8 @@
 pub mod app_state;
+pub mod bot_data;
+pub mod db;
 pub mod oauth_client;
+pub mod shared;
 pub mod slack_api;
 pub mod users;
 pub mod web_api_routes;

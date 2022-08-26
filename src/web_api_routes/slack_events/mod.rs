@@ -30,13 +30,12 @@ fn verify_events_request(
     body: &web::Json<event_wrapper::EventWrapper>,
 ) -> bool {
     if let Some(time_stamp_header) = req.headers().get("X-Slack-Request-Timestamp") {
-        let time_stamp = time_stamp_header.to_str().unwrap_or_else(|_| "");
+        let time_stamp = time_stamp_header.to_str().unwrap_or("");
         // TODO verify time
         let body_string = serde_qs::to_string(&body).unwrap_or_else(|_| "".to_string());
         let sig_base_string = format!("{}:{}:{}", CHALLENGE_VERSION, time_stamp, body_string);
         if let Some(slack_signature_header) = req.headers().get("X-Slack-Signature") {
-            let slack_signature = slack_signature_header.to_str().unwrap_or_else(|_| "");
-            let data = data.app.lock().unwrap();
+            let slack_signature = slack_signature_header.to_str().unwrap_or("");
             let slack_signing_secret = &data.signing_secret;
             let valid = verify(
                 sig_base_string.as_bytes(),
@@ -49,7 +48,7 @@ fn verify_events_request(
             }
         }
     }
-    return false;
+    false
 }
 
 const DIVIDER: &str = "\n\n========\n\n";
@@ -70,15 +69,13 @@ pub async fn slack_events(
     if let Some(event) = &body.event {
         match event {
             event_wrapper::EventTypes::Message(message_data) => {
-                let data = data.app.lock().unwrap();
-                channel_message::handle_channel_message(message_data, &data.data_state).await;
+                channel_message::handle_channel_message(message_data, &data).await;
             }
             event_wrapper::EventTypes::TeamJoin(join_data) => {
-                let mut data = data.app.lock().unwrap();
-                team_join::handle_new_user(&join_data.user, &mut data.data_state);
+                team_join::handle_new_user(&join_data.user, &data);
             }
             event_wrapper::EventTypes::ReactionAdded(reaction_data) => {
-                reaction_added::handle_reaction_item(reaction_data);
+                reaction_added::handle_reaction_item(reaction_data, &data);
             }
             _ => (),
         }
@@ -88,5 +85,5 @@ pub async fn slack_events(
         challenge: body.challenge.clone(),
     };
 
-    return HttpResponse::Ok().json(response);
+    HttpResponse::Ok().json(response)
 }

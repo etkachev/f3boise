@@ -34,6 +34,7 @@ impl BackBlastData {
         self.pax = pax;
     }
 
+    /// get all pax (including qs)
     pub fn get_pax(&self) -> HashSet<String> {
         self.pax
             .union(&self.qs)
@@ -51,12 +52,9 @@ impl BackBlastData {
     }
 
     pub fn is_valid_back_blast(&self) -> bool {
-        let has_ao = match self.ao {
-            AO::Unknown(_) | AO::DR => false,
-            _ => true,
-        };
+        let has_ao = !matches!(self.ao, AO::Unknown(_) | AO::DR);
 
-        let has_pax = self.qs.len() > 0 && self.pax.len() > 0;
+        let has_pax = !self.qs.is_empty() && !self.pax.is_empty();
         let valid_date = self.date > NaiveDate::MIN;
         let valid_event_times = self.event_times.is_some();
 
