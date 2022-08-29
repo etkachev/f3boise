@@ -14,10 +14,12 @@ pub struct DbBackBlast {
     pub date: NaiveDate,
 }
 
-impl DbBackBlast {
-    pub fn from(data: &BackBlastData) -> Self {
-        let q: Vec<String> = data.qs.clone().into_iter().collect();
-        let pax: Vec<String> = data.get_pax().into_iter().collect();
+impl From<&BackBlastData> for DbBackBlast {
+    fn from(data: &BackBlastData) -> Self {
+        let mut q: Vec<String> = data.qs.clone().into_iter().collect();
+        let mut pax: Vec<String> = data.get_pax().into_iter().collect();
+        q.sort();
+        pax.sort();
         DbBackBlast {
             ao: data.ao.to_string(),
             q: q.join(","),
@@ -25,7 +27,9 @@ impl DbBackBlast {
             date: data.date,
         }
     }
+}
 
+impl DbBackBlast {
     /// generate unique id based on ao and date combined.
     pub fn get_unique_id(&self) -> String {
         format!("{}-{}", self.ao, self.date)

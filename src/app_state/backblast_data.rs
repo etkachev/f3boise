@@ -1,4 +1,5 @@
 use super::ao_data::AO;
+use crate::db::db_back_blast::DbBackBlast;
 use crate::web_api_routes::slack_events::event_times::EventTimes;
 use chrono::NaiveDate;
 use std::collections::HashSet;
@@ -59,6 +60,23 @@ impl BackBlastData {
         let valid_event_times = self.event_times.is_some();
 
         has_ao && has_pax && valid_date && valid_event_times
+    }
+}
+
+fn split_comma_string(input: &str) -> HashSet<String> {
+    let mut result = HashSet::<String>::new();
+    for item in input.split(',').collect::<Vec<&str>>() {
+        result.insert(item.to_string());
+    }
+    result
+}
+
+impl From<DbBackBlast> for BackBlastData {
+    fn from(db_bb: DbBackBlast) -> Self {
+        let ao = AO::from(db_bb.ao.clone());
+        let qs = split_comma_string(&db_bb.q);
+        let pax = split_comma_string(&db_bb.pax);
+        BackBlastData::new(ao, qs, pax, db_bb.date)
     }
 }
 

@@ -6,7 +6,7 @@ use crate::db::db_back_blast::DbBackBlast;
 use crate::shared::common_errors::AppError;
 use crate::shared::constants::{DB_BACKBLAST_DIR_PATH, DB_DIR_PATH};
 use crate::users::f3_user::F3User;
-use chrono::{Datelike, NaiveDate};
+use chrono::{Datelike, Months, NaiveDate};
 use std::collections::HashMap;
 
 pub mod db_back_blast;
@@ -82,12 +82,43 @@ impl DbStore {
             wrt.serialize(record)?;
         }
         wrt.flush()?;
-        println!("Saved backblast data to csv");
         Ok(())
     }
 
+    pub fn get_all_back_blast_data(&self) -> Result<Vec<BackBlastData>, AppError> {
+        let mut start_date = NaiveDate::from_ymd(2021, 1, 1);
+        let mut file_path = self.get_bb_db_file_path(&start_date);
+        let mut db_results = HashMap::<String, DbBackBlast>::new();
+
+        while std::path::Path::new(&file_path).exists() {
+            let mut rdr = csv::ReaderBuilder::new().from_path(&file_path)?;
+
+            for bb in rdr.deserialize() {
+                let bb: DbBackBlast = bb?;
+                if db_results.contains_key(bb.get_unique_id().as_str()) {
+                    println!("Dup record: {:?}", bb);
+                }
+                db_results.insert(bb.get_unique_id(), bb);
+            }
+            println!("Finished file fetching: {}", file_path);
+            start_date = start_date
+                .checked_add_months(Months::new(1))
+                .expect("Could not increment month");
+            file_path = self.get_bb_db_file_path(&start_date);
+        }
+
+        println!("Finished fetching");
+        let mut list = Vec::<BackBlastData>::new();
+
+        for (_, bb) in db_results.into_iter() {
+            let data_bb = BackBlastData::from(bb);
+            list.push(data_bb);
+        }
+        Ok(list)
+    }
+
     fn get_bb_db_file_path(&self, date: &NaiveDate) -> String {
-        let month = date.month();
+        let month = date.format("%m").to_string();
         let year = date.year();
         format!("{}{}-{}.csv", DB_BACKBLAST_DIR_PATH, year, month)
     }

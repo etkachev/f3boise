@@ -1,5 +1,7 @@
 use crate::slack_api::channels::public_channels::PublicChannels;
+use chrono::Weekday;
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 
 /// Different AO options.
 #[derive(PartialEq, Debug)]
@@ -14,6 +16,42 @@ pub enum AO {
     BowlerPark,
     DR,
     Unknown(String),
+}
+
+/// days of the week the ao is open
+pub type AoDays = HashSet<Weekday>;
+
+impl AO {
+    pub fn week_days(&self) -> AoDays {
+        match self {
+            AO::Bleach => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Sat]),
+            AO::Gem => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
+            AO::OldGlory => HashSet::from([Weekday::Mon, Weekday::Wed]),
+            AO::Rebel => HashSet::from([Weekday::Tue, Weekday::Thu]),
+            AO::IronMountain => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
+            AO::Ruckership => HashSet::from([Weekday::Fri]),
+            AO::Backyard => HashSet::from([Weekday::Wed, Weekday::Fri]),
+            AO::BowlerPark => HashSet::from([Weekday::Mon, Weekday::Wed]),
+            _ => HashSet::new(),
+        }
+    }
+}
+
+impl Clone for AO {
+    fn clone(&self) -> Self {
+        match self {
+            AO::Bleach => AO::Bleach,
+            AO::Gem => AO::Gem,
+            AO::OldGlory => AO::OldGlory,
+            AO::Rebel => AO::Rebel,
+            AO::IronMountain => AO::IronMountain,
+            AO::Ruckership => AO::Ruckership,
+            AO::Backyard => AO::Backyard,
+            AO::BowlerPark => AO::BowlerPark,
+            AO::DR => AO::DR,
+            AO::Unknown(name) => AO::Unknown(name.to_string()),
+        }
+    }
 }
 
 impl ToString for AO {
@@ -79,13 +117,23 @@ impl From<PublicChannels> for AO {
 /// represents ao for db
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AoData {
+    /// name of AO
     pub name: String,
+    /// should be comma separated list of days of week this AO meets
+    pub days: String,
 }
 
 impl AoData {
     pub fn from(ao: &AO) -> Self {
+        let days = ao.week_days();
+        let serialized = days
+            .into_iter()
+            .map(|day| day.to_string())
+            .collect::<Vec<String>>()
+            .join(",");
         AoData {
             name: ao.to_string(),
+            days: serialized,
         }
     }
 }

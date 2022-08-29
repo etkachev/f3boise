@@ -13,6 +13,10 @@ path = "src/bin/web_api.rs"
 name = "f3botscraper"
 path = "src/bin/bot_scraper.rs"
 
+[[bin]]
+name = "migrate"
+path = "src/bin/migrate_old_data.rs"
+
 [dependencies]
 actix-web = "4"
 actix-session = { version = "0.7.1", features = ["cookie-session"] }

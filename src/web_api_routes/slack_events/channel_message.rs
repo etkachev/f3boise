@@ -1,4 +1,4 @@
-use crate::app_state::backblast_data::{BackBlastData, BACK_BLAST_TAG};
+use crate::app_state::backblast_data::BACK_BLAST_TAG;
 use crate::app_state::parse_backblast::parse_back_blast;
 use crate::web_api_routes::slack_events::event_times::EventTimes;
 use crate::web_api_state::MutableWebState;
