@@ -65,7 +65,18 @@ impl BackBlastData {
 
 fn split_comma_string(input: &str) -> HashSet<String> {
     let mut result = HashSet::<String>::new();
-    for item in input.split(',').collect::<Vec<&str>>() {
+    for item in input
+        .split(',')
+        .filter_map(|name| {
+            let name = name.trim();
+            if !name.is_empty() {
+                Some(name)
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<&str>>()
+    {
         result.insert(item.to_string());
     }
     result

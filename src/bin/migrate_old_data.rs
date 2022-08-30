@@ -24,14 +24,30 @@ struct PaxCount {
     pub post_count: u16,
 }
 
+fn clean_sheet_name(name: &str) -> &str {
+    let name = name.trim();
+    let name = if let Some((name, _)) = name.split_once(&['(', '|'][..]) {
+        name.trim()
+    } else {
+        name
+    };
+    name
+}
+
+fn extract_names(list: &String) -> Vec<&str> {
+    list.split(',').map(clean_sheet_name).collect()
+}
+
 fn map_to_bb(ao: &AO, old: OldBackBlast) -> Option<BackBlastData> {
     // date format: 10/8/2021
     let mut date_parsed = NaiveDate::parse_from_str(&old.date, "%m/%d/%Y").unwrap();
     if date_parsed < NaiveDate::from_ymd(2000, 1, 1) {
         date_parsed = NaiveDate::parse_from_str(&old.date, "%m/%d/%y").unwrap();
     }
-    let pax: Vec<&str> = old.pax.split(',').map(|name| name.trim()).collect();
-    let qs: Vec<&str> = old.q.split(',').map(|name| name.trim()).collect();
+    // let pax: Vec<&str> = old.pax.split(',').map(|name| name.trim()).collect();
+    let pax = extract_names(&old.pax);
+    // let qs: Vec<&str> = old.q.split(',').map(|name| name.trim()).collect();
+    let qs = extract_names(&old.q);
     if pax.is_empty() {
         if !qs.is_empty() {
             println!("Qs but no pax");
@@ -113,15 +129,72 @@ fn verify_ao_stats(ao: &AO, data: &[BackBlastData], ao_file_path: &str) -> Resul
     let ao = ao.clone();
     let pax_counts_file = pax_counts_path(ao_file_path);
     let mut rdr = csv::ReaderBuilder::new().from_path(pax_counts_file)?;
+    let mut pax_counts = Vec::<PaxCount>::new();
     for item in rdr.deserialize() {
         let item: PaxCount = item?;
+        let pax_count_name = clean_sheet_name(item.name.as_str());
+        let pax_count_name = pax_count_name.to_lowercase();
         let pax_data = data
             .iter()
-            .filter(|data| data.ao == ao && data.get_pax().contains(&item.name))
+            .filter(|data| {
+                data.ao == ao
+                    && data
+                        .get_pax()
+                        .iter()
+                        .map(|name| name.to_lowercase())
+                        .collect::<Vec<String>>()
+                        .contains(&pax_count_name)
+            })
             .count();
         if pax_data != item.post_count as usize {
             println!("Mismatch for {} in {}", item.name, ao.to_string());
             println!("Calculated: {} | Recorded: {}", pax_data, item.post_count);
+        }
+        pax_counts.push(item);
+    }
+
+    let pax_counts_names: Vec<String> = pax_counts
+        .iter()
+        .filter_map(|pc| {
+            if pc.post_count > 0 {
+                let name = clean_sheet_name(pc.name.as_str());
+                Some(name.to_lowercase())
+            } else {
+                None
+            }
+        })
+        .collect();
+    let pax_db_names: Vec<String> =
+        data.iter()
+            .filter(|item| item.ao == ao)
+            .fold(Vec::new(), |mut acc, item| {
+                for name in item.get_pax() {
+                    if !acc.contains(&name) {
+                        acc.push(name.to_lowercase());
+                    }
+                }
+                acc
+            });
+
+    // check pax counts data
+    for name in pax_counts_names.iter() {
+        if !pax_db_names.contains(name) {
+            println!(
+                "{}: Found in PAX counts but not backblasts: {}",
+                ao.to_string(),
+                name
+            );
+        }
+    }
+
+    // check db data
+    for name in pax_db_names.iter() {
+        if !pax_counts_names.contains(name) {
+            println!(
+                "{}: Found in bb names but not PAX counts: {}",
+                ao.to_string(),
+                name
+            );
         }
     }
     Ok(())
