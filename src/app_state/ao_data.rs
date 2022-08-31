@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 /// Different AO options.
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Deserialize, Serialize)]
 pub enum AO {
     Bleach,
     Gem,

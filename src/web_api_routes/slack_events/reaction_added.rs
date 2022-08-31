@@ -26,7 +26,7 @@ pub struct ReactionItem {
 pub fn handle_reaction_item(reaction: &ReactionAddedData, app_state: &MutableWebState) {
     let self_bot_id = {
         let app = app_state.app.lock().unwrap();
-        app.data_state.self_bot_id.to_owned()
+        app.self_bot_id.to_owned()
     };
     match &self_bot_id {
         Some(bot_id) if &reaction.user != bot_id => {

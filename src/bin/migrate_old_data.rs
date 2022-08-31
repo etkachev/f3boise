@@ -34,7 +34,7 @@ fn clean_sheet_name(name: &str) -> &str {
     name
 }
 
-fn extract_names(list: &String) -> Vec<&str> {
+fn extract_names(list: &str) -> Vec<&str> {
     list.split(',').map(clean_sheet_name).collect()
 }
 
@@ -44,9 +44,7 @@ fn map_to_bb(ao: &AO, old: OldBackBlast) -> Option<BackBlastData> {
     if date_parsed < NaiveDate::from_ymd(2000, 1, 1) {
         date_parsed = NaiveDate::parse_from_str(&old.date, "%m/%d/%y").unwrap();
     }
-    // let pax: Vec<&str> = old.pax.split(',').map(|name| name.trim()).collect();
     let pax = extract_names(&old.pax);
-    // let qs: Vec<&str> = old.q.split(',').map(|name| name.trim()).collect();
     let qs = extract_names(&old.q);
     if pax.is_empty() {
         if !qs.is_empty() {
@@ -142,8 +140,7 @@ fn verify_ao_stats(ao: &AO, data: &[BackBlastData], ao_file_path: &str) -> Resul
                         .get_pax()
                         .iter()
                         .map(|name| name.to_lowercase())
-                        .collect::<Vec<String>>()
-                        .contains(&pax_count_name)
+                        .any(|name| name == pax_count_name)
             })
             .count();
         if pax_data != item.post_count as usize {

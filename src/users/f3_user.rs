@@ -19,10 +19,15 @@ impl F3User {
 
     /// convert from reference of slack user data.
     pub fn from(user: &SlackUserData) -> Self {
-        let cleaned_name = if let Some((name, _)) = user.profile.display_name.split_once('-') {
-            name.trim()
+        let name = if user.profile.display_name.is_empty() {
+            format!("{} {}", user.profile.first_name, user.profile.last_name)
         } else {
-            user.profile.display_name.trim()
+            user.profile.display_name.to_string()
+        };
+        let cleaned_name = if let Some((split_name, _)) = name.split_once('-') {
+            split_name.trim()
+        } else {
+            name.trim()
         };
         F3User {
             id: Some(user.id.to_string()),

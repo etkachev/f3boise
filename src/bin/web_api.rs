@@ -5,10 +5,9 @@ use actix_web::{
 use dotenv::dotenv;
 use f3_api_rs::db::DbStore;
 use f3_api_rs::oauth_client::get_oauth_client;
+use f3_api_rs::web_api_routes::pax_data::get_pax_info;
 use f3_api_rs::web_api_routes::slack_events::slack_events;
-use f3_api_rs::web_api_state::{
-    MutableWebState, WebAppState, LOCAL_URL, PORT_NUMBER, SLACK_SERVER,
-};
+use f3_api_rs::web_api_state::{MutableWebState, LOCAL_URL, PORT_NUMBER, SLACK_SERVER};
 use oauth2::reqwest::http_client;
 use oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, Scope, TokenResponse};
 use serde::Deserialize;
@@ -108,9 +107,6 @@ async fn main() -> std::io::Result<()> {
     let client = get_oauth_client();
     let base_api_url = format!("https://{}/api/", SLACK_SERVER);
     let data_app = f3_api_rs::app_state::AppState::new();
-    let web_app = WebAppState {
-        data_state: data_app,
-    };
 
     let mut web_app = MutableWebState {
         token: auth_token.to_string(),
@@ -119,7 +115,7 @@ async fn main() -> std::io::Result<()> {
         bot_auth_token: auth_token,
         signing_secret,
         verify_token,
-        app: Mutex::new(web_app),
+        app: Mutex::new(data_app),
         db: DbStore::new(),
     };
 
@@ -141,6 +137,7 @@ async fn main() -> std::io::Result<()> {
             .service(login)
             .service(logout)
             .service(slack_events)
+            .service(web::scope("/pax").service(get_pax_info))
     })
     .bind((LOCAL_URL, PORT_NUMBER))?
     .run()

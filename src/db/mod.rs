@@ -11,6 +11,8 @@ use std::collections::HashMap;
 
 pub mod db_back_blast;
 
+const F3_BOISE_START_DATE: (i32, u32, u32) = (2021, 1, 1);
+
 /// Main Db Store
 #[derive(Debug)]
 pub struct DbStore {}
@@ -86,7 +88,11 @@ impl DbStore {
     }
 
     pub fn get_all_back_blast_data(&self) -> Result<Vec<BackBlastData>, AppError> {
-        let mut start_date = NaiveDate::from_ymd(2021, 1, 1);
+        let mut start_date = NaiveDate::from_ymd(
+            F3_BOISE_START_DATE.0,
+            F3_BOISE_START_DATE.1,
+            F3_BOISE_START_DATE.2,
+        );
         let mut file_path = self.get_bb_db_file_path(&start_date);
         let mut db_results = HashMap::<String, DbBackBlast>::new();
 

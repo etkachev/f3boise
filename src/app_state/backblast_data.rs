@@ -2,12 +2,13 @@ use super::ao_data::AO;
 use crate::db::db_back_blast::DbBackBlast;
 use crate::web_api_routes::slack_events::event_times::EventTimes;
 use chrono::NaiveDate;
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 pub const BACK_BLAST_TAG: &str = "#backblast";
 
 /// General data of a backblast
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct BackBlastData {
     /// AO this backblast is part of
     pub ao: AO,

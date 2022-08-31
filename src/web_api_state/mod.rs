@@ -33,7 +33,7 @@ pub struct MutableWebState {
     pub bot_auth_token: String,
     /// Deprecated verify token
     pub verify_token: String,
-    pub app: Mutex<WebAppState>,
+    pub app: Mutex<AppState>,
     pub db: DbStore,
 }
 
@@ -46,7 +46,7 @@ impl MutableWebState {
         if let Ok(users) = self.db.get_stored_users() {
             {
                 let mut app = self.app.lock().unwrap();
-                app.data_state.users.extend(users);
+                app.users.extend(users);
             }
             println!("Loaded db users");
         }
@@ -55,7 +55,7 @@ impl MutableWebState {
         {
             let app = self.app.lock().unwrap();
             // sync latest slack users with local db
-            if let Err(err) = self.db.sync_users_local(&app.data_state.users) {
+            if let Err(err) = self.db.sync_users_local(&app.users) {
                 println!("Error syncing users to local: {:?}", err);
             }
         }
@@ -82,7 +82,7 @@ impl MutableWebState {
             // separate scope for minimizing lock
             {
                 let mut app = self.app.lock().unwrap();
-                app.data_state.channels = public_channels;
+                app.channels = public_channels;
             }
         } else {
             eprintln!(
@@ -114,9 +114,9 @@ impl MutableWebState {
             // scoped to limit lock
             {
                 let mut app = self.app.lock().unwrap();
-                app.data_state.users.extend(users_bots.users);
-                app.data_state.bots = users_bots.bots;
-                app.data_state.set_self_bot_id();
+                app.users.extend(users_bots.users);
+                app.bots = users_bots.bots;
+                app.set_self_bot_id();
             }
         } else {
             eprintln!("{:?}", response.error);
@@ -126,8 +126,7 @@ impl MutableWebState {
     pub async fn get_back_blasts(&self) {
         let history_request = {
             let app = self.app.lock().unwrap();
-            app.data_state
-                .get_channel_data(PublicChannels::BotPlayground)
+            app.get_channel_data(PublicChannels::BotPlayground)
                 .map(|channel_data| ChannelHistoryRequest::new(&channel_data.id))
         };
         if let Some(request) = history_request {
@@ -150,10 +149,8 @@ impl MutableWebState {
                     // scoped to limit lock
                     {
                         let app = self.app.lock().unwrap();
-                        let data = parse_backblast::parse_back_blast(
-                            entry.text.as_str(),
-                            &app.data_state.users,
-                        );
+                        let data =
+                            parse_backblast::parse_back_blast(entry.text.as_str(), &app.users);
                         println!("{:?}", data);
                     }
                 }
@@ -167,8 +164,7 @@ impl MutableWebState {
             // scope to minimize lock
             let channel_data = {
                 let app = self.app.lock().unwrap();
-                app.data_state
-                    .get_channel_data(PublicChannels::from(&backblast.ao))
+                app.get_channel_data(PublicChannels::from(&backblast.ao))
                     .map(|data| {
                         let emoji = if verified { "white_check_mark" } else { "x" };
                         ReactionsAddRequest::new(
@@ -213,8 +209,4 @@ impl MutableWebState {
             .await
             .expect("Failed to make request")
     }
-}
-
-pub struct WebAppState {
-    pub data_state: AppState,
 }

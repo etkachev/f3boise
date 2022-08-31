@@ -22,7 +22,7 @@ pub async fn handle_channel_message(event: &ChannelMessageEvent, web_app: &Mutab
         line if line.starts_with(BACK_BLAST_TAG) => {
             let mut data = {
                 let app = web_app.app.lock().unwrap();
-                parse_back_blast(event.text.as_str(), &app.data_state.users)
+                parse_back_blast(event.text.as_str(), &app.users)
             };
             data.set_event_times(EventTimes::new(
                 event.ts.to_string(),

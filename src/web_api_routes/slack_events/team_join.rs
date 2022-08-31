@@ -12,7 +12,6 @@ pub fn handle_new_user(user: &SlackUserData, app_state: &MutableWebState) {
     let mapped_user = F3User::from(user);
     {
         let mut app = app_state.app.lock().unwrap();
-        app.data_state
-            .add_user(user.profile.display_name.as_str(), mapped_user);
+        app.add_user(user.id.as_str(), mapped_user);
     }
 }

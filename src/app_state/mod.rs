@@ -34,8 +34,8 @@ impl AppState {
         self.self_bot_id = matched_bot;
     }
 
-    pub fn add_user(&mut self, name: &str, user: F3User) {
-        self.users.insert(name.to_string(), user);
+    pub fn add_user(&mut self, id: &str, user: F3User) {
+        self.users.insert(id.to_string(), user);
     }
 
     pub fn get_channel_data(&self, channel: PublicChannels) -> Option<&ChannelData> {
