@@ -2,7 +2,7 @@ use dotenv::dotenv;
 // use f3_api_rs::app_state;
 // use std::env;
 
-#[actix_web::main]
+#[tokio::main]
 async fn main() {
     dotenv().ok();
 

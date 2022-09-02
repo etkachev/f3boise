@@ -47,11 +47,17 @@ pub mod response {
         pub name: String,
         pub profile: SlackUserProfile,
         pub deleted: bool,
+        #[serde(default)]
         pub real_name: String,
+        #[serde(default)]
         pub is_admin: bool,
+        #[serde(default)]
         pub is_owner: bool,
+        #[serde(default)]
         pub is_primary_owner: bool,
+        #[serde(default)]
         pub is_restricted: bool,
+        #[serde(default)]
         pub is_ultra_restricted: bool,
         pub is_bot: bool,
         pub is_app_user: bool,

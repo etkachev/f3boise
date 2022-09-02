@@ -2,6 +2,7 @@ use crate::app_state::backblast_data::{BackBlastData, BACK_BLAST_TAG};
 use crate::app_state::{parse_backblast, AppState};
 use crate::bot_data::{BotUser, UserBotCombo};
 use crate::db::DbStore;
+use crate::oauth_client::get_oauth_client;
 use crate::slack_api::channels::history::request::ChannelHistoryRequest;
 use crate::slack_api::channels::history::response::{ChannelsHistoryResponse, MessageData};
 use crate::slack_api::channels::list::request::ConversationListRequest;
@@ -208,5 +209,20 @@ impl MutableWebState {
         async_http_client(request)
             .await
             .expect("Failed to make request")
+    }
+}
+
+impl Default for MutableWebState {
+    fn default() -> Self {
+        MutableWebState {
+            token: String::new(),
+            base_api_url: String::new(),
+            oauth: get_oauth_client(),
+            signing_secret: String::new(),
+            bot_auth_token: String::new(),
+            verify_token: String::new(),
+            app: Mutex::new(Default::default()),
+            db: Default::default(),
+        }
     }
 }

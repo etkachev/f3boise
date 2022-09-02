@@ -19,6 +19,7 @@ path = "src/bin/migrate_old_data.rs"
 
 [dependencies]
 actix-web = "4"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 actix-session = { version = "0.7.1", features = ["cookie-session"] }
 oauth2 = "4.2.3"
 dotenv = "0.15.0"
@@ -34,3 +35,19 @@ sha2 = "0.10.2"
 hex-literal = "0.3.4"
 hex = "0.4.3"
 csv = "1.1"
+config = "0.13"
+
+[dependencies.sqlx]
+version = "0.6"
+default-features = false
+features = [
+    "runtime-actix-rustls",
+    "macros",
+    "postgres",
+    "uuid",
+    "chrono",
+    "migrate"
+]
+
+[dev-dependencies]
+reqwest = "0.11"
