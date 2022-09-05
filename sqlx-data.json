@@ -1,0 +1,79 @@
+{
+  "db": "PostgreSQL",
+  "052e2aa40ccee153f0b9934982fae74f9945e20f1ff80da4d7598d6bf14a016d": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n    INSERT INTO users (id, slack_id, name, email)\n    VALUES($1,$2,$3,$4)\n    ON CONFLICT (slack_id)\n        DO NOTHING;\n    "
+  },
+  "899221ee4dfd9e73c4ae9828f50f7b8c7ee37fc3d533f3c8fa5b66e0c49b5f9a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Text",
+          "Date",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n    INSERT INTO back_blasts (id, ao, q, pax, date, bb_type)\n    VALUES($1,$2,$3,$4,$5,$6)\n    ON CONFLICT ON CONSTRAINT back_blasts_ao_date_bb_type_key\n        DO NOTHING;\n    "
+  },
+  "96b41fd06278d944f56fdfe98792ff6ce9d0f660ebbc4200ff04fadc60af47a8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n    INSERT INTO ao_list (id, name, days)\n    VALUES($1,$2,$3)\n    ON CONFLICT (name)\n    DO NOTHING;\n    "
+  },
+  "a82fab2c6d84945c51438aad27aa0a0b7729e84475e02ccbaa75f1c13a73c06e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "slack_id",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "email",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        SELECT slack_id, name, email\n        FROM users;\n    "
+  }
+}
