@@ -3,7 +3,7 @@ pub enum ChannelTypes {
     Public,
     Private,
     MPIM,
-    IM
+    IM,
 }
 
 impl ChannelTypes {
@@ -12,7 +12,7 @@ impl ChannelTypes {
             ChannelTypes::Public => String::from("public_channel"),
             ChannelTypes::Private => String::from("private_channel"),
             ChannelTypes::MPIM => String::from("mpim"),
-            ChannelTypes::IM => String::from("im")
+            ChannelTypes::IM => String::from("im"),
         }
     }
 }
