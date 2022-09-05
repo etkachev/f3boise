@@ -12,10 +12,8 @@ pub fn get_oauth_client() -> BasicClient {
         .expect("Invalid authorization endpoint URL");
     let token_url = TokenUrl::new(format!("https://{}/api/oauth.v2.access", SLACK_SERVER))
         .expect("Invalid token url");
-    let client = BasicClient::new(client_id, Some(client_secret), auth_url, Some(token_url))
-        .set_redirect_uri(
-            RedirectUrl::new(format!("http://{}:{}/auth", LOCAL_URL, PORT_NUMBER))
-                .expect("Invalid redirect URL"),
-        );
-    client
+    BasicClient::new(client_id, Some(client_secret), auth_url, Some(token_url)).set_redirect_uri(
+        RedirectUrl::new(format!("http://{}:{}/auth", LOCAL_URL, PORT_NUMBER))
+            .expect("Invalid redirect URL"),
+    )
 }

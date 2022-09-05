@@ -1,152 +1,121 @@
+use crate::app_state::MutableAppState;
+use crate::configuration::{DatabaseSettings, Settings};
+use crate::db::init::{get_db_users, sync_ao_list};
 use crate::db::DbStore;
 use crate::oauth_client::get_oauth_client;
+use crate::shared::common_errors::AppError;
+use crate::web_api_routes::auth::get_key;
 use crate::web_api_routes::pax_data::get_pax_info;
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
-use actix_session::{storage::CookieSessionStore, Session, SessionMiddleware};
+use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::dev::Server;
-use actix_web::{
-    cookie::Key, get, http::header, middleware, web, App, HttpResponse, HttpServer, Responder,
-};
-use oauth2::reqwest::http_client;
-use oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, Scope, TokenResponse};
-use serde::Deserialize;
+use actix_web::{middleware, web, App, HttpResponse, HttpServer, Responder};
+use sqlx::postgres::PgPoolOptions;
+use sqlx::PgPool;
 use std::env;
-use std::sync::Mutex;
+use std::net::TcpListener;
 
-fn get_key() -> Key {
-    Key::generate()
+pub struct Application {
+    port: u16,
+    server: Server,
 }
 
-#[get("/")]
-async fn index(session: Session) -> impl Responder {
-    let access = session.get::<String>("access").unwrap();
-    let link = if access.is_some() { "logout" } else { "login" };
-    let html = format!(
-        r#"
-        <html>
-        <head><title>Home page</title></head>
-        <body>
-        <h1>Home</h1>
-        <a href="/{}">{}</a>
-        </body>
-        </html>
-        "#,
-        link, link,
-    );
-    HttpResponse::Ok().body(html)
+impl Application {
+    pub async fn build(configuration: Settings) -> Result<Self, AppError> {
+        let connection_pool = get_connection_pool(&configuration.database);
+
+        sync_ao_list(&connection_pool).await?;
+
+        // TODO update
+        let web_state = init_web_state();
+        let mut app_state = MutableAppState::new();
+
+        let db_users = get_db_users(&connection_pool).await?;
+        let slack_users = web_state.get_users().await?;
+        app_state.insert_users(db_users);
+        app_state.insert_users(slack_users.users);
+        app_state.insert_bots(slack_users.bots);
+        let public_channels = web_state.get_public_channels().await?;
+        app_state.insert_channels(public_channels);
+        app_state.sync_users(&connection_pool).await?;
+        println!("Synced all");
+
+        let address = format!(
+            "{}:{}",
+            configuration.application.host, configuration.application.port
+        );
+        let listener = TcpListener::bind(&address)?;
+        let port = listener.local_addr().unwrap().port();
+
+        let server = run(web_state, app_state, listener, connection_pool)?;
+        Ok(Self { port, server })
+    }
+
+    pub fn port(&self) -> u16 {
+        self.port
+    }
+
+    pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
+        self.server.await
+    }
 }
 
-#[get("/login")]
-async fn login(data: web::Data<MutableWebState>) -> impl Responder {
-    // Create a PKCE code verifier and SHA-256 encode it as a code challenge.
-    let (pkce_code_challenge, _pkce_code_verifier) = PkceCodeChallenge::new_random_sha256();
-    // Generate the authorization URL to which we'll redirect the user.
-    let (auth_url, _csrf_token) = &data
-        .oauth
-        .authorize_url(CsrfToken::new_random)
-        .add_scope(Scope::new("channels:read".to_string()))
-        .set_pkce_challenge(pkce_code_challenge)
-        .url();
-
-    HttpResponse::Found()
-        .append_header((header::LOCATION, auth_url.to_string()))
-        .finish()
+pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
+    PgPoolOptions::new()
+        .acquire_timeout(std::time::Duration::from_secs(2))
+        .connect_lazy_with(configuration.with_db())
 }
 
-#[get("/logout")]
-async fn logout(session: Session) -> impl Responder {
-    session.remove("access");
-
-    HttpResponse::Found()
-        .append_header((header::LOCATION, "/".to_string()))
-        .finish()
-}
-
-#[derive(Deserialize)]
-struct AuthRequest {
-    code: String,
-    state: String,
-}
-
-#[get("/auth")]
-async fn auth(
-    session: Session,
-    data: web::Data<MutableWebState>,
-    params: web::Query<AuthRequest>,
-) -> impl Responder {
-    println!("state is :{}", params.state);
-    let code = AuthorizationCode::new(params.code.clone());
-    let token = &data
-        .oauth
-        .exchange_code(code)
-        .request(http_client)
-        .expect("exchange_code failed");
-    let access = token.access_token().secret();
-    session
-        .insert("access", access)
-        .expect("Could not set access token to session");
-    let html = r#"
-        <html>
-        <head><title>Auth Page</title></head>
-        <body>
-            <h1>Auth finished</h1>
-        </body>
-        </html>
-        "#
-    .to_string();
-    HttpResponse::Ok().body(html)
-}
-
-async fn health_check() -> impl Responder {
-    HttpResponse::Ok()
-}
-
-pub async fn init_web_app() -> MutableWebState {
+fn init_web_state() -> MutableWebState {
     let auth_token = env::var("BOT_OAUTH_TOKEN").expect("No auth token set in env");
     let signing_secret = env::var("SLACK_SIGNING_SECRET").expect("No Signing secret set in env");
     let verify_token = env::var("DEPRECATED_VERIFY_TOKEN").expect("No Verify token set in env");
     let client = get_oauth_client();
     let base_api_url = format!("https://{}/api/", SLACK_SERVER);
-    let data_app = crate::app_state::AppState::new();
-
-    let mut web_app = MutableWebState {
+    MutableWebState {
         token: auth_token.to_string(),
         base_api_url,
         oauth: client,
         bot_auth_token: auth_token,
         signing_secret,
         verify_token,
-        app: Mutex::new(data_app),
         db: DbStore::new(),
-    };
+    }
+}
 
-    web_app.initialize_data().await;
+async fn health_check() -> impl Responder {
+    HttpResponse::Ok()
+}
 
-    web_app
+async fn index() -> impl Responder {
+    HttpResponse::Ok().body("F3 Boise")
 }
 
 pub fn run(
     web_app: MutableWebState,
-    tcp_listener: std::net::TcpListener,
+    app_state: MutableAppState,
+    tcp_listener: TcpListener,
+    db_pool: PgPool,
 ) -> Result<Server, std::io::Error> {
     let web_app_data = web::Data::new(web_app);
+    let db_pool = web::Data::new(db_pool);
+    let app_state_data = web::Data::new(app_state);
 
     let server = HttpServer::new(move || {
         App::new()
-            .app_data(web_app_data.clone())
             .wrap(middleware::Compress::default())
             .wrap(SessionMiddleware::new(
                 CookieSessionStore::default(),
                 get_key(),
             ))
-            .service(index)
+            .route("/", web::get().to(index))
             .route("/health_check", web::get().to(health_check))
-            .service(auth)
-            .service(login)
-            .service(logout)
-            .service(slack_events)
+            .route("/events", web::post().to(slack_events))
             .service(web::scope("/pax").service(get_pax_info))
+            .app_data(web_app_data.clone())
+            .app_data(app_state_data.clone())
+            .app_data(db_pool.clone())
     })
     .listen(tcp_listener)?
     .run();

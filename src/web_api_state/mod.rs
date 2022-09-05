@@ -1,10 +1,7 @@
-use crate::app_state::backblast_data::{BackBlastData, BACK_BLAST_TAG};
-use crate::app_state::{parse_backblast, AppState};
 use crate::bot_data::{BotUser, UserBotCombo};
 use crate::db::DbStore;
 use crate::oauth_client::get_oauth_client;
-use crate::slack_api::channels::history::request::ChannelHistoryRequest;
-use crate::slack_api::channels::history::response::{ChannelsHistoryResponse, MessageData};
+use crate::shared::common_errors::AppError;
 use crate::slack_api::channels::list::request::ConversationListRequest;
 use crate::slack_api::channels::list::response::{ChannelData, ChannelsListResponse};
 use crate::slack_api::channels::public_channels::PublicChannels;
@@ -19,7 +16,6 @@ use http::{HeaderMap, Method};
 use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
 use std::collections::HashMap;
-use std::sync::Mutex;
 
 pub const LOCAL_URL: &str = "127.0.0.1";
 pub const SLACK_SERVER: &str = "slack.com";
@@ -34,67 +30,39 @@ pub struct MutableWebState {
     pub bot_auth_token: String,
     /// Deprecated verify token
     pub verify_token: String,
-    pub app: Mutex<AppState>,
     pub db: DbStore,
 }
 
 impl MutableWebState {
-    pub async fn initialize_data(&mut self) {
-        if let Err(err) = self.db.init_db() {
-            println!("Error initializing db: {:?}", err);
-        }
-        // load users from local db
-        if let Ok(users) = self.db.get_stored_users() {
-            {
-                let mut app = self.app.lock().unwrap();
-                app.users.extend(users);
-            }
-            println!("Loaded db users");
-        }
-        self.get_public_channels().await;
-        self.get_users().await;
-        {
-            let app = self.app.lock().unwrap();
-            // sync latest slack users with local db
-            if let Err(err) = self.db.sync_users_local(&app.users) {
-                println!("Error syncing users to local: {:?}", err);
-            }
-        }
-    }
-
-    async fn get_public_channels(&self) {
+    pub async fn get_public_channels(
+        &self,
+    ) -> Result<HashMap<PublicChannels, ChannelData>, AppError> {
         let request = ConversationListRequest::with_types(vec![ChannelTypes::Public]);
         let url = request.get_url_request(&self.base_api_url);
         println!("Calling: {:?}", url.as_str());
         let response = self.make_get_url_request(url).await;
 
-        let response: ChannelsListResponse =
-            serde_json::from_slice(&response.body).expect("Could not parse response");
+        let response: ChannelsListResponse = serde_json::from_slice(&response.body)?;
 
         if let Some(channels) = response.channels {
             let public_channels: HashMap<PublicChannels, ChannelData> =
                 channels
                     .into_iter()
                     .fold(HashMap::new(), |mut acc, channel| {
-                        let channel_name = PublicChannels::from_name(channel.name.to_string());
+                        let channel_name = PublicChannels::from(channel.name.to_string());
                         acc.insert(channel_name, channel);
                         acc
                     });
-            // separate scope for minimizing lock
-            {
-                let mut app = self.app.lock().unwrap();
-                app.channels = public_channels;
-            }
+            Ok(public_channels)
         } else {
-            eprintln!(
-                "Error from response: {:?}",
-                response.error.unwrap_or_else(|| "No error".to_string())
-            );
+            Err(AppError::General(
+                response.error.unwrap_or_else(|| "No error".to_string()),
+            ))
         }
     }
 
     /// get users that exist in slack then sync it to local db
-    async fn get_users(&mut self) {
+    pub async fn get_users(&self) -> Result<UserBotCombo, AppError> {
         let url = UsersListRequest::default().get_url_request(&self.base_api_url);
         println!("Calling: {:?}", url.as_str());
         let response = self.make_get_url_request(url).await;
@@ -112,82 +80,64 @@ impl MutableWebState {
                     }
                     acc
                 });
-            // scoped to limit lock
-            {
-                let mut app = self.app.lock().unwrap();
-                app.users.extend(users_bots.users);
-                app.bots = users_bots.bots;
-                app.set_self_bot_id();
-            }
+            Ok(users_bots)
         } else {
-            eprintln!("{:?}", response.error);
+            Err(AppError::General(
+                response.error.unwrap_or_else(|| "No Error".to_string()),
+            ))
         }
     }
 
     pub async fn get_back_blasts(&self) {
-        let history_request = {
-            let app = self.app.lock().unwrap();
-            app.get_channel_data(PublicChannels::BotPlayground)
-                .map(|channel_data| ChannelHistoryRequest::new(&channel_data.id))
-        };
-        if let Some(request) = history_request {
+        // TODO
+        // let history_request = {
+        //     let app = self.app.lock().unwrap();
+        //     app.get_channel_data(PublicChannels::BotPlayground)
+        //         .map(|channel_data| ChannelHistoryRequest::new(&channel_data.id))
+        // };
+        // if let Some(request) = history_request {
+        //     let url = request.get_url_request(&self.base_api_url);
+        //     println!("Calling: {:?}", url.as_str());
+        //     let response = self.make_get_url_request(url).await;
+        //     let response: ChannelsHistoryResponse =
+        //         serde_json::from_slice(&response.body).expect("Could not parse response");
+        //     if let Some(messages) = response.messages {
+        //         let backblasts = messages
+        //             .iter()
+        //             .filter(|message| {
+        //                 let (first_line, _) = message.text.split_once('\n').unwrap_or(("", ""));
+        //                 first_line.to_lowercase().starts_with(BACK_BLAST_TAG)
+        //             })
+        //             .collect::<Vec<&MessageData>>();
+        //
+        //         for entry in backblasts {
+        //             println!("Entry: {}", entry.ts);
+        //             // scoped to limit lock
+        //             {
+        //                 // TODO
+        //                 // let app = self.app.lock().unwrap();
+        //                 // let data =
+        //                 //     parse_backblast::parse_back_blast(entry.text.as_str(), &app.users);
+        //                 // println!("{:?}", data);
+        //             }
+        //         }
+        //     }
+        // }
+    }
+
+    pub async fn back_blast_verified(&self, channel_request: Option<ReactionsAddRequest>) {
+        if let Some(request) = channel_request {
             let url = request.get_url_request(&self.base_api_url);
             println!("Calling: {:?}", url.as_str());
             let response = self.make_get_url_request(url).await;
-            let response: ChannelsHistoryResponse =
+            let response: ReactionsAddResponse =
                 serde_json::from_slice(&response.body).expect("Could not parse response");
-            if let Some(messages) = response.messages {
-                let backblasts = messages
-                    .iter()
-                    .filter(|message| {
-                        let (first_line, _) = message.text.split_once('\n').unwrap_or(("", ""));
-                        first_line.to_lowercase().starts_with(BACK_BLAST_TAG)
-                    })
-                    .collect::<Vec<&MessageData>>();
-
-                for entry in backblasts {
-                    println!("Entry: {}", entry.ts);
-                    // scoped to limit lock
-                    {
-                        let app = self.app.lock().unwrap();
-                        let data =
-                            parse_backblast::parse_back_blast(entry.text.as_str(), &app.users);
-                        println!("{:?}", data);
-                    }
-                }
-            }
-        }
-    }
-
-    pub async fn back_blast_verified(&self, verified: bool, backblast: &BackBlastData) {
-        if let Some(event_times) = &backblast.event_times {
-            // only if event times exist, we can find the message times
-            // scope to minimize lock
-            let channel_data = {
-                let app = self.app.lock().unwrap();
-                app.get_channel_data(PublicChannels::from(&backblast.ao))
-                    .map(|data| {
-                        let emoji = if verified { "white_check_mark" } else { "x" };
-                        ReactionsAddRequest::new(
-                            data.id.to_string(),
-                            emoji,
-                            event_times.ts.to_string(),
-                        )
-                    })
-            };
-            if let Some(request) = channel_data {
-                let url = request.get_url_request(&self.base_api_url);
-                println!("Calling: {:?}", url.as_str());
-                let response = self.make_get_url_request(url).await;
-                let response: ReactionsAddResponse =
-                    serde_json::from_slice(&response.body).expect("Could not parse response");
-                println!("Emoji added!: {}", response.ok);
-                if !response.ok {
-                    eprintln!(
-                        "Err: {}",
-                        response.error.unwrap_or_else(|| "err".to_string())
-                    );
-                }
+            println!("Emoji added!: {}", response.ok);
+            if !response.ok {
+                eprintln!(
+                    "Err: {}",
+                    response.error.unwrap_or_else(|| "err".to_string())
+                );
             }
         }
     }
@@ -221,7 +171,6 @@ impl Default for MutableWebState {
             signing_secret: String::new(),
             bot_auth_token: String::new(),
             verify_token: String::new(),
-            app: Mutex::new(Default::default()),
             db: Default::default(),
         }
     }

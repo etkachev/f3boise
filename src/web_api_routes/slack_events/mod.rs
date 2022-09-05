@@ -1,7 +1,9 @@
+use crate::app_state::MutableAppState;
 use crate::web_api_state::MutableWebState;
-use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
+use actix_web::{web, HttpRequest, HttpResponse, Responder};
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
+use sqlx::PgPool;
 
 pub mod channel_message;
 pub mod event_times;
@@ -53,12 +55,16 @@ fn verify_events_request(
 
 const DIVIDER: &str = "\n\n========\n\n";
 
-#[post("/events")]
 pub async fn slack_events(
     data: web::Data<MutableWebState>,
+    app_state: web::Data<MutableAppState>,
+    db_pool: web::Data<PgPool>,
     req: HttpRequest,
+    // body: web::Json<serde_json::Value>,
     body: web::Json<event_wrapper::EventWrapper>,
 ) -> impl Responder {
+    println!("Event incoming!");
+    // TODO refactor
     let valid_requset = verify_events_request(&data, &req, &body);
     if !valid_requset {
         return HttpResponse::Unauthorized().body("Event not allowed");
@@ -69,17 +75,28 @@ pub async fn slack_events(
     if let Some(event) = &body.event {
         match event {
             event_wrapper::EventTypes::Message(message_data) => {
-                channel_message::handle_channel_message(message_data, &data).await;
+                channel_message::handle_channel_message(message_data, &data, &app_state, &db_pool)
+                    .await;
             }
             event_wrapper::EventTypes::TeamJoin(join_data) => {
-                team_join::handle_new_user(&join_data.user, &data);
+                team_join::handle_new_user(&join_data.user, &app_state);
             }
             event_wrapper::EventTypes::ReactionAdded(reaction_data) => {
-                reaction_added::handle_reaction_item(reaction_data, &data);
+                reaction_added::handle_reaction_item(reaction_data, &app_state);
             }
             _ => (),
         }
     }
+
+    // if let Some(challenge) = body.get("challenge") {
+    //     let response = slack_challenge::ChallengeResponse {
+    //         challenge: Some(challenge.to_string()),
+    //     };
+    //
+    //     return HttpResponse::Ok().json(response);
+    // }
+    //
+    // return HttpResponse::Unauthorized().finish();
 
     let response = slack_challenge::ChallengeResponse {
         challenge: body.challenge.clone(),

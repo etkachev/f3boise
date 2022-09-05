@@ -1,8 +1,11 @@
 use chrono::NaiveDate;
 use f3_api_rs::app_state::ao_data::AO;
 use f3_api_rs::app_state::backblast_data::BackBlastData;
+use f3_api_rs::configuration::get_configuration;
+use f3_api_rs::db::save_back_blast::save;
 use f3_api_rs::db::DbStore;
 use f3_api_rs::shared::common_errors::AppError;
+use f3_api_rs::web_api_run::get_connection_pool;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -80,7 +83,10 @@ fn pax_counts_path(folder: &str) -> String {
     format!("{}/PAX counts.csv", folder)
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    let config = get_configuration().expect("Failed to read config");
+    let connection_pool = get_connection_pool(&config.database);
     let db = DbStore::new();
     db.init_db().expect("Could not init db");
     let aos = [
@@ -96,11 +102,15 @@ fn main() {
         let ao_name = ao.to_string();
         match read_back_blasts(ao, &back_blast_path(file_path)) {
             Ok(bb) => {
-                for entry in bb {
-                    if let Err(err) = db.resolve_new_back_blast(&entry) {
-                        println!("Error saving bb: {:?}", err);
-                    }
+                if let Err(err) = save(&connection_pool, &bb).await {
+                    println!("Error saving bb: {:?}", err);
                 }
+                // for entry in bb {
+                //
+                //     if let Err(err) = db.resolve_new_back_blast(&entry) {
+                //         println!("Error saving bb: {:?}", err);
+                //     }
+                // }
                 println!("Saved: {}", ao_name);
             }
             Err(err) => {
@@ -109,6 +119,7 @@ fn main() {
         }
     }
 
+    // TODO update
     match db.get_all_back_blast_data() {
         Ok(mut results) => {
             results.sort_by(|a, b| a.date.cmp(&b.date));

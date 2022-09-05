@@ -1,4 +1,5 @@
 pub mod request {
+    use crate::app_state::backblast_data::BackBlastData;
     use crate::slack_api::{api_endpoints, url_requests::SlackUrlRequest};
     use serde::{Deserialize, Serialize};
 
@@ -26,6 +27,23 @@ pub mod request {
         fn get_api_url(&self) -> &str {
             api_endpoints::REACTIONS_ADD
         }
+    }
+
+    pub fn channel_request(
+        back_blast: &BackBlastData,
+        verified: bool,
+        channel_id: &str,
+    ) -> Option<ReactionsAddRequest> {
+        if let Some(event_times) = &back_blast.event_times {
+            let emoji = if verified { "white_check_mark" } else { "x" };
+            return Some(ReactionsAddRequest::new(
+                channel_id.to_string(),
+                emoji,
+                event_times.ts.to_string(),
+            ));
+        }
+
+        None
     }
 }
 

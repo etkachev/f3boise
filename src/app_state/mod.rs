@@ -1,11 +1,58 @@
 use crate::bot_data::{BotUser, BOT_NAME};
+use crate::db::init::sync_users;
+use crate::shared::common_errors::AppError;
 use crate::slack_api::channels::{list::response::ChannelData, public_channels::PublicChannels};
 use crate::users::f3_user::F3User;
+use sqlx::PgPool;
 use std::collections::HashMap;
+use std::sync::Mutex;
 
 pub mod ao_data;
 pub mod backblast_data;
 pub mod parse_backblast;
+
+pub struct MutableAppState {
+    pub app: Mutex<AppState>,
+}
+
+impl MutableAppState {
+    pub fn new() -> Self {
+        MutableAppState {
+            app: Mutex::new(AppState::default()),
+        }
+    }
+
+    pub async fn sync_users(&self, db_pool: &PgPool) -> Result<(), AppError> {
+        let users = {
+            let app = self.app.lock().expect("Could not lock app state");
+            app.users.clone()
+        };
+        sync_users(db_pool, &users).await?;
+        Ok(())
+    }
+
+    pub fn insert_users(&mut self, users: HashMap<String, F3User>) {
+        let mut app = self.app.lock().expect("Could not lock app state");
+        app.users.extend(users);
+    }
+
+    pub fn insert_bots(&mut self, bots: HashMap<String, BotUser>) {
+        let mut app = self.app.lock().expect("Could not lock app state");
+        app.bots = bots;
+        app.set_self_bot_id();
+    }
+
+    pub fn insert_channels(&mut self, channels: HashMap<PublicChannels, ChannelData>) {
+        let mut app = self.app.lock().expect("Could not lock app state");
+        app.channels = channels;
+    }
+}
+
+impl Default for MutableAppState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 #[derive(Debug, Default)]
 pub struct AppState {

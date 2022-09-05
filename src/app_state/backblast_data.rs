@@ -6,9 +6,10 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 pub const BACK_BLAST_TAG: &str = "#backblast";
+pub const SLACK_BLAST_TAG: &str = "*slackblast*:";
 
 /// General data of a backblast
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Eq)]
 pub struct BackBlastData {
     /// AO this backblast is part of
     pub ao: AO,
@@ -18,6 +19,8 @@ pub struct BackBlastData {
     pax: HashSet<String>,
     /// date that workout happened
     pub date: NaiveDate,
+    /// type of back blast
+    pub bb_type: BackBlastType,
     pub event_times: Option<EventTimes>,
 }
 
@@ -62,6 +65,30 @@ impl BackBlastData {
 
         has_ao && has_pax && valid_date && valid_event_times
     }
+
+    /// combo of ao, date, and type
+    pub fn get_unique_id(&self) -> String {
+        format!(
+            "{}-{}-{}",
+            self.ao.to_string(),
+            self.date,
+            self.bb_type.to_string()
+        )
+    }
+}
+
+#[derive(Deserialize, Serialize, PartialEq, Debug, Eq)]
+pub enum BackBlastType {
+    BackBlast,
+    // TODO more types like DoubleDown, etc
+}
+
+impl ToString for BackBlastType {
+    fn to_string(&self) -> String {
+        match self {
+            BackBlastType::BackBlast => "backblast".to_string(),
+        }
+    }
 }
 
 fn split_comma_string(input: &str) -> HashSet<String> {
@@ -99,6 +126,7 @@ impl Default for BackBlastData {
             qs: HashSet::new(),
             pax: HashSet::new(),
             date: NaiveDate::MIN,
+            bb_type: BackBlastType::BackBlast,
             event_times: None,
         }
     }

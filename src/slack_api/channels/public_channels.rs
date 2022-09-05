@@ -15,15 +15,25 @@ pub enum PublicChannels {
     Unknown(String),
 }
 
-impl PublicChannels {
-    pub fn from(ao: &AO) -> Self {
+impl From<&AO> for PublicChannels {
+    fn from(ao: &AO) -> Self {
         match ao {
-            // TODO for now just forward to bot
-            _ => PublicChannels::BotPlayground,
+            AO::Bleach => PublicChannels::Bleach,
+            AO::Backyard => PublicChannels::Backyard,
+            AO::BowlerPark => PublicChannels::BowlerPark,
+            AO::Gem => PublicChannels::Gem,
+            AO::OldGlory => PublicChannels::OldGlory,
+            AO::Rebel => PublicChannels::Rebel,
+            AO::IronMountain => PublicChannels::IronMountain,
+            AO::Ruckership => PublicChannels::Ruckership,
+            AO::DR => PublicChannels::DR,
+            AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }
     }
+}
 
-    pub fn from_name(name: String) -> Self {
+impl From<String> for PublicChannels {
+    fn from(name: String) -> Self {
         match name.as_str() {
             "bot-playground" => PublicChannels::BotPlayground,
             "ao-backyard" => PublicChannels::Backyard,

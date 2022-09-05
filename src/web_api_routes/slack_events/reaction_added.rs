@@ -1,4 +1,4 @@
-use crate::web_api_state::MutableWebState;
+use crate::app_state::MutableAppState;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -7,7 +7,7 @@ pub struct ReactionAddedData {
     pub user: String,
     pub reaction: String,
     /// id of user that created original item that has been reacted to.
-    pub item_user: String,
+    pub item_user: Option<String>,
     /// reaction item itself.
     pub item: ReactionItem,
     pub event_ts: String,
@@ -23,7 +23,7 @@ pub struct ReactionItem {
     pub ts: String,
 }
 
-pub fn handle_reaction_item(reaction: &ReactionAddedData, app_state: &MutableWebState) {
+pub fn handle_reaction_item(reaction: &ReactionAddedData, app_state: &MutableAppState) {
     let self_bot_id = {
         let app = app_state.app.lock().unwrap();
         app.self_bot_id.to_owned()

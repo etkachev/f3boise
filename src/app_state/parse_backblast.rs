@@ -2,11 +2,17 @@ use crate::app_state::{
     ao_data::AO,
     backblast_data::{BackBlastData, BACK_BLAST_TAG},
 };
+use crate::slack_api::channels::list::response::ChannelData;
+use crate::slack_api::channels::public_channels::PublicChannels;
 use crate::users::f3_user::F3User;
 use chrono::NaiveDate;
 use std::collections::{HashMap, HashSet};
 
-pub fn parse_back_blast(text: &str, users: &HashMap<String, F3User>) -> BackBlastData {
+pub fn parse_back_blast(
+    text: &str,
+    users: &HashMap<String, F3User>,
+    channels: &HashMap<PublicChannels, ChannelData>,
+) -> BackBlastData {
     let text = text.trim();
     let mut back_blast = BackBlastData::default();
     for (index, text_line) in text.lines().enumerate() {
@@ -17,43 +23,61 @@ pub fn parse_back_blast(text: &str, users: &HashMap<String, F3User>) -> BackBlas
                 back_blast.ao = AO::from(stripped.to_string());
             }
         } else {
-            // parse everything else
-            if let Some((prefix, rest_of_line)) =
-                text_line.split_once(|c| c == ' ' || c == ':' || c == '-')
-            {
-                match prefix.trim().to_lowercase().as_str() {
-                    "q" | "qs" => {
-                        let users = parse_users_list(rest_of_line, users);
-                        back_blast.qs = users;
+            let split_line_char = |c| c == ' ' || c == ':' || c == '-';
+            let line_parse = text_line.split_once("*:").unwrap_or_else(|| {
+                text_line
+                    .split_once(split_line_char)
+                    .unwrap_or(("", text_line))
+            });
+            match line_parse {
+                ("", rest_of_line) => {
+                    // maybe date or time
+                    if let Some(date) = parse_date(rest_of_line) {
+                        back_blast.date = date;
                         continue;
                     }
-                    "pax" => {
-                        let users = parse_users_list(rest_of_line, users);
-                        back_blast.set_pax(users);
-                        continue;
-                    }
-                    _ => {
-                        // maybe date
-                        if let Some(date) = parse_date(text_line) {
-                            back_blast.date = date;
-                            continue;
+
+                    if let Some(stripped) = rest_of_line.trim().strip_prefix('#') {
+                        let possible_ao = AO::from(stripped.to_string());
+                        match possible_ao {
+                            AO::Unknown(name) if name == "EMPTY" => {}
+                            _ => {
+                                back_blast.ao = possible_ao;
+                                continue;
+                            }
                         }
                     }
                 }
-            } else {
-                // maybe date or time
-                if let Some(date) = parse_date(text_line) {
-                    back_blast.date = date;
-                    continue;
-                }
-
-                if let Some(stripped) = text_line.trim().strip_prefix('#') {
-                    let possible_ao = AO::from(stripped.to_string());
-                    match possible_ao {
-                        AO::Unknown(name) if name == "EMPTY" => {}
-                        _ => {
-                            back_blast.ao = possible_ao;
+                (prefix, rest_of_line) => {
+                    let prefix_lower = prefix.strip_prefix('*').unwrap_or(prefix).trim();
+                    match prefix_lower.to_lowercase().as_str() {
+                        "ao" => {
+                            let ao = parse_channels_list(rest_of_line, channels);
+                            back_blast.ao = ao;
                             continue;
+                        }
+                        "q" | "qs" => {
+                            let users = parse_users_list(rest_of_line, users);
+                            back_blast.qs = users;
+                            continue;
+                        }
+                        "pax" => {
+                            let users = parse_users_list(rest_of_line, users);
+                            back_blast.set_pax(users);
+                            continue;
+                        }
+                        "date" => {
+                            if let Some(date) = parse_date(rest_of_line) {
+                                back_blast.date = date;
+                                continue;
+                            }
+                        }
+                        _ => {
+                            // maybe date
+                            if let Some(date) = parse_date(text_line) {
+                                back_blast.date = date;
+                                continue;
+                            }
                         }
                     }
                 }
@@ -66,21 +90,29 @@ pub fn parse_back_blast(text: &str, users: &HashMap<String, F3User>) -> BackBlas
 
 fn parse_date(date: &str) -> Option<NaiveDate> {
     let date = date.trim();
-    if let Ok(parsed) = NaiveDate::parse_from_str(date, "%m-%d-%y") {
-        return Some(parsed);
-    }
-
-    if let Ok(parsed) = NaiveDate::parse_from_str(date, "%m.%d.%y") {
-        return Some(parsed);
+    let date_parse_formats = ["%m-%d-%y", "%m.%d.%y", "%Y-%m-%d"];
+    for date_format in date_parse_formats {
+        if let Ok(parsed) = NaiveDate::parse_from_str(date, date_format) {
+            return Some(parsed);
+        }
     }
     None
 }
 
-fn clean_name(name: &str) -> String {
+/// extract id of potential slack user reference
+fn extract_slack_user_ref(name: &str) -> String {
     let name = name.strip_prefix('<').unwrap_or(name);
     let name = name.strip_suffix('>').unwrap_or(name);
     let name = name.strip_prefix('@').unwrap_or(name);
     name.to_string()
+}
+
+/// extract id of potential slack channel reference
+fn extract_slack_channel_ref(channel: &str) -> String {
+    let channel = channel.strip_prefix('<').unwrap_or(channel);
+    let channel = channel.strip_suffix('>').unwrap_or(channel);
+    let channel = channel.strip_prefix('#').unwrap_or(channel);
+    channel.to_string()
 }
 
 fn parse_users_list(text: &str, users: &HashMap<String, F3User>) -> HashSet<String> {
@@ -89,8 +121,12 @@ fn parse_users_list(text: &str, users: &HashMap<String, F3User>) -> HashSet<Stri
         .split(|c| c == ' ' || c == ',')
         .into_iter()
         .filter(|c| !c.trim().is_empty())
-        .filter(|c| c.starts_with('@') || c.starts_with("<@"))
-        .map(clean_name)
+        .filter(|c| {
+            c.starts_with('@')
+                || c.starts_with("<@")
+                || c.starts_with(|ch: char| ch.is_alphabetic())
+        })
+        .map(extract_slack_user_ref)
         .fold(HashSet::<String>::new(), |mut acc, name| {
             if let Some(matching_slack_user) = users.get(name.as_str()) {
                 acc.insert(matching_slack_user.name.to_string());
@@ -102,10 +138,30 @@ fn parse_users_list(text: &str, users: &HashMap<String, F3User>) -> HashSet<Stri
     split_names
 }
 
+fn parse_channels_list(text: &str, channels: &HashMap<PublicChannels, ChannelData>) -> AO {
+    let text = text.trim();
+    let channel_id = extract_slack_channel_ref(text);
+    let ao = channels
+        .iter()
+        .find_map(|(public_channel, channel_data)| {
+            if channel_data.id == channel_id {
+                Some(AO::from(public_channel))
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| AO::Unknown("Unknown".to_string()));
+    ao
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use chrono::NaiveDate;
+
+    fn empty_channels() -> HashMap<PublicChannels, ChannelData> {
+        HashMap::from([])
+    }
 
     #[test]
     fn variant_one() {
@@ -119,7 +175,8 @@ mod tests {
                 email: "backslash@gmail.com".to_string(),
             },
         )]);
-        let parsed = parse_back_blast(text, &users);
+        let channels = empty_channels();
+        let parsed = parse_back_blast(text, &users, &channels);
         assert_eq!(
             parsed,
             BackBlastData::new(
@@ -133,9 +190,10 @@ mod tests {
 
     #[test]
     fn variant_two() {
-        let text = "#Backblast #rebel\n8.22.22\nQ: @Slice and @Doppler\nPax: @Daft @Bacon Bacon Bacon @Focker @Lawsuit";
+        let text = "#Backblast #rebel\n8.22.22\nQ: @Slice, @Doppler\nPax: @Daft @Bacon Bacon Bacon @Focker @Lawsuit";
         let users = HashMap::<String, F3User>::from([]);
-        let parsed = parse_back_blast(text, &users);
+        let channels = empty_channels();
+        let parsed = parse_back_blast(text, &users, &channels);
         assert_eq!(
             parsed,
             BackBlastData::new(
@@ -147,14 +205,142 @@ mod tests {
                     "Focker".to_string(),
                     "Lawsuit".to_string()
                 ]),
-                NaiveDate::from_ymd(2022, 8, 22)
+                NaiveDate::from_ymd(2022, 8, 22),
             )
         );
     }
 
     #[test]
+    fn bot_bb_variant() {
+        let text = "*Slackblast*: \n*Billy Madison*\n*DATE*: 2022-08-22\n*AO*: <#C03UR7GM7Q9>\n*Q*: <@U03SR452HL7>\n*PAX*: <@U03T87KHRFE> , Cliffhanger, Firewall\n*FNGs*: 1 Firewall\n*COUNT*: 3\nDisclaimer \nMission Statement \n5 principles\n\nWarmup:\n10 Grass grabbers IC\n10 Tin soldiers IC\n10 Michael Phelps IC\n\nThang:\nMosey w/ sandbags + rucks to the track\n\nBilly Madison:\n1st grade: 400m mosey + SSH x12\n2nd grade: 400m mosey + Curls (for the girls) x12\n3rd grade: 400m mosey + Merkins x12\n4th grade: 400m mosey + Sandbag Squats x12 5th grade: 400m mosey + Ruck burpees x12\n\nCountarama\n Namearama\n FNG ritual\n Announcements \nTAPS\n\n  \\";
+        let users = HashMap::<String, F3User>::from([
+            (
+                "U03SR452HL7".to_string(),
+                F3User {
+                    id: Some("U03SR452HL7".to_string()),
+                    name: "Backslash".to_string(),
+                    email: "email@test.com".to_string(),
+                },
+            ),
+            (
+                "U03T87KHRFE".to_string(),
+                F3User {
+                    id: Some("U03T87KHRFE".to_string()),
+                    name: "Stinger".to_string(),
+                    email: "stinger@gmail.com".to_string(),
+                },
+            ),
+        ]);
+        let channels = HashMap::<PublicChannels, ChannelData>::from([(
+            PublicChannels::Bleach,
+            ChannelData {
+                id: "C03UR7GM7Q9".to_string(),
+                name: "ao-bleach".to_string(),
+            },
+        )]);
+        let parsed = parse_back_blast(text, &users, &channels);
+        assert_eq!(
+            parsed,
+            BackBlastData::new(
+                AO::Bleach,
+                HashSet::from(["Backslash".to_string()]),
+                HashSet::from([
+                    "Stinger".to_string(),
+                    "Cliffhanger".to_string(),
+                    "Firewall".to_string()
+                ]),
+                NaiveDate::from_ymd(2022, 8, 22),
+            )
+        );
+    }
+
+    #[test]
+    fn bot_variant_2() {
+        let text = "*Slackblast*: \n*Testing*\n*DATE*: 2022-09-04\n*AO*: <#C03UR7GM7Q9>\n*Q*: <@U03T87KHRFE>, <@U03SR452HL7> \n*PAX*: <@U0410479LG2> <@U040AL30FA8> <@U03SR452HL7> , Retina, Atlas\n*FNGs*: 1 Atlas\n*COUNT*: 5\n\n*WARMUP:* \n*THE THANG:* \n*MARY:* \n*ANNOUNCEMENTS:* \n*COT:* ";
+        let users = HashMap::<String, F3User>::from([
+            (
+                "U03SR452HL7".to_string(),
+                F3User {
+                    id: Some("U03SR452HL7".to_string()),
+                    name: "Backslash".to_string(),
+                    email: "email@test.com".to_string(),
+                },
+            ),
+            (
+                "U03T87KHRFE".to_string(),
+                F3User {
+                    id: Some("U03T87KHRFE".to_string()),
+                    name: "Stinger".to_string(),
+                    email: "stinger@gmail.com".to_string(),
+                },
+            ),
+            (
+                "U040AL30FA8".to_string(),
+                F3User {
+                    id: Some("U040AL30FA8".to_string()),
+                    name: "Tenor".to_string(),
+                    email: "".to_string(),
+                },
+            ),
+            (
+                "U0410479LG2".to_string(),
+                F3User {
+                    id: Some("U0410479LG2".to_string()),
+                    name: "Canuck".to_string(),
+                    email: "".to_string(),
+                },
+            ),
+        ]);
+        let channels = HashMap::<PublicChannels, ChannelData>::from([(
+            PublicChannels::Bleach,
+            ChannelData {
+                id: "C03UR7GM7Q9".to_string(),
+                name: "ao-bleach".to_string(),
+            },
+        )]);
+        let parsed = parse_back_blast(text, &users, &channels);
+        let expected = BackBlastData::new(
+            AO::Bleach,
+            HashSet::from(["Backslash".to_string(), "Stinger".to_string()]),
+            HashSet::from([
+                "Stinger".to_string(),
+                "Backslash".to_string(),
+                "Tenor".to_string(),
+                "Canuck".to_string(),
+                "Retina".to_string(),
+                "Atlas".to_string(),
+            ]),
+            NaiveDate::from_ymd(2022, 9, 4),
+        );
+        assert_eq!(parsed.ao, expected.ao);
+        assert_eq!(parsed.qs, expected.qs);
+        assert_eq!(parsed.date, expected.date);
+        assert_eq!(parsed.get_pax(), expected.get_pax());
+    }
+
+    #[test]
+    fn parsing_channels_id() {
+        let text = "<#C03UR7GM7Q9>";
+        let channels = HashMap::<PublicChannels, ChannelData>::from([(
+            PublicChannels::Bleach,
+            ChannelData {
+                id: "C03UR7GM7Q9".to_string(),
+                name: "ao-bleach".to_string(),
+            },
+        )]);
+        let ao = parse_channels_list(text, &channels);
+        assert_eq!(ao, AO::Bleach);
+    }
+
+    #[test]
+    fn parse_year_date() {
+        let parsed = parse_date("2022-08-22");
+        assert_eq!(parsed, Some(NaiveDate::from_ymd(2022, 8, 22)))
+    }
+
+    #[test]
     fn cleaning_names() {
-        let cleaned = clean_name("@Timney");
+        let cleaned = extract_slack_user_ref("@Timney");
         assert_eq!(cleaned, "Timney".to_string());
     }
 
