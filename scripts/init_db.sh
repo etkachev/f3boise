@@ -33,8 +33,8 @@ then
     -e POSTGRES_DB=${DB_NAME} \
     -p "${DB_PORT}":5432 \
     -d postgres \
-    -c ssl=true \
-    postgres -N 1000
+    postgres -N 1000 \
+    -c ssl=true
     # ^ Increased maximum number of connections for testing purposes
 fi
 
