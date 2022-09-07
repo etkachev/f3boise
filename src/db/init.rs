@@ -34,7 +34,7 @@ pub async fn sync_ao_list(db_pool: &PgPool) -> Result<(), AppError> {
         }
         Err(err) => {
             println!("Err beginnging transaction: {:?}", err);
-            AppError::Sqlx(err)
+            Err(AppError::Sqlx(err))
         }
     }
 }
