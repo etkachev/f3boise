@@ -44,6 +44,7 @@ impl MutableWebState {
 
         let response: ChannelsListResponse = serde_json::from_slice(&response.body)?;
 
+        println!("Finished getting public channels");
         if let Some(channels) = response.channels {
             let public_channels: HashMap<PublicChannels, ChannelData> =
                 channels
@@ -68,6 +69,7 @@ impl MutableWebState {
         let response = self.make_get_url_request(url).await;
         let response: UsersListResponse =
             serde_json::from_slice(&response.body).expect("Could not parse response");
+        println!("Got slack users back");
         if let Some(users) = response.members {
             let users_bots: UserBotCombo = users
                 .into_iter()

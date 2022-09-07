@@ -15,12 +15,15 @@ use uuid::Uuid;
 
 /// Sync full ao list
 pub async fn sync_ao_list(db_pool: &PgPool) -> Result<(), AppError> {
+    println!("Starting sync ao list");
     let mut transaction = db_pool.begin().await.expect("Failed to begin transaction");
 
+    println!("Start Sync ao list");
     for item in AO_LIST {
         let ao = AoData::from(&item);
         insert_ao_record(&mut transaction, &ao).await?;
     }
+    println!("End Sync ao list");
 
     transaction
         .commit()
@@ -78,6 +81,7 @@ impl From<&F3User> for DbUser {
 /// get existing db users
 pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, AppError> {
     let mut results = HashMap::<String, F3User>::new();
+    println!("Fetch all users from db");
     let rows: Vec<DbUser> = sqlx::query_as!(
         DbUser,
         r#"
@@ -87,6 +91,7 @@ pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, A
     )
     .fetch_all(db_pool)
     .await?;
+    println!("Finished fetching users");
     for item in rows {
         results.insert(item.slack_id.to_string(), F3User::from(item));
     }
@@ -94,14 +99,17 @@ pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, A
 }
 
 pub async fn sync_users(db_pool: &PgPool, users: &HashMap<String, F3User>) -> Result<(), AppError> {
+    println!("Start full sync users");
     let mut transaction = db_pool.begin().await.expect("Failed to begin transaction");
     for (_, user) in users.iter() {
         upsert_user(&mut transaction, &DbUser::from(user)).await?;
     }
+    println!("Finishing full sync users");
     transaction
         .commit()
         .await
         .expect("Could not commit transaction");
+    println!("Finished full sync users");
     Ok(())
 }
 

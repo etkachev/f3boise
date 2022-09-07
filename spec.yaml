@@ -37,6 +37,26 @@ services:
     routes:
       - path: /
     envs:
+      - key: SLACK_CLIENT_ID
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+        value: EV[1:pNhjC7V6V6N18o3boUhwgIk9bSrDddRg:1vBuqCNtB7yjgc+2LWioD+wPc+XFFKF2fAAAtRiBDqMqgkC1JHhtKbZQUg==]
+      - key: SLACK_CLIENT_SECRET
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+        value: EV[1:EHtkMctw+QGxq7ZjaU4+3Gdp0HC8j4dM:SdmC9MBudJpCyUc9szTHTNeTwd7KTZO6EWh7/Eav5P4FhOwZMNTSD92uNRbMvoWb]
+      - key: SLACK_SIGNING_SECRET
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+        value: EV[1:gTWMU78QWOASpbLKiNKqBef8NEcOmykm:uzinDEhotWTKlV5sv8ptrKaEHorsm1aMVV9ZgK+QcCB6m2TDRpgXJMA8iy5EruNK]
+      - key: BOT_OAUTH_TOKEN
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+        value: EV[1:YREWToa7rv15Q0RbNWYEkvWBklx/ZP3D:CKEOaayUl8o70CKce3NjPoWjELC3yW0Q2HZiojYTJIvKL7SScZeT8IkjEZylIssMCbdUWKawCw4vMIm93YuWyEWlTho4ArVU8w==]
+      - key: DEPRECATED_VERIFY_TOKEN
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+        value: EV[1:DDg2hU900qkVcVv2XiJD3iGU3StotMvk:3axMCWJFKG9g5zrLIHuCImxPwEeBt/ezNFNIl5/dcQ9UKt9OcxVohg==]
       - key: APP_DATABASE__USERNAME
         scope: RUN_TIME
         value: ${f3boise.USERNAME}
