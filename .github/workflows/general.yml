@@ -180,6 +180,11 @@ jobs:
       SQLX_FEATURES: postgres,rustls
       # IMPORTANT update below if above line updates
       SQLX_CACHE_KEY: 2
+      BOT_OAUTH_TOKEN: ${{ secrets.BOT_OAUTH_TOKEN }}
+      DEPRECATED_VERIFY_TOKEN: ${{ secrets.DEPRECATED_VERIFY_TOKEN }}
+      SLACK_CLIENT_ID: ${{ secrets.SLACK_CLIENT_ID }}
+      SLACK_CLIENT_SECRET: ${{ secrets.SLACK_CLIENT_SECRET }}
+      SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
