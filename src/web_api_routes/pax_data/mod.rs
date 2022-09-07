@@ -1,8 +1,11 @@
 use crate::app_state::MutableAppState;
+use crate::db::init::get_db_users;
+use crate::users::f3_user::F3User;
 use crate::web_api_state::MutableWebState;
-use actix_web::{get, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
 
 #[derive(Deserialize, Serialize)]
 pub struct PaxInfoQuery {
@@ -34,7 +37,6 @@ impl Default for PaxInfoResponse {
     }
 }
 
-#[get("/")]
 pub async fn get_pax_info(
     _web_state: web::Data<MutableWebState>,
     _app_state: web::Data<MutableAppState>,
@@ -74,4 +76,15 @@ pub async fn get_pax_info(
     //     }
     //     Err(err) => HttpResponse::NotFound().body(format!("Err: {:?}", err)),
     // }
+}
+
+pub async fn get_users(db_pool: web::Data<PgPool>) -> impl Responder {
+    let response = get_db_users(&db_pool).await;
+    match response {
+        Ok(users) => {
+            let users: Vec<F3User> = users.into_values().collect();
+            HttpResponse::Ok().json(users)
+        }
+        Err(err) => HttpResponse::NotFound().body(err.to_string()),
+    }
 }

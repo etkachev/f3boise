@@ -1,12 +1,12 @@
 use crate::app_state::MutableAppState;
 use crate::configuration::{DatabaseSettings, Settings};
-use crate::db::init::{get_db_users, sync_ao_list};
 use crate::db::DbStore;
 use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::auth::get_key;
-use crate::web_api_routes::pax_data::get_pax_info;
+use crate::web_api_routes::pax_data::{get_pax_info, get_users};
 use crate::web_api_routes::slack_events::slack_events;
+use crate::web_api_routes::sync::sync_data;
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::dev::Server;
@@ -25,21 +25,9 @@ impl Application {
     pub async fn build(configuration: Settings) -> Result<Self, AppError> {
         let connection_pool = get_connection_pool(&configuration.database);
 
-        sync_ao_list(&connection_pool).await?;
-
         // TODO update
         let web_state = init_web_state();
-        let mut app_state = MutableAppState::new();
-
-        let db_users = get_db_users(&connection_pool).await?;
-        let slack_users = web_state.get_users().await?;
-        app_state.insert_users(db_users);
-        app_state.insert_users(slack_users.users);
-        app_state.insert_bots(slack_users.bots);
-        let public_channels = web_state.get_public_channels().await?;
-        app_state.insert_channels(public_channels);
-        app_state.sync_users(&connection_pool).await?;
-        println!("Synced all");
+        let app_state = MutableAppState::new();
 
         let address = format!(
             "{}:{}",
@@ -113,7 +101,12 @@ pub fn run(
             .route("/", web::get().to(index))
             .route("/health_check", web::get().to(health_check))
             .route("/events", web::post().to(slack_events))
-            .service(web::scope("/pax").service(get_pax_info))
+            .route("/sync", web::get().to(sync_data))
+            .service(
+                web::scope("/pax")
+                    .route("/info", web::get().to(get_pax_info))
+                    .route("/all", web::get().to(get_users)),
+            )
             .app_data(web_app_data.clone())
             .app_data(app_state_data.clone())
             .app_data(db_pool.clone())
