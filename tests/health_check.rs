@@ -4,22 +4,44 @@ use f3_api_rs::configuration::{get_configuration, DatabaseSettings};
 use f3_api_rs::web_api_run::run;
 use f3_api_rs::web_api_state::{MutableWebState, LOCAL_URL};
 // use secrecy::ExposeSecret;
+use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
+use uuid::Uuid;
 
-async fn spawn_app() -> String {
+// Ensure that the `tracing` stack is only initialised once using `once_cell`
+static TRACING: Lazy<()> = Lazy::new(|| {
+    // let subscriber = get_subscriber("test".into(), "debug".into());
+    // init_subscriber(subscriber);
+});
+
+pub struct TestApp {
+    pub address: String,
+    pub db_pool: PgPool,
+}
+
+async fn spawn_app() -> TestApp {
+    // The first time `initialize` is invoked the code in `TRACING` is executed.
+    // All other invocations will instead skip execution.
+    Lazy::force(&TRACING);
+
     dotenv().ok();
     let default_state = MutableWebState::default();
     let app_state = MutableAppState::new();
     let address = format!("{}:{}", LOCAL_URL, 0);
     let listener = TcpListener::bind(&address).expect("Failed to bind to random port");
     let port = listener.local_addr().unwrap().port();
-    let config = get_configuration().expect("Failed to get config");
+    let address = format!("http://{}:{}", LOCAL_URL, port);
+    let mut config = get_configuration().expect("Failed to get config");
+    config.database.database_name = Uuid::new_v4().to_string();
     let pg_pool = configure_database(&config.database).await;
-    let server =
-        run(default_state, app_state, listener, pg_pool).expect("Failed to bind to address");
+    let server = run(default_state, app_state, listener, pg_pool.clone())
+        .expect("Failed to bind to address");
     let _ = tokio::spawn(server);
-    format!("http://{}:{}", LOCAL_URL, port)
+    TestApp {
+        address,
+        db_pool: pg_pool,
+    }
 }
 
 async fn configure_database(config: &DatabaseSettings) -> PgPool {
@@ -46,11 +68,11 @@ async fn configure_database(config: &DatabaseSettings) -> PgPool {
 
 #[tokio::test]
 async fn health_check_works() {
-    let address = spawn_app().await;
-    println!("running on address: {}", address);
+    let app = spawn_app().await;
+    println!("running on address: {}", app.address);
     let client = reqwest::Client::new();
     let response = client
-        .get(&format!("{}/health_check", &address))
+        .get(&format!("{}/health_check", &app.address))
         .send()
         .await
         .expect("Failed to execute request");
