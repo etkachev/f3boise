@@ -25,20 +25,20 @@ impl Application {
     pub async fn build(configuration: Settings) -> Result<Self, AppError> {
         let connection_pool = get_connection_pool(&configuration.database);
 
-        sync_ao_list(&connection_pool).await?;
+        // sync_ao_list(&connection_pool).await?;
 
         // TODO update
         let web_state = init_web_state();
         let mut app_state = MutableAppState::new();
 
-        let db_users = get_db_users(&connection_pool).await?;
-        let slack_users = web_state.get_users().await?;
-        app_state.insert_users(db_users);
-        app_state.insert_users(slack_users.users);
-        app_state.insert_bots(slack_users.bots);
-        let public_channels = web_state.get_public_channels().await?;
-        app_state.insert_channels(public_channels);
-        app_state.sync_users(&connection_pool).await?;
+        // let db_users = get_db_users(&connection_pool).await?;
+        // let slack_users = web_state.get_users().await?;
+        // app_state.insert_users(db_users);
+        // app_state.insert_users(slack_users.users);
+        // app_state.insert_bots(slack_users.bots);
+        // let public_channels = web_state.get_public_channels().await?;
+        // app_state.insert_channels(public_channels);
+        // app_state.sync_users(&connection_pool).await?;
         println!("Synced all");
 
         let address = format!(
