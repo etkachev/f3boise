@@ -1,23 +1,11 @@
-use chrono::NaiveDate;
 use f3_api_rs::app_state::ao_data::AO;
 use f3_api_rs::app_state::backblast_data::BackBlastData;
 use f3_api_rs::configuration::get_configuration;
-use f3_api_rs::db::save_back_blast::save;
 use f3_api_rs::db::DbStore;
+use f3_api_rs::migrate_old::{clean_sheet_name, save_old_back_blasts, AOLIST};
 use f3_api_rs::shared::common_errors::AppError;
 use f3_api_rs::web_api_run::get_connection_pool;
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
-struct OldBackBlast {
-    pub date: String,
-    pub q: String,
-    pub count: u16,
-    pub fngs: Option<u16>,
-    pub pax: String,
-}
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -25,58 +13,6 @@ struct PaxCount {
     pub name: String,
     #[serde(rename = "Post Count")]
     pub post_count: u16,
-}
-
-fn clean_sheet_name(name: &str) -> &str {
-    let name = name.trim();
-    let name = if let Some((name, _)) = name.split_once(&['(', '|'][..]) {
-        name.trim()
-    } else {
-        name
-    };
-    name
-}
-
-fn extract_names(list: &str) -> Vec<&str> {
-    list.split(',').map(clean_sheet_name).collect()
-}
-
-fn map_to_bb(ao: &AO, old: OldBackBlast) -> Option<BackBlastData> {
-    // date format: 10/8/2021
-    let mut date_parsed = NaiveDate::parse_from_str(&old.date, "%m/%d/%Y").unwrap();
-    if date_parsed < NaiveDate::from_ymd(2000, 1, 1) {
-        date_parsed = NaiveDate::parse_from_str(&old.date, "%m/%d/%y").unwrap();
-    }
-    let pax = extract_names(&old.pax);
-    let qs = extract_names(&old.q);
-    if pax.is_empty() {
-        if !qs.is_empty() {
-            println!("Qs but no pax");
-        }
-        return None;
-    }
-    let mut q_set = HashSet::<String>::new();
-    for q in qs {
-        q_set.insert(q.to_string());
-    }
-    let mut pax_set = HashSet::<String>::new();
-    for p in pax {
-        pax_set.insert(p.to_string());
-    }
-    let data = BackBlastData::new(ao.clone(), q_set, pax_set, date_parsed);
-    Some(data)
-}
-
-const BACK_YARD_BB_PATH: &str = "db_files/old/Backyard";
-const BLEACH_BB_PATH: &str = "db_files/old/Bleach";
-const GEM_BB_PATH: &str = "db_files/old/Gem";
-const IR_BB_PATH: &str = "db_files/old/Iron Mountain";
-const OLD_GLORY_BB_PATH: &str = "db_files/old/Old Glory";
-const REBEL_BB_PATH: &str = "db_files/old/Rebel";
-const RUCKERSHIP_BB_PATH: &str = "db_files/old/Ruckership";
-
-fn back_blast_path(folder: &str) -> String {
-    format!("{}/Backblasts.csv", folder)
 }
 
 fn pax_counts_path(folder: &str) -> String {
@@ -89,34 +25,8 @@ async fn main() {
     let connection_pool = get_connection_pool(&config.database);
     let db = DbStore::new();
     db.init_db().expect("Could not init db");
-    let aos = [
-        (AO::Backyard, BACK_YARD_BB_PATH),
-        (AO::Bleach, BLEACH_BB_PATH),
-        (AO::Gem, GEM_BB_PATH),
-        (AO::IronMountain, IR_BB_PATH),
-        (AO::OldGlory, OLD_GLORY_BB_PATH),
-        (AO::Rebel, REBEL_BB_PATH),
-        (AO::Ruckership, RUCKERSHIP_BB_PATH),
-    ];
-    for (ao, file_path) in aos.iter() {
-        let ao_name = ao.to_string();
-        match read_back_blasts(ao, &back_blast_path(file_path)) {
-            Ok(bb) => {
-                if let Err(err) = save(&connection_pool, &bb).await {
-                    println!("Error saving bb: {:?}", err);
-                }
-                // for entry in bb {
-                //
-                //     if let Err(err) = db.resolve_new_back_blast(&entry) {
-                //         println!("Error saving bb: {:?}", err);
-                //     }
-                // }
-                println!("Saved: {}", ao_name);
-            }
-            Err(err) => {
-                println!("Err: {:?}", err);
-            }
-        }
+    if let Err(err) = save_old_back_blasts(&connection_pool).await {
+        println!("Error saving bb: {:?}", err);
     }
 
     // TODO update
@@ -124,7 +34,7 @@ async fn main() {
         Ok(mut results) => {
             results.sort_by(|a, b| a.date.cmp(&b.date));
 
-            for (ao, ao_path) in aos.iter() {
+            for (ao, ao_path) in AOLIST.iter() {
                 if let Err(err) = verify_ao_stats(ao, &results, ao_path) {
                     println!("Error verifying: {:?}", err);
                 }
@@ -206,29 +116,4 @@ fn verify_ao_stats(ao: &AO, data: &[BackBlastData], ao_file_path: &str) -> Resul
         }
     }
     Ok(())
-}
-
-fn read_back_blasts(ao: &AO, path: &str) -> Result<Vec<BackBlastData>, AppError> {
-    let path = std::path::Path::new(path);
-    let mut results = Vec::<BackBlastData>::new();
-    let mut rdr = csv::ReaderBuilder::new().from_path(path)?;
-
-    for record in rdr.deserialize() {
-        let record: OldBackBlast = record?;
-        if record
-            .pax
-            .split(',')
-            .map(|name| name.trim())
-            .next()
-            .is_none()
-        {
-            if record.q.split(',').map(|name| name.trim()).next().is_some() {
-                println!("Qs but no pax");
-            }
-        } else if let Some(bb) = map_to_bb(ao, record) {
-            results.push(bb);
-        }
-    }
-
-    Ok(results)
 }

@@ -2,6 +2,7 @@ pub mod app_state;
 pub mod bot_data;
 pub mod configuration;
 pub mod db;
+pub mod migrate_old;
 pub mod oauth_client;
 pub mod shared;
 pub mod slack_api;
