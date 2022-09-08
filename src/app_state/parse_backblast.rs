@@ -287,7 +287,7 @@ mod tests {
 
     #[test]
     fn bot_variation_3() {
-        let text = "*Slackblast*:\n*Nice and simple BD*\n*DATE*: 2022-09-08\n*AO*: <#C03UBFXVBGD|ao-gem>\n*Q*: <@U041CMSLS2V>\n*PAX*: <@U040X6299FX> <@U041CMSLS2V> <@U040X05NJ85> <@U040QCPQM1V> <@U0405B5P7MK> <@U041H4NEP8R> <@U041E4057RT> <@U041W347TBK> <@U0411DA459U> <@U04173V1E02> <@U0416JH2T36>\n*FNGs*: None\n*COUNT*: 18\n\n*WARMUP:*\n*THE THANG:*\nThe Thang\n25 around the world merkins (5 of each - 2 hands on ground, 1 hand on coupon, both hands on coupon, 1 hand on coupon, both hands on ground)\n20 BBSU\n15 curls in cadence\n15 squats in cadence\n10 overhead press\nMosey\nRepeat - I think we did 4 or 5 sets\n*MARY:*\n*ANNOUNCEMENTS:*\n*COT:*";
+        let text = "*Slackblast*:\n*Nice and simple BD*\n*DATE*: 2022-09-08\n*AO*: <#C03UBFXVBGD|ao-gem>\n*Q*: <@U041CMSLS2V>\n*PAX*: <@U040X6299FX> <@U041CMSLS2V> <@U040X05NJ85> <@U040QCPQM1V> <@U0405B5P7MK> <@U041H4NEP8R> <@U041E4057RT> <@U041W347TBK> <@U0411DA459U> <@U04173V1E02> <@U0416JH2T36> , others\n*FNGs*: None\n*COUNT*: 18\n\n*WARMUP:*\n*THE THANG:*\nThe Thang\n25 around the world merkins (5 of each - 2 hands on ground, 1 hand on coupon, both hands on coupon, 1 hand on coupon, both hands on ground)\n20 BBSU\n15 curls in cadence\n15 squats in cadence\n10 overhead press\nMosey\nRepeat - I think we did 4 or 5 sets\n*MARY:*\n*ANNOUNCEMENTS:*\n*COT:*";
         let users = HashMap::<String, F3User>::from([
             hash_set_user("U041CMSLS2V", "Samwise"),
             hash_set_user("U040X6299FX", "Chubbs"),
@@ -324,6 +324,7 @@ mod tests {
                 "Freighter".to_string(),
                 "Napoleon".to_string(),
                 "Gopher".to_string(),
+                "others".to_string(),
             ]),
             NaiveDate::from_ymd(2022, 9, 8),
         );

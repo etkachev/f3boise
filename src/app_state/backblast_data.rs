@@ -63,6 +63,27 @@ impl BackBlastData {
         let valid_date = self.date > NaiveDate::MIN;
         let valid_event_times = self.event_times.is_some();
 
+        if !has_ao {
+            println!("No ao: {:?}", self.ao);
+        }
+
+        if !has_pax {
+            println!(
+                "No pax - qs: {:?}, pax: {:?}, ALL: {:?}",
+                self.qs,
+                self.pax,
+                self.get_pax()
+            );
+        }
+
+        if !valid_date {
+            println!("invalid date: {:?}", self.date);
+        }
+
+        if !valid_event_times {
+            println!("Ts times invalid: {:?}", self.event_times);
+        }
+
         has_ao && has_pax && valid_date && valid_event_times
     }
 
