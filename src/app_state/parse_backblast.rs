@@ -112,6 +112,11 @@ fn extract_slack_channel_ref(channel: &str) -> String {
     let channel = channel.strip_prefix('<').unwrap_or(channel);
     let channel = channel.strip_suffix('>').unwrap_or(channel);
     let channel = channel.strip_prefix('#').unwrap_or(channel);
+    // sometimes the format is "<#C03UBFXVBGD|ao-gem>"
+    let channel = channel
+        .split_once('|')
+        .map(|(first, _)| first)
+        .unwrap_or(channel);
     channel.to_string()
 }
 
@@ -163,18 +168,22 @@ mod tests {
         HashMap::from([])
     }
 
+    fn hash_set_user(id: &str, name: &str) -> (String, F3User) {
+        (
+            id.to_string(),
+            F3User {
+                id: Some(id.to_string()),
+                name: name.to_string(),
+                email: "email@test.com".to_string(),
+            },
+        )
+    }
+
     #[test]
     fn variant_one() {
         let text = "#backblast #bleach\n\n08-20-22\n\n0600-0700\n\nQ: @Stinger\n\nPAX: @Timney <@U03SR452HL7>\n\nConditions: nice\n\nFocus on the workout was a modified version of the Elk Fit workout. High intensity with short recovery periods with heavy weights.\n\nWarm up: waterfall, couch stretch, Michael Phelps\n\nThe Thang:\n1 mile run for time.\n\nFirst Phase - Tabata\nBent over row with SB - 20sec x 8 sets (10s rest)\nPush ups with ruck - 20sec x 8 sets (10s rest)\nOverhead press - 20sec x 8 sets (10s rest)\nTricep dips - 20sec x 8 sets (10s rest)\nGood mornings - 20sec x 8 sets (10s rest)\nWeighted sit-ups - 20sec x 8 sets (10s rest)";
 
-        let users = HashMap::<String, F3User>::from([(
-            "U03SR452HL7".to_string(),
-            F3User {
-                id: Some("U03SR452HL7".to_string()),
-                name: "Backslash".to_string(),
-                email: "backslash@gmail.com".to_string(),
-            },
-        )]);
+        let users = HashMap::<String, F3User>::from([hash_set_user("U03SR452HL7", "Backslash")]);
         let channels = empty_channels();
         let parsed = parse_back_blast(text, &users, &channels);
         assert_eq!(
@@ -214,22 +223,8 @@ mod tests {
     fn bot_bb_variant() {
         let text = "*Slackblast*: \n*Billy Madison*\n*DATE*: 2022-08-22\n*AO*: <#C03UR7GM7Q9>\n*Q*: <@U03SR452HL7>\n*PAX*: <@U03T87KHRFE> , Cliffhanger, Firewall\n*FNGs*: 1 Firewall\n*COUNT*: 3\nDisclaimer \nMission Statement \n5 principles\n\nWarmup:\n10 Grass grabbers IC\n10 Tin soldiers IC\n10 Michael Phelps IC\n\nThang:\nMosey w/ sandbags + rucks to the track\n\nBilly Madison:\n1st grade: 400m mosey + SSH x12\n2nd grade: 400m mosey + Curls (for the girls) x12\n3rd grade: 400m mosey + Merkins x12\n4th grade: 400m mosey + Sandbag Squats x12 5th grade: 400m mosey + Ruck burpees x12\n\nCountarama\n Namearama\n FNG ritual\n Announcements \nTAPS\n\n  \\";
         let users = HashMap::<String, F3User>::from([
-            (
-                "U03SR452HL7".to_string(),
-                F3User {
-                    id: Some("U03SR452HL7".to_string()),
-                    name: "Backslash".to_string(),
-                    email: "email@test.com".to_string(),
-                },
-            ),
-            (
-                "U03T87KHRFE".to_string(),
-                F3User {
-                    id: Some("U03T87KHRFE".to_string()),
-                    name: "Stinger".to_string(),
-                    email: "stinger@gmail.com".to_string(),
-                },
-            ),
+            hash_set_user("U03SR452HL7", "Backslash"),
+            hash_set_user("U03T87KHRFE", "Stinger"),
         ]);
         let channels = HashMap::<PublicChannels, ChannelData>::from([(
             PublicChannels::Bleach,
@@ -258,38 +253,10 @@ mod tests {
     fn bot_variant_2() {
         let text = "*Slackblast*: \n*Testing*\n*DATE*: 2022-09-04\n*AO*: <#C03UR7GM7Q9>\n*Q*: <@U03T87KHRFE>, <@U03SR452HL7> \n*PAX*: <@U0410479LG2> <@U040AL30FA8> <@U03SR452HL7> , Retina, Atlas\n*FNGs*: 1 Atlas\n*COUNT*: 5\n\n*WARMUP:* \n*THE THANG:* \n*MARY:* \n*ANNOUNCEMENTS:* \n*COT:* ";
         let users = HashMap::<String, F3User>::from([
-            (
-                "U03SR452HL7".to_string(),
-                F3User {
-                    id: Some("U03SR452HL7".to_string()),
-                    name: "Backslash".to_string(),
-                    email: "email@test.com".to_string(),
-                },
-            ),
-            (
-                "U03T87KHRFE".to_string(),
-                F3User {
-                    id: Some("U03T87KHRFE".to_string()),
-                    name: "Stinger".to_string(),
-                    email: "stinger@gmail.com".to_string(),
-                },
-            ),
-            (
-                "U040AL30FA8".to_string(),
-                F3User {
-                    id: Some("U040AL30FA8".to_string()),
-                    name: "Tenor".to_string(),
-                    email: "".to_string(),
-                },
-            ),
-            (
-                "U0410479LG2".to_string(),
-                F3User {
-                    id: Some("U0410479LG2".to_string()),
-                    name: "Canuck".to_string(),
-                    email: "".to_string(),
-                },
-            ),
+            hash_set_user("U03SR452HL7", "Backslash"),
+            hash_set_user("U03T87KHRFE", "Stinger"),
+            hash_set_user("U040AL30FA8", "Tenor"),
+            hash_set_user("U0410479LG2", "Canuck"),
         ]);
         let channels = HashMap::<PublicChannels, ChannelData>::from([(
             PublicChannels::Bleach,
@@ -319,6 +286,55 @@ mod tests {
     }
 
     #[test]
+    fn bot_variation_3() {
+        let text = "*Slackblast*:\n*Nice and simple BD*\n*DATE*: 2022-09-08\n*AO*: <#C03UBFXVBGD|ao-gem>\n*Q*: <@U041CMSLS2V>\n*PAX*: <@U040X6299FX> <@U041CMSLS2V> <@U040X05NJ85> <@U040QCPQM1V> <@U0405B5P7MK> <@U041H4NEP8R> <@U041E4057RT> <@U041W347TBK> <@U0411DA459U> <@U04173V1E02> <@U0416JH2T36>\n*FNGs*: None\n*COUNT*: 18\n\n*WARMUP:*\n*THE THANG:*\nThe Thang\n25 around the world merkins (5 of each - 2 hands on ground, 1 hand on coupon, both hands on coupon, 1 hand on coupon, both hands on ground)\n20 BBSU\n15 curls in cadence\n15 squats in cadence\n10 overhead press\nMosey\nRepeat - I think we did 4 or 5 sets\n*MARY:*\n*ANNOUNCEMENTS:*\n*COT:*";
+        let users = HashMap::<String, F3User>::from([
+            hash_set_user("U041CMSLS2V", "Samwise"),
+            hash_set_user("U040X6299FX", "Chubbs"),
+            hash_set_user("U040X05NJ85", "Defrost"),
+            hash_set_user("U040QCPQM1V", "Donatello"),
+            hash_set_user("U0405B5P7MK", "Slice"),
+            hash_set_user("U041H4NEP8R", "Daft"),
+            hash_set_user("U041E4057RT", "Watts"),
+            hash_set_user("U041W347TBK", "Stone Cold"),
+            hash_set_user("U0411DA459U", "Freighter"),
+            hash_set_user("U04173V1E02", "Napoleon"),
+            hash_set_user("U0416JH2T36", "Gopher"),
+        ]);
+        let channels = HashMap::<PublicChannels, ChannelData>::from([(
+            PublicChannels::Gem,
+            ChannelData {
+                id: "C03UBFXVBGD".to_string(),
+                name: "ao-gem".to_string(),
+            },
+        )]);
+        let parsed = parse_back_blast(text, &users, &channels);
+        let expected = BackBlastData::new(
+            AO::Gem,
+            HashSet::from(["Samwise".to_string()]),
+            HashSet::from([
+                "Samwise".to_string(),
+                "Chubbs".to_string(),
+                "Defrost".to_string(),
+                "Donatello".to_string(),
+                "Slice".to_string(),
+                "Daft".to_string(),
+                "Watts".to_string(),
+                "Stone Cold".to_string(),
+                "Freighter".to_string(),
+                "Napoleon".to_string(),
+                "Gopher".to_string(),
+            ]),
+            NaiveDate::from_ymd(2022, 9, 8),
+        );
+
+        assert_eq!(parsed.ao, expected.ao);
+        assert_eq!(parsed.qs, expected.qs);
+        assert_eq!(parsed.date, expected.date);
+        assert_eq!(parsed.get_pax(), expected.get_pax());
+    }
+
+    #[test]
     fn parsing_channels_id() {
         let text = "<#C03UR7GM7Q9>";
         let channels = HashMap::<PublicChannels, ChannelData>::from([(
@@ -330,6 +346,20 @@ mod tests {
         )]);
         let ao = parse_channels_list(text, &channels);
         assert_eq!(ao, AO::Bleach);
+    }
+
+    #[test]
+    fn parse_channel_id_variant_1() {
+        let text = "<#C03UBFXVBGD|ao-gem>";
+        let channels = HashMap::<PublicChannels, ChannelData>::from([(
+            PublicChannels::Gem,
+            ChannelData {
+                id: "C03UBFXVBGD".to_string(),
+                name: "ao-gem".to_string(),
+            },
+        )]);
+        let ao = parse_channels_list(text, &channels);
+        assert_eq!(ao, AO::Gem);
     }
 
     #[test]
