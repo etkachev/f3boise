@@ -42,6 +42,8 @@ RUN apt-get update -y \
 COPY --from=builder /app/target/release/f3webapi f3webapi
 # We need the configuration file at runtime!
 COPY configuration configuration
+# We will need migration files as well for syncing old
+COPY migration_files migration_files
 ENV APP_ENVIRONMENT production
 # When `docker run` is executed, launch the binary!
 ENTRYPOINT ["./f3webapi"]
