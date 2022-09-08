@@ -60,13 +60,12 @@ pub async fn slack_events(
     app_state: web::Data<MutableAppState>,
     db_pool: web::Data<PgPool>,
     req: HttpRequest,
-    // body: web::Json<serde_json::Value>,
     body: web::Json<event_wrapper::EventWrapper>,
 ) -> impl Responder {
     println!("Event incoming!");
     // TODO refactor
-    let valid_requset = verify_events_request(&data, &req, &body);
-    if !valid_requset {
+    let valid_request = verify_events_request(&data, &req, &body);
+    if !valid_request {
         return HttpResponse::Unauthorized().body("Event not allowed");
     }
 

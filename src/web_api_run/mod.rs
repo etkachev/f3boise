@@ -6,7 +6,7 @@ use crate::shared::common_errors::AppError;
 use crate::web_api_routes::auth::get_key;
 use crate::web_api_routes::pax_data::{get_pax_info, get_users};
 use crate::web_api_routes::slack_events::slack_events;
-use crate::web_api_routes::sync::{sync_data, sync_old_data};
+use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route};
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::dev::Server;
@@ -101,8 +101,8 @@ pub fn run(
             .route("/", web::get().to(index))
             .route("/health_check", web::get().to(health_check))
             .route("/events", web::post().to(slack_events))
-            .route("/sync", web::get().to(sync_data))
-            .route("/sync-old", web::get().to(sync_old_data))
+            .route("/sync", web::get().to(sync_data_route))
+            .route("/sync-old", web::get().to(sync_old_data_route))
             .service(
                 web::scope("/pax")
                     .route("/info", web::get().to(get_pax_info))

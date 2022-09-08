@@ -4,6 +4,7 @@ use chrono::NaiveDate;
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
+/// db representation of back blast
 pub struct BackBlastDbEntry {
     pub id: Uuid,
     pub ao: String,

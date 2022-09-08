@@ -15,16 +15,13 @@ use uuid::Uuid;
 
 /// Sync full ao list
 pub async fn sync_ao_list(db_pool: &PgPool) -> Result<(), AppError> {
-    println!("Starting sync ao list");
     match db_pool.try_begin().await {
         Ok(transaction) => {
             let mut transaction = transaction.expect("Failed to begin transaction");
-            println!("Start Sync ao list");
             for item in AO_LIST {
                 let ao = AoData::from(&item);
                 insert_ao_record(&mut transaction, &ao).await?;
             }
-            println!("End Sync ao list");
 
             transaction
                 .commit()

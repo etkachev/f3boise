@@ -1,8 +1,14 @@
 use super::ao_data::AO;
 use crate::db::db_back_blast::DbBackBlast;
+use crate::db::queries::all_back_blasts::BackBlastJsonData;
+use crate::db::save_back_blast::BackBlastDbEntry;
+use crate::shared::string_utils::{
+    json_value_to_string_vec, string_split_hash, string_vec_to_hash,
+};
 use crate::web_api_routes::slack_events::event_times::EventTimes;
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::HashSet;
 
 pub const BACK_BLAST_TAG: &str = "#backblast";
@@ -101,6 +107,7 @@ impl BackBlastData {
 #[derive(Deserialize, Serialize, PartialEq, Debug, Eq)]
 pub enum BackBlastType {
     BackBlast,
+    DoubleDown,
     // TODO more types like DoubleDown, etc
 }
 
@@ -108,6 +115,17 @@ impl ToString for BackBlastType {
     fn to_string(&self) -> String {
         match self {
             BackBlastType::BackBlast => "backblast".to_string(),
+            BackBlastType::DoubleDown => "doubledown".to_string(),
+        }
+    }
+}
+
+impl From<&str> for BackBlastType {
+    fn from(bb_type: &str) -> Self {
+        match bb_type {
+            "backblast" => BackBlastType::BackBlast,
+            "doubledown" => BackBlastType::DoubleDown,
+            _ => BackBlastType::BackBlast,
         }
     }
 }
@@ -137,6 +155,44 @@ impl From<DbBackBlast> for BackBlastData {
         let qs = split_comma_string(&db_bb.q);
         let pax = split_comma_string(&db_bb.pax);
         BackBlastData::new(ao, qs, pax, db_bb.date)
+    }
+}
+
+impl From<&BackBlastDbEntry> for BackBlastData {
+    fn from(db_entry: &BackBlastDbEntry) -> Self {
+        let qs = string_split_hash(&db_entry.q, ',');
+        let pax = string_split_hash(&db_entry.pax, ',');
+        BackBlastData {
+            ao: AO::from(db_entry.ao.to_string()),
+            qs,
+            pax,
+            date: db_entry.date,
+            bb_type: BackBlastType::from(db_entry.bb_type.as_str()),
+            event_times: None,
+        }
+    }
+}
+
+fn default_string_array_value() -> Value {
+    Value::Array(vec![])
+}
+
+impl From<BackBlastJsonData> for BackBlastData {
+    fn from(data: BackBlastJsonData) -> Self {
+        let q = data.q.unwrap_or_else(default_string_array_value);
+        let q = json_value_to_string_vec(q);
+        let pax = data.pax.unwrap_or_else(default_string_array_value);
+        let pax = json_value_to_string_vec(pax);
+        let qs = string_vec_to_hash(&q);
+        let pax = string_vec_to_hash(&pax);
+        BackBlastData {
+            ao: AO::from(data.ao.to_string()),
+            qs,
+            pax,
+            date: data.date,
+            bb_type: BackBlastType::from(data.bb_type.as_str()),
+            event_times: None,
+        }
     }
 }
 
