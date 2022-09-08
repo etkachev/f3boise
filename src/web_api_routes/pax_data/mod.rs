@@ -3,7 +3,6 @@ use crate::app_state::MutableAppState;
 use crate::db::init::get_db_users;
 use crate::db::queries::all_back_blasts::get_list_with_pax;
 use crate::users::f3_user::F3User;
-use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
@@ -44,7 +43,6 @@ impl Default for PaxInfoResponse {
 
 pub async fn get_pax_info(
     db_pool: web::Data<PgPool>,
-    _web_state: web::Data<MutableWebState>,
     app_state: web::Data<MutableAppState>,
     req: web::Query<PaxInfoQuery>,
 ) -> impl Responder {

@@ -136,6 +136,10 @@ fn parse_users_list(text: &str, users: &HashMap<String, F3User>) -> HashSet<Stri
             if let Some(matching_slack_user) = users.get(name.as_str()) {
                 acc.insert(matching_slack_user.name.to_string());
             } else {
+                let name = name
+                    .split_once('(')
+                    .map(|(n, _)| n.trim())
+                    .unwrap_or_else(|| name.trim());
                 acc.insert(name.to_string());
             }
             acc
@@ -336,6 +340,52 @@ mod tests {
     }
 
     #[test]
+    fn full_parse_variant_1() {
+        let text = "*Slackblast*: \n*Iron Mountain BD test*\n*DATE*: 2022-09-08\n*AO*: <#C03TZV5RRF1>\n*Q*: <@U041ACAGYDC>, <@U040AL30FA8> <@U03T87KHRFE> \n*PAX*: <@U041Z1HFL1F> <@U04133WBEHG> <@U04173A973L> <@U040X7RD605> , Preacherman, Atlas, Test one (@Stinger), Test two (@Gopher)\n*FNGs*: 2 Test one (@Stinger), Test two (@Gopher)\n*COUNT*: 6\n\n*WARMUP:* \n*THE THANG:* \n*MARY:* \n*ANNOUNCEMENTS:* \n*COT:* ";
+        let users = HashMap::<String, F3User>::from([
+            hash_set_user("U041ACAGYDC", "Revere"),
+            hash_set_user("U040AL30FA8", "Canuck"),
+            hash_set_user("U03T87KHRFE", "Stinger"),
+            hash_set_user("U041Z1HFL1F", "Hightower"),
+            hash_set_user("U04133WBEHG", "Big Sky"),
+            hash_set_user("U04173A973L", "Escobar"),
+            hash_set_user("U040X7RD605", "Telecaster"),
+        ]);
+        let channels = HashMap::<PublicChannels, ChannelData>::from([(
+            PublicChannels::IronMountain,
+            ChannelData {
+                id: "C03TZV5RRF1".to_string(),
+                name: "ao-iron-mountain".to_string(),
+            },
+        )]);
+        let parsed = parse_back_blast(text, &users, &channels);
+        let expected = BackBlastData::new(
+            AO::IronMountain,
+            HashSet::from([
+                "Revere".to_string(),
+                "Canuck".to_string(),
+                "Stinger".to_string(),
+            ]),
+            HashSet::from([
+                "Hightower".to_string(),
+                "Big Sky".to_string(),
+                "Escobar".to_string(),
+                "Telecaster".to_string(),
+                "Preacherman".to_string(),
+                "Atlas".to_string(),
+                "Test".to_string(),
+                "two".to_string(),
+                "one".to_string(),
+            ]),
+            NaiveDate::from_ymd(2022, 9, 8),
+        );
+        assert_eq!(parsed.ao, expected.ao);
+        assert_eq!(parsed.qs, expected.qs);
+        assert_eq!(parsed.date, expected.date);
+        assert_eq!(parsed.get_pax(), expected.get_pax());
+    }
+
+    #[test]
     fn parsing_channels_id() {
         let text = "<#C03UR7GM7Q9>";
         let channels = HashMap::<PublicChannels, ChannelData>::from([(
@@ -378,18 +428,39 @@ mod tests {
     #[test]
     fn user_list_parsing() {
         let text = "@Timney <@U03SR452HL7>";
-        let users = HashMap::<String, F3User>::from([(
-            "U03SR452HL7".to_string(),
-            F3User {
-                id: Some("U03SR452HL7".to_string()),
-                name: "Backslash".to_string(),
-                email: "backslash@gmail.com".to_string(),
-            },
-        )]);
+        let users = HashMap::<String, F3User>::from([hash_set_user("U03SR452HL7", "Backslash")]);
         let parsed = parse_users_list(text, &users);
         assert_eq!(
             parsed,
             HashSet::from(["Timney".to_string(), "Backslash".to_string()])
         );
+    }
+
+    #[test]
+    fn slack_user_parsing() {
+        // TODO need to update slackbot for standardizing format
+        let text = "<@U041Z1HFL1F> <@U04133WBEHG> <@U04173A973L> <@U040X7RD605> , Preacherman, Atlas, Test one (@Stinger), Test two (@Gopher)";
+        let users = HashMap::<String, F3User>::from([
+            hash_set_user("U041Z1HFL1F", "Hightower"),
+            hash_set_user("U04133WBEHG", "Big Sky"),
+            hash_set_user("U04173A973L", "Telecaster"),
+            hash_set_user("U040X7RD605", "Escobar"),
+        ]);
+
+        let parsed = parse_users_list(text, &users);
+        assert_eq!(
+            parsed,
+            HashSet::from([
+                "Hightower".to_string(),
+                "Big Sky".to_string(),
+                "Telecaster".to_string(),
+                "Escobar".to_string(),
+                "Preacherman".to_string(),
+                "Atlas".to_string(),
+                "Test".to_string(),
+                "one".to_string(),
+                "two".to_string()
+            ])
+        )
     }
 }

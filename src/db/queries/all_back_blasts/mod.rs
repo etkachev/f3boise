@@ -1,4 +1,3 @@
-use crate::db::save_back_blast::BackBlastDbEntry;
 use crate::shared::common_errors::AppError;
 use chrono::NaiveDate;
 use sqlx::types::JsonValue;
@@ -6,12 +5,23 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 /// get all back blast data (with type 'backblast')
-pub async fn get_all(db_pool: &PgPool) -> Result<Vec<BackBlastDbEntry>, AppError> {
-    let rows: Vec<BackBlastDbEntry> = sqlx::query_as!(
-        BackBlastDbEntry,
+pub async fn get_all(db_pool: &PgPool) -> Result<Vec<BackBlastJsonData>, AppError> {
+    let rows: Vec<BackBlastJsonData> = sqlx::query_as!(
+        BackBlastJsonData,
         r#"
+    WITH list_view AS (
+        SELECT
+            id,
+            ao,
+            to_jsonb(string_to_array(q, ',')) as q,
+            to_jsonb(string_to_array(pax, ',')) as pax,
+            date,
+            bb_type
+        FROM back_blasts
+    )
+    
     SELECT id, ao, q, pax, date, bb_type
-    FROM back_blasts
+    FROM list_view 
     WHERE bb_type = 'backblast'
     ORDER BY date DESC;
     "#
