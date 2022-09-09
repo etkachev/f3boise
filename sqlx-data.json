@@ -120,6 +120,32 @@
     },
     "query": "\n    WITH list_view AS (\n        SELECT\n            ao,\n            string_to_array(q, ',') as q,\n            string_to_array(pax, ',') as pax,\n            date,\n            bb_type\n        FROM back_blasts\n    )\n    \n    SELECT ao, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    WHERE pax @> array[$1] AND bb_type = 'backblast'\n    ORDER BY date DESC;\n    "
   },
+  "db3dbdeb1dfacca1e233371423dba2c1237e9526c1c75c0c1a10396aa9b2c64b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "ao",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "date",
+          "ordinal": 1,
+          "type_info": "Date"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Date"
+        ]
+      }
+    },
+    "query": "\n        SELECT ao, date\n        FROM back_blasts\n        WHERE bb_type = 'backblast' AND date >= $1\n        ORDER BY date DESC;\n        "
+  },
   "e2226fb647ca5dc4bd247a389b3381febbf64e05903194e3765873ca1d5764ab": {
     "describe": {
       "columns": [

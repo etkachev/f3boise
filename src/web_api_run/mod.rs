@@ -4,7 +4,7 @@ use crate::db::DbStore;
 use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::auth::get_key;
-use crate::web_api_routes::back_blast_data::get_all_back_blasts_route;
+use crate::web_api_routes::back_blast_data::{get_all_back_blasts_route, get_missing_back_blasts};
 use crate::web_api_routes::pax_data::{get_pax_info, get_users};
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route};
@@ -110,7 +110,9 @@ pub fn run(
                     .route("/all", web::get().to(get_users)),
             )
             .service(
-                web::scope("/back_blasts").route("/all", web::get().to(get_all_back_blasts_route)),
+                web::scope("/back_blasts")
+                    .route("/all", web::get().to(get_all_back_blasts_route))
+                    .route("/missing", web::get().to(get_missing_back_blasts)),
             )
             .app_data(web_app_data.clone())
             .app_data(app_state_data.clone())
