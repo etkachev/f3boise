@@ -1,4 +1,4 @@
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use f3_api_rs::app_state::MutableAppState;
 use f3_api_rs::configuration::{get_configuration, DatabaseSettings};
 use f3_api_rs::web_api_run::run;

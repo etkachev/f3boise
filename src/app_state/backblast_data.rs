@@ -2,13 +2,10 @@ use super::ao_data::AO;
 use crate::db::db_back_blast::DbBackBlast;
 use crate::db::queries::all_back_blasts::BackBlastJsonData;
 use crate::db::save_back_blast::BackBlastDbEntry;
-use crate::shared::string_utils::{
-    json_value_to_string_vec, string_split_hash, string_vec_to_hash,
-};
+use crate::shared::string_utils::{string_split_hash, string_vec_to_hash};
 use crate::web_api_routes::slack_events::event_times::EventTimes;
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::collections::HashSet;
 
 pub const BACK_BLAST_TAG: &str = "#backblast";
@@ -68,27 +65,6 @@ impl BackBlastData {
         let has_pax = !self.qs.is_empty() && !self.pax.is_empty();
         let valid_date = self.date > NaiveDate::MIN;
         let valid_event_times = self.event_times.is_some();
-
-        if !has_ao {
-            println!("No ao: {:?}", self.ao);
-        }
-
-        if !has_pax {
-            println!(
-                "No pax - qs: {:?}, pax: {:?}, ALL: {:?}",
-                self.qs,
-                self.pax,
-                self.get_pax()
-            );
-        }
-
-        if !valid_date {
-            println!("invalid date: {:?}", self.date);
-        }
-
-        if !valid_event_times {
-            println!("Ts times invalid: {:?}", self.event_times);
-        }
 
         has_ao && has_pax && valid_date && valid_event_times
     }
@@ -173,18 +149,10 @@ impl From<&BackBlastDbEntry> for BackBlastData {
     }
 }
 
-fn default_string_array_value() -> Value {
-    Value::Array(vec![])
-}
-
 impl From<BackBlastJsonData> for BackBlastData {
     fn from(data: BackBlastJsonData) -> Self {
-        let q = data.q.unwrap_or_else(default_string_array_value);
-        let q = json_value_to_string_vec(q);
-        let pax = data.pax.unwrap_or_else(default_string_array_value);
-        let pax = json_value_to_string_vec(pax);
-        let qs = string_vec_to_hash(&q);
-        let pax = string_vec_to_hash(&pax);
+        let qs = string_vec_to_hash(&data.q);
+        let pax = string_vec_to_hash(&data.pax);
         BackBlastData {
             ao: AO::from(data.ao.to_string()),
             qs,

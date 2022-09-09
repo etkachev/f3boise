@@ -1,4 +1,4 @@
-use dotenv::dotenv;
+use dotenvy::dotenv;
 // use f3_api_rs::app_state;
 // use std::env;
 

@@ -15,54 +15,6 @@
     },
     "query": "\n    INSERT INTO users (id, slack_id, name, email)\n    VALUES($1,$2,$3,$4)\n    ON CONFLICT (slack_id)\n        DO NOTHING;\n    "
   },
-  "2ba2525a6c0293c0aa3593f8e2f135167224245b954ae67d01cea2888f76751c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "ao",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "q",
-          "ordinal": 2,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "pax",
-          "ordinal": 3,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "date",
-          "ordinal": 4,
-          "type_info": "Date"
-        },
-        {
-          "name": "bb_type",
-          "ordinal": 5,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        null,
-        null,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\n    WITH list_view AS (\n        SELECT\n            id,\n            ao,\n            to_jsonb(string_to_array(q, ',')) as q,\n            to_jsonb(string_to_array(pax, ',')) as pax,\n            date,\n            bb_type\n        FROM back_blasts\n    )\n    \n    SELECT id, ao, q, pax, date, bb_type\n    FROM list_view \n    WHERE bb_type = 'backblast'\n    ORDER BY date DESC;\n    "
-  },
   "899221ee4dfd9e73c4ae9828f50f7b8c7ee37fc3d533f3c8fa5b66e0c49b5f9a": {
     "describe": {
       "columns": [],
@@ -124,42 +76,36 @@
     },
     "query": "\n        SELECT slack_id, name, email\n        FROM users;\n    "
   },
-  "f22a6fed2db3c20b00cecb56e9a43fdcf20aefa775a7a970ca71f74b70f473e3": {
+  "abca0edd4b11697c82c0d6c0dc9598ea3794db4dd951d9fc65aa03fd7760d19c": {
     "describe": {
       "columns": [
         {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
           "name": "ao",
-          "ordinal": 1,
+          "ordinal": 0,
           "type_info": "Text"
         },
         {
-          "name": "q",
-          "ordinal": 2,
-          "type_info": "Jsonb"
+          "name": "q!",
+          "ordinal": 1,
+          "type_info": "TextArray"
         },
         {
-          "name": "pax",
-          "ordinal": 3,
-          "type_info": "Jsonb"
+          "name": "pax!",
+          "ordinal": 2,
+          "type_info": "TextArray"
         },
         {
           "name": "date",
-          "ordinal": 4,
+          "ordinal": 3,
           "type_info": "Date"
         },
         {
           "name": "bb_type",
-          "ordinal": 5,
+          "ordinal": 4,
           "type_info": "Text"
         }
       ],
       "nullable": [
-        false,
         false,
         null,
         null,
@@ -172,6 +118,48 @@
         ]
       }
     },
-    "query": "\n    WITH list_view AS (\n        SELECT\n            id,\n            ao,\n            to_jsonb(string_to_array(q, ',')) as q,\n            to_jsonb(string_to_array(pax, ',')) as pax,\n            date,\n            bb_type\n        FROM back_blasts\n    )\n    \n    SELECT id, ao, q, pax, date, bb_type\n    FROM list_view \n    WHERE pax ?| array[$1] AND bb_type = 'backblast'\n    ORDER BY date DESC;\n    "
+    "query": "\n    WITH list_view AS (\n        SELECT\n            ao,\n            string_to_array(q, ',') as q,\n            string_to_array(pax, ',') as pax,\n            date,\n            bb_type\n        FROM back_blasts\n    )\n    \n    SELECT ao, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    WHERE pax @> array[$1] AND bb_type = 'backblast'\n    ORDER BY date DESC;\n    "
+  },
+  "e2226fb647ca5dc4bd247a389b3381febbf64e05903194e3765873ca1d5764ab": {
+    "describe": {
+      "columns": [
+        {
+          "name": "ao",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "q!",
+          "ordinal": 1,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "pax!",
+          "ordinal": 2,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "date",
+          "ordinal": 3,
+          "type_info": "Date"
+        },
+        {
+          "name": "bb_type",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        null,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n    WITH list_view AS (\n        SELECT\n            ao,\n            string_to_array(q, ',') as q,\n            string_to_array(pax, ',') as pax,\n            date,\n            bb_type\n        FROM back_blasts\n    )\n    \n    SELECT ao, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    WHERE bb_type = 'backblast'\n    ORDER BY date DESC;\n    "
   }
 }

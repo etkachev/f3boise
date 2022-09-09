@@ -1,8 +1,7 @@
 use crate::shared::common_errors::AppError;
 use chrono::NaiveDate;
-use sqlx::types::JsonValue;
+use serde::Deserialize;
 use sqlx::PgPool;
-use uuid::Uuid;
 
 /// get all back blast data (with type 'backblast')
 pub async fn get_all(db_pool: &PgPool) -> Result<Vec<BackBlastJsonData>, AppError> {
@@ -11,16 +10,15 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<BackBlastJsonData>, AppErro
         r#"
     WITH list_view AS (
         SELECT
-            id,
             ao,
-            to_jsonb(string_to_array(q, ',')) as q,
-            to_jsonb(string_to_array(pax, ',')) as pax,
+            string_to_array(q, ',') as q,
+            string_to_array(pax, ',') as pax,
             date,
             bb_type
         FROM back_blasts
     )
     
-    SELECT id, ao, q, pax, date, bb_type
+    SELECT ao, q as "q!", pax as "pax!", date, bb_type
     FROM list_view 
     WHERE bb_type = 'backblast'
     ORDER BY date DESC;
@@ -31,11 +29,11 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<BackBlastJsonData>, AppErro
     Ok(rows)
 }
 
+#[derive(Deserialize)]
 pub struct BackBlastJsonData {
-    pub id: Uuid,
     pub ao: String,
-    pub q: Option<JsonValue>,
-    pub pax: Option<JsonValue>,
+    pub q: Vec<String>,
+    pub pax: Vec<String>,
     pub date: NaiveDate,
     pub bb_type: String,
 }
@@ -50,18 +48,17 @@ pub async fn get_list_with_pax(
         r#"
     WITH list_view AS (
         SELECT
-            id,
             ao,
-            to_jsonb(string_to_array(q, ',')) as q,
-            to_jsonb(string_to_array(pax, ',')) as pax,
+            string_to_array(q, ',') as q,
+            string_to_array(pax, ',') as pax,
             date,
             bb_type
         FROM back_blasts
     )
     
-    SELECT id, ao, q, pax, date, bb_type
+    SELECT ao, q as "q!", pax as "pax!", date, bb_type
     FROM list_view 
-    WHERE pax ?| array[$1] AND bb_type = 'backblast'
+    WHERE pax @> array[$1] AND bb_type = 'backblast'
     ORDER BY date DESC;
     "#,
         name

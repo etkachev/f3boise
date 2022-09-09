@@ -1,4 +1,4 @@
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use f3_api_rs::configuration::get_configuration;
 use f3_api_rs::shared::common_errors::AppError;
 use f3_api_rs::web_api_run::Application;
