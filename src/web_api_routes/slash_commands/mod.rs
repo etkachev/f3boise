@@ -1,5 +1,6 @@
 use crate::app_state::MutableAppState;
 use crate::web_api_routes::slash_commands::my_stats::handle_my_stats;
+use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
@@ -10,8 +11,14 @@ pub mod my_stats;
 pub async fn my_stats_command_route(
     db_pool: web::Data<PgPool>,
     app_state: web::Data<MutableAppState>,
+    web_state: web::Data<MutableWebState>,
     form: web::Form<SlashCommandForm>,
 ) -> impl Responder {
+    // TODO add guard of some sort?
+    if web_state.verify_token != form.token {
+        return HttpResponse::Unauthorized().body("Sorry buddy");
+    }
+
     println!("form: {:?}", form);
     match form.command.as_str() {
         "/my-stats" => match handle_my_stats(&db_pool, &app_state, &form).await {
