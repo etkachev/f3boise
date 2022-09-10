@@ -18,11 +18,6 @@ async fn main() -> Result<(), AppError> {
     };
 
     Ok(())
-
-    // let web_app = init_web_app().await;
-    // let address = format!("{}:{}", LOCAL_URL, config.application_port);
-    // let listener = std::net::TcpListener::bind(&address).expect("Could not bind to port");
-    // run(web_app, listener)?.await
 }
 
 fn report_exit(task_name: &str, outcome: Result<Result<(), impl Debug + Display>, JoinError>) {

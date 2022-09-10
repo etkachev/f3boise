@@ -1,5 +1,4 @@
 use crate::bot_data::{BotUser, UserBotCombo};
-use crate::db::DbStore;
 use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
 use crate::slack_api::channels::list::request::ConversationListRequest;
@@ -30,7 +29,6 @@ pub struct MutableWebState {
     pub bot_auth_token: String,
     /// Deprecated verify token
     pub verify_token: String,
-    pub db: DbStore,
 }
 
 impl MutableWebState {
@@ -173,7 +171,6 @@ impl Default for MutableWebState {
             signing_secret: String::new(),
             bot_auth_token: String::new(),
             verify_token: String::new(),
-            db: Default::default(),
         }
     }
 }

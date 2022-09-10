@@ -1,6 +1,5 @@
 use crate::app_state::MutableAppState;
 use crate::configuration::{DatabaseSettings, Settings};
-use crate::db::DbStore;
 use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::auth::get_key;
@@ -71,7 +70,6 @@ fn init_web_state() -> MutableWebState {
         bot_auth_token: auth_token,
         signing_secret,
         verify_token,
-        db: DbStore::new(),
     }
 }
 

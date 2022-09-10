@@ -1,7 +1,7 @@
 use f3_api_rs::app_state::ao_data::AO;
 use f3_api_rs::app_state::backblast_data::BackBlastData;
 use f3_api_rs::configuration::get_configuration;
-use f3_api_rs::db::DbStore;
+use f3_api_rs::db::queries::all_back_blasts::get_all;
 use f3_api_rs::migrate_old::{clean_sheet_name, save_old_back_blasts, AOLIST};
 use f3_api_rs::shared::common_errors::AppError;
 use f3_api_rs::web_api_run::get_connection_pool;
@@ -23,24 +23,23 @@ fn pax_counts_path(folder: &str) -> String {
 async fn main() {
     let config = get_configuration().expect("Failed to read config");
     let connection_pool = get_connection_pool(&config.database);
-    let db = DbStore::new();
-    db.init_db().expect("Could not init db");
     if let Err(err) = save_old_back_blasts(&connection_pool).await {
         println!("Error saving bb: {:?}", err);
     }
 
-    // TODO update
-    match db.get_all_back_blast_data() {
-        Ok(mut results) => {
-            results.sort_by(|a, b| a.date.cmp(&b.date));
+    match get_all(&connection_pool).await {
+        Ok(results) => {
+            let mut mapped: Vec<BackBlastData> =
+                results.into_iter().map(BackBlastData::from).collect();
+            mapped.sort_by(|a, b| a.date.cmp(&b.date));
 
             for (ao, ao_path) in AOLIST.iter() {
-                if let Err(err) = verify_ao_stats(ao, &results, ao_path) {
+                if let Err(err) = verify_ao_stats(ao, &mapped, ao_path) {
                     println!("Error verifying: {:?}", err);
                 }
             }
         }
-        Err(err) => println!("Error getting all data: {:?}", err),
+        Err(err) => println!("Err: {}", err),
     }
 }
 
