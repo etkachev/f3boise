@@ -1,3 +1,4 @@
+use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::BackBlastData;
 use crate::app_state::MutableAppState;
 use crate::db::init::get_db_users;
@@ -7,18 +8,51 @@ use actix_web::{web, HttpResponse, Responder};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+use std::collections::HashMap;
 
 #[derive(Deserialize, Serialize)]
 pub struct PaxInfoQuery {
     id: String,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Serialize)]
 pub struct PaxInfoResponse {
-    name: String,
-    post_count: usize,
-    q_count: usize,
-    start_date: NaiveDate,
+    pub name: String,
+    pub post_count: usize,
+    pub q_count: usize,
+    pub start_date: NaiveDate,
+    pub favorite_ao: FavoriteAoData,
+}
+
+/// represents a hashmap of ao and how many posts you did in that ao
+#[derive(Default, Serialize)]
+pub struct FavoriteAoData {
+    data: HashMap<AO, u16>,
+}
+
+impl FavoriteAoData {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn for_ao(&mut self, ao: &AO) {
+        self.data
+            .entry(ao.clone())
+            .and_modify(|e| *e += 1)
+            .or_insert(1);
+    }
+
+    pub fn favorite(&self) -> String {
+        if self.data.is_empty() {
+            String::from("You need to first attend...")
+        } else {
+            self.data
+                .iter()
+                .max_by(|(_, num_a), (_, num_b)| num_a.cmp(num_b))
+                .map(|(ao, _)| ao.to_string())
+                .unwrap_or_else(|| "None".to_string())
+        }
+    }
 }
 
 impl PaxInfoResponse {
@@ -37,6 +71,7 @@ impl Default for PaxInfoResponse {
             post_count: 0,
             q_count: 0,
             start_date: NaiveDate::MAX,
+            favorite_ao: FavoriteAoData::new(),
         }
     }
 }

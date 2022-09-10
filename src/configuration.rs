@@ -32,13 +32,10 @@ pub struct DatabaseSettings {
 impl DatabaseSettings {
     pub fn without_db(&self) -> PgConnectOptions {
         let ssl_mode = if self.require_ssl {
-            // TODO look into more
             PgSslMode::Require
-            // PgSslMode::Prefer
         } else {
             PgSslMode::Prefer
         };
-        println!("require ssl: {}", self.require_ssl);
         PgConnectOptions::new()
             .host(&self.host)
             .username(&self.username)

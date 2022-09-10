@@ -7,6 +7,7 @@ use crate::web_api_routes::auth::get_key;
 use crate::web_api_routes::back_blast_data::{get_all_back_blasts_route, get_missing_back_blasts};
 use crate::web_api_routes::pax_data::{get_pax_info, get_users};
 use crate::web_api_routes::slack_events::slack_events;
+use crate::web_api_routes::slash_commands::my_stats_command_route;
 use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route};
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
@@ -104,6 +105,7 @@ pub fn run(
             .route("/events", web::post().to(slack_events))
             .route("/sync", web::get().to(sync_data_route))
             .route("/sync-old", web::get().to(sync_old_data_route))
+            .route("/slash-commands", web::post().to(my_stats_command_route))
             .service(
                 web::scope("/pax")
                     .route("/info", web::get().to(get_pax_info))

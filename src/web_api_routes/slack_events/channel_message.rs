@@ -10,28 +10,6 @@ use sqlx::PgPool;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct ChannelMessageEvent {
-    /**
-    "subtype": "bot_message",
-    "ts": "1358877455.000010",
-    "text": "Pushing is the answer",
-    "bot_id": "BB12033",
-    "username": "github",
-    "icons": {}
-
-    channel: "id"
-    channel_type: "channel"
-    event_ts: "1662333021.006700",
-    hidden: true,
-    message: "B040Z8BJUSE",
-    icons: {},
-    subtype: "bot_message",
-    text: "FULL"
-    ts: string,
-    type: "message"
-    username: "Stringer via backblast"
-
-
-    **/
     pub channel: String,
     // TODO update type
     pub subtype: Option<String>,
