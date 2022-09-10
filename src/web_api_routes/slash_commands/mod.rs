@@ -8,7 +8,7 @@ use sqlx::PgPool;
 pub mod my_stats;
 
 /// respond to slash commands
-pub async fn my_stats_command_route(
+pub async fn slack_slash_commands_route(
     db_pool: web::Data<PgPool>,
     app_state: web::Data<MutableAppState>,
     web_state: web::Data<MutableWebState>,
