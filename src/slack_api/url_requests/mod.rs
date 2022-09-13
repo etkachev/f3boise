@@ -11,4 +11,12 @@ pub trait SlackUrlRequest: serde::Serialize {
         Url::parse(format!("{}{}?{}", base_api, self.get_api_url(), params).as_str())
             .unwrap_or_else(|_| Url::parse(base_api).unwrap())
     }
+
+    fn get_plain_url_request(&self, base_api: &str) -> Url
+    where
+        Self: Sized,
+    {
+        Url::parse(format!("{}{}", base_api, self.get_api_url()).as_str())
+            .unwrap_or_else(|_| Url::parse(base_api).unwrap())
+    }
 }

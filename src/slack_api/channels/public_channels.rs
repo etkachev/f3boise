@@ -12,6 +12,7 @@ pub enum PublicChannels {
     Rebel,
     Ruckership,
     DR,
+    Welcome,
     Unknown(String),
 }
 
@@ -45,6 +46,7 @@ impl From<String> for PublicChannels {
             "ao-rebel" => PublicChannels::Rebel,
             "ao-ruckership" => PublicChannels::Ruckership,
             "downrange" => PublicChannels::DR,
+            "welcome" => PublicChannels::Welcome,
             _ => PublicChannels::Unknown(name),
         }
     }

@@ -78,7 +78,7 @@ pub async fn slack_events(
                     .await;
             }
             event_wrapper::EventTypes::TeamJoin(join_data) => {
-                team_join::handle_new_user(&join_data.user, &app_state);
+                team_join::handle_new_user(&join_data.user, &app_state, &data).await;
             }
             event_wrapper::EventTypes::ReactionAdded(reaction_data) => {
                 reaction_added::handle_reaction_item(reaction_data, &app_state);
@@ -86,16 +86,6 @@ pub async fn slack_events(
             _ => (),
         }
     }
-
-    // if let Some(challenge) = body.get("challenge") {
-    //     let response = slack_challenge::ChallengeResponse {
-    //         challenge: Some(challenge.to_string()),
-    //     };
-    //
-    //     return HttpResponse::Ok().json(response);
-    // }
-    //
-    // return HttpResponse::Unauthorized().finish();
 
     let response = slack_challenge::ChallengeResponse {
         challenge: body.challenge.clone(),

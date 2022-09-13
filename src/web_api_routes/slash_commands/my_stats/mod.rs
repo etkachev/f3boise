@@ -2,8 +2,9 @@ use crate::app_state::backblast_data::BackBlastData;
 use crate::app_state::MutableAppState;
 use crate::db::queries::all_back_blasts::get_list_with_pax;
 use crate::shared::common_errors::AppError;
+use crate::slack_api::block_kit::BlockBuilder;
 use crate::web_api_routes::pax_data::PaxInfoResponse;
-use crate::web_api_routes::slash_commands::{SlackBlock, SlashCommandForm, SlashCommandResponse};
+use crate::web_api_routes::slash_commands::SlashCommandForm;
 use sqlx::PgPool;
 
 /// parse user backblast data to pax info (TODO should be converted to sql query)
@@ -35,7 +36,7 @@ pub async fn handle_my_stats(
     db_pool: &PgPool,
     app_state: &MutableAppState,
     form: &SlashCommandForm,
-) -> Result<SlashCommandResponse, AppError> {
+) -> Result<BlockBuilder, AppError> {
     let user_name = {
         let app = app_state.app.lock().expect("Could not lock app");
         app.users
@@ -50,12 +51,14 @@ pub async fn handle_my_stats(
     let user_name = user_name.unwrap();
 
     let response = get_user_stats_by_name(db_pool, user_name.as_str()).await?;
+    let block_builder = BlockBuilder::new()
+        .add_section_markdown(format!("*Here are your stats {}:*", response.name).as_str())
+        .add_section_markdown(format!("*Total Posts*: {}", response.post_count).as_str())
+        .add_section_markdown(format!("*Q Posts*: {}", response.q_count).as_str())
+        .add_section_markdown(
+            format!("*Favorite AO*: {}", response.favorite_ao.favorite()).as_str(),
+        )
+        .add_section_markdown(format!("*First F3 Boise post*: {:?}", response.start_date).as_str());
 
-    Ok(SlashCommandResponse::new(vec![
-        SlackBlock::new(format!("*Here are your stats {}:*", response.name).as_str()),
-        SlackBlock::new(format!("*Total Posts*: {}", response.post_count).as_str()),
-        SlackBlock::new(format!("*Q Posts*: {}", response.q_count).as_str()),
-        SlackBlock::new(format!("*Favorite AO: {}*", response.favorite_ao.favorite()).as_str()),
-        SlackBlock::new(format!("*First F3 Boise post*: {:?}", response.start_date).as_str()),
-    ]))
+    Ok(block_builder)
 }

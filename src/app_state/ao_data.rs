@@ -98,37 +98,31 @@ impl From<String> for AO {
 
 impl From<PublicChannels> for AO {
     fn from(channel: PublicChannels) -> Self {
-        match channel {
-            PublicChannels::Rebel => AO::Rebel,
-            PublicChannels::Ruckership => AO::Ruckership,
-            PublicChannels::Backyard => AO::Backyard,
-            PublicChannels::IronMountain => AO::IronMountain,
-            PublicChannels::Bleach => AO::Bleach,
-            PublicChannels::Gem => AO::Gem,
-            PublicChannels::OldGlory => AO::OldGlory,
-            PublicChannels::BowlerPark => AO::BowlerPark,
-            PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
-            PublicChannels::DR => AO::DR,
-            PublicChannels::Unknown(unknown) => AO::Unknown(unknown),
-        }
+        channel_to_ao_mapper(&channel)
     }
 }
 
 impl From<&PublicChannels> for AO {
     fn from(channel: &PublicChannels) -> Self {
-        match channel {
-            PublicChannels::Rebel => AO::Rebel,
-            PublicChannels::Ruckership => AO::Ruckership,
-            PublicChannels::Backyard => AO::Backyard,
-            PublicChannels::IronMountain => AO::IronMountain,
-            PublicChannels::Bleach => AO::Bleach,
-            PublicChannels::Gem => AO::Gem,
-            PublicChannels::OldGlory => AO::OldGlory,
-            PublicChannels::BowlerPark => AO::BowlerPark,
-            PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
-            PublicChannels::DR => AO::DR,
-            PublicChannels::Unknown(unknown) => AO::Unknown(unknown.to_string()),
-        }
+        channel_to_ao_mapper(channel)
+    }
+}
+
+/// shared mapper from public channel to ao
+fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
+    match channel {
+        PublicChannels::Rebel => AO::Rebel,
+        PublicChannels::Ruckership => AO::Ruckership,
+        PublicChannels::Backyard => AO::Backyard,
+        PublicChannels::IronMountain => AO::IronMountain,
+        PublicChannels::Bleach => AO::Bleach,
+        PublicChannels::Gem => AO::Gem,
+        PublicChannels::OldGlory => AO::OldGlory,
+        PublicChannels::BowlerPark => AO::BowlerPark,
+        PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
+        PublicChannels::DR => AO::DR,
+        PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
+        PublicChannels::Unknown(unknown) => AO::Unknown(unknown.to_string()),
     }
 }
 

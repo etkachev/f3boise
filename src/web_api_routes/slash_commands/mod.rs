@@ -2,7 +2,7 @@ use crate::app_state::MutableAppState;
 use crate::web_api_routes::slash_commands::my_stats::handle_my_stats;
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sqlx::PgPool;
 
 pub mod my_stats;
@@ -41,41 +41,4 @@ pub struct SlashCommandForm {
     pub response_url: String,
     pub trigger_id: String,
     pub api_app_id: String,
-}
-
-#[derive(Serialize)]
-pub struct SlashCommandResponse {
-    blocks: Vec<SlackBlock>,
-}
-
-impl SlashCommandResponse {
-    pub fn new(blocks: Vec<SlackBlock>) -> Self {
-        SlashCommandResponse { blocks }
-    }
-}
-
-#[derive(Serialize)]
-pub struct SlackBlock {
-    #[serde(rename = "type")]
-    pub event_type: String,
-    pub text: SlackBlockText,
-}
-
-impl SlackBlock {
-    pub fn new(text: &str) -> Self {
-        SlackBlock {
-            event_type: "section".to_string(),
-            text: SlackBlockText {
-                event_type: "mrkdwn".to_string(),
-                text: text.to_string(),
-            },
-        }
-    }
-}
-
-#[derive(Serialize)]
-pub struct SlackBlockText {
-    #[serde(rename = "type")]
-    pub event_type: String,
-    pub text: String,
 }

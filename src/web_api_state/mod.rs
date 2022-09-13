@@ -7,10 +7,13 @@ use crate::slack_api::channels::public_channels::PublicChannels;
 use crate::slack_api::channels::reactions_add::request::ReactionsAddRequest;
 use crate::slack_api::channels::reactions_add::response::ReactionsAddResponse;
 use crate::slack_api::channels::types::ChannelTypes;
+use crate::slack_api::chat::post_message::request::PostMessageRequest;
+use crate::slack_api::chat::post_message::response::PostMessageResponse;
 use crate::slack_api::url_requests::SlackUrlRequest;
 use crate::slack_api::users::users_list::request::UsersListRequest;
 use crate::slack_api::users::users_list::response::UsersListResponse;
 use crate::users::f3_user::F3User;
+use http::header::CONTENT_TYPE;
 use http::{HeaderMap, Method};
 use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
@@ -142,6 +145,20 @@ impl MutableWebState {
         }
     }
 
+    /// post message to someone or channel
+    pub async fn post_message(&self, request: PostMessageRequest) -> Result<(), AppError> {
+        let url = request.get_plain_url_request(&self.base_api_url);
+        println!("Calling: {:?}", url.as_str());
+        let body = serde_json::to_vec(&request)?;
+        let response = self.make_post_request(url, body).await;
+        let response: PostMessageResponse = serde_json::from_slice(&response.body)?;
+        if let Some(err) = response.error {
+            Err(AppError::General(err))
+        } else {
+            Ok(())
+        }
+    }
+
     fn get_auth_header(&self) -> HeaderMap {
         let mut header_map = HeaderMap::new();
         let bearer = format!("Bearer {}", self.token);
@@ -156,6 +173,21 @@ impl MutableWebState {
             headers: self.get_auth_header(),
             body: Vec::new(),
         };
+        async_http_client(request)
+            .await
+            .expect("Failed to make request")
+    }
+
+    async fn make_post_request(&self, url: url::Url, body: Vec<u8>) -> oauth2::HttpResponse {
+        let mut request = oauth2::HttpRequest {
+            url,
+            method: Method::POST,
+            headers: self.get_auth_header(),
+            body,
+        };
+        request
+            .headers
+            .insert(CONTENT_TYPE, "application/json".parse().unwrap());
         async_http_client(request)
             .await
             .expect("Failed to make request")
