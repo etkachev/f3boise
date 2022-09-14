@@ -154,7 +154,7 @@ impl From<BackBlastJsonData> for BackBlastData {
         let qs = string_vec_to_hash(&data.q);
         let pax = string_vec_to_hash(&data.pax);
         BackBlastData {
-            ao: AO::from(data.ao.to_string()),
+            ao: AO::from_channel_id(data.channel_id.as_str()),
             qs,
             pax,
             date: data.date,

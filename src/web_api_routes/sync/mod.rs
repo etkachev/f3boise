@@ -20,8 +20,6 @@ pub async fn sync_data_to_state(
     web_state: &MutableWebState,
     app_state: &MutableAppState,
 ) -> Result<(), AppError> {
-    sync_ao_list(db_pool).await?;
-    println!("synced ao list");
     let db_users = get_db_users(db_pool).await?;
     // scoped to limit lock
     {
@@ -41,6 +39,8 @@ pub async fn sync_data_to_state(
     println!("set slack users and bots");
 
     let public_channels = web_state.get_public_channels().await?;
+    sync_ao_list(db_pool).await?;
+    println!("synced ao list");
     // scoped to limit lock
     {
         let mut app = app_state.app.lock().expect("Could not lock app state");

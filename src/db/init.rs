@@ -20,7 +20,8 @@ pub async fn sync_ao_list(db_pool: &PgPool) -> Result<(), AppError> {
             let mut transaction = transaction.expect("Failed to begin transaction");
             for item in AO_LIST {
                 let ao = AoData::from(&item);
-                insert_ao_record(&mut transaction, &ao).await?;
+                let channel_id = item.channel_id();
+                insert_ao_record(&mut transaction, &ao, channel_id).await?;
             }
 
             transaction
@@ -39,20 +40,24 @@ pub async fn sync_ao_list(db_pool: &PgPool) -> Result<(), AppError> {
 async fn insert_ao_record(
     transaction: &mut Transaction<'_, Postgres>,
     ao: &AoData,
+    channel_id: &str,
 ) -> Result<(), AppError> {
     let id = Uuid::new_v4();
     let name = &ao.name;
     let days = &ao.days;
+    let active = &ao.active;
     sqlx::query!(
         r#"
-    INSERT INTO ao_list (id, name, days)
-    VALUES($1,$2,$3)
+    INSERT INTO ao_list (id, name, days, channel_id, active)
+    VALUES($1,$2,$3,$4,$5)
     ON CONFLICT (name)
     DO NOTHING;
     "#,
         id,
         name,
-        days
+        days,
+        channel_id,
+        active
     )
     .execute(transaction)
     .await?;

@@ -12,6 +12,8 @@ pub struct BackBlastDbEntry {
     pub pax: String,
     pub date: NaiveDate,
     pub bb_type: String,
+    pub channel_id: String,
+    pub active: bool,
 }
 
 impl From<&BackBlastData> for BackBlastDbEntry {
@@ -28,6 +30,8 @@ impl From<&BackBlastData> for BackBlastDbEntry {
             pax: pax.join(","),
             // TODO defaults to backblast type.
             bb_type: data.bb_type.to_string(),
+            channel_id: data.ao.channel_id().to_string(),
+            active: !data.ao.is_otb(),
         }
     }
 }
@@ -54,9 +58,9 @@ async fn save_back_blast(
 ) -> Result<(), AppError> {
     sqlx::query!(
         r#"
-    INSERT INTO back_blasts (id, ao, q, pax, date, bb_type)
-    VALUES($1,$2,$3,$4,$5,$6)
-    ON CONFLICT ON CONSTRAINT back_blasts_ao_date_bb_type_key
+    INSERT INTO back_blasts (id, ao, q, pax, date, bb_type, channel_id, active)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8)
+    ON CONFLICT ON CONSTRAINT back_blasts_channel_id_date_bb_type_key
         DO NOTHING;
     "#,
         db_bb.id,
@@ -64,7 +68,9 @@ async fn save_back_blast(
         db_bb.q,
         db_bb.pax,
         db_bb.date,
-        db_bb.bb_type
+        db_bb.bb_type,
+        db_bb.channel_id,
+        db_bb.active
     )
     .execute(transaction)
     .await?;

@@ -13,8 +13,9 @@ pub enum AO {
     IronMountain,
     Ruckership,
     Backyard,
-    BowlerPark,
+    Rise,
     DR,
+    LakeViewPark,
     Unknown(String),
 }
 
@@ -31,8 +32,45 @@ impl AO {
             AO::IronMountain => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Ruckership => HashSet::from([Weekday::Fri]),
             AO::Backyard => HashSet::from([Weekday::Wed, Weekday::Fri]),
-            AO::BowlerPark => HashSet::from([Weekday::Mon, Weekday::Wed]),
+            AO::Rise => HashSet::from([Weekday::Mon, Weekday::Wed]),
             _ => HashSet::new(),
+        }
+    }
+
+    /// whether or not AO is otb.
+    pub fn is_otb(&self) -> bool {
+        matches!(self, AO::Rise | AO::LakeViewPark)
+    }
+
+    pub fn channel_id(&self) -> &str {
+        match self {
+            AO::Bleach => const_names::BLEACH_CHANNEL_ID,
+            AO::Gem => const_names::GEM_CHANNEL_ID,
+            AO::OldGlory => const_names::OLD_GLORY_CHANNEL_ID,
+            AO::Rebel => const_names::REBEL_CHANNEL_ID,
+            AO::IronMountain => const_names::IRON_MOUNTAIN_CHANNEL_ID,
+            AO::Ruckership => const_names::RUCKERSHIP_CHANNEL_ID,
+            AO::Backyard => const_names::BACKYARD_CHANNEL_ID,
+            AO::Rise => const_names::RISE_CHANNEL_ID,
+            AO::LakeViewPark => const_names::LAKE_VIEW_PARK_CHANNEL_ID,
+            AO::DR => const_names::DR_CHANNEL_ID,
+            AO::Unknown(_) => "UNKNOWN",
+        }
+    }
+
+    pub fn from_channel_id(channel_id: &str) -> Self {
+        match channel_id {
+            const_names::BLEACH_CHANNEL_ID => AO::Bleach,
+            const_names::GEM_CHANNEL_ID => AO::Gem,
+            const_names::OLD_GLORY_CHANNEL_ID => AO::OldGlory,
+            const_names::REBEL_CHANNEL_ID => AO::Rebel,
+            const_names::IRON_MOUNTAIN_CHANNEL_ID => AO::IronMountain,
+            const_names::RUCKERSHIP_CHANNEL_ID => AO::Ruckership,
+            const_names::BACKYARD_CHANNEL_ID => AO::Backyard,
+            const_names::RISE_CHANNEL_ID => AO::Rise,
+            const_names::LAKE_VIEW_PARK_CHANNEL_ID => AO::LakeViewPark,
+            const_names::DR_CHANNEL_ID => AO::DR,
+            _ => AO::Unknown("UNKNOWN".to_string()),
         }
     }
 }
@@ -47,8 +85,9 @@ impl Clone for AO {
             AO::IronMountain => AO::IronMountain,
             AO::Ruckership => AO::Ruckership,
             AO::Backyard => AO::Backyard,
-            AO::BowlerPark => AO::BowlerPark,
+            AO::Rise => AO::Rise,
             AO::DR => AO::DR,
+            AO::LakeViewPark => AO::LakeViewPark,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
     }
@@ -64,7 +103,8 @@ impl ToString for AO {
             AO::IronMountain => const_names::IRON_MOUNTAIN,
             AO::Ruckership => const_names::RUCKERSHIP,
             AO::Backyard => const_names::BACKYARD,
-            AO::BowlerPark => const_names::BOWLER_PARK,
+            AO::Rise => const_names::RISE,
+            AO::LakeViewPark => const_names::LAKE_VIEW_PARK,
             AO::DR => "",
             AO::Unknown(_) => "",
         };
@@ -88,7 +128,8 @@ impl From<String> for AO {
             const_names::REBEL => AO::Rebel,
             const_names::IRON_MOUNTAIN | "ironmountain" => AO::IronMountain,
             const_names::RUCKERSHIP | "rucker-ship" => AO::Ruckership,
-            const_names::BOWLER_PARK => AO::BowlerPark,
+            const_names::RISE | "bowler-park" => AO::Rise,
+            const_names::LAKE_VIEW_PARK => AO::LakeViewPark,
             const_names::BACKYARD => AO::Backyard,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
@@ -118,7 +159,8 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::Bleach => AO::Bleach,
         PublicChannels::Gem => AO::Gem,
         PublicChannels::OldGlory => AO::OldGlory,
-        PublicChannels::BowlerPark => AO::BowlerPark,
+        PublicChannels::Rise => AO::Rise,
+        PublicChannels::LakeViewPark => AO::LakeViewPark,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
@@ -133,6 +175,8 @@ pub struct AoData {
     pub name: String,
     /// should be comma separated list of days of week this AO meets
     pub days: String,
+    /// whether it's an official AO or otb (Off the books)
+    pub active: bool,
 }
 
 impl AoData {
@@ -146,6 +190,7 @@ impl AoData {
         AoData {
             name: ao.to_string(),
             days: serialized,
+            active: !ao.is_otb(),
         }
     }
 }
@@ -154,17 +199,29 @@ pub mod const_names {
     use super::AO;
 
     pub const BLEACH: &str = "bleach";
+    pub const BLEACH_CHANNEL_ID: &str = "C03UR7GM7Q9";
     pub const GEM: &str = "gem";
+    pub const GEM_CHANNEL_ID: &str = "C03UBFXVBGD";
     pub const OLD_GLORY: &str = "old-glory";
+    pub const OLD_GLORY_CHANNEL_ID: &str = "C03TZTPUFRV";
     pub const REBEL: &str = "rebel";
+    pub const REBEL_CHANNEL_ID: &str = "C03V463RFRN";
     pub const IRON_MOUNTAIN: &str = "iron-mountain";
+    pub const IRON_MOUNTAIN_CHANNEL_ID: &str = "C03TZTTHDPZ";
     pub const RUCKERSHIP: &str = "ruckership";
+    pub const RUCKERSHIP_CHANNEL_ID: &str = "C03V46DGXMW";
     pub const BACKYARD: &str = "backyard";
-    pub const BOWLER_PARK: &str = "bowler-park";
+    pub const BACKYARD_CHANNEL_ID: &str = "C03UEBT1QRZ";
+    pub const RISE: &str = "rise";
+    pub const RISE_CHANNEL_ID: &str = "C03UT46303T";
+    /// TODO otb
+    pub const LAKE_VIEW_PARK: &str = "lakeview-park";
+    pub const LAKE_VIEW_PARK_CHANNEL_ID: &str = "C0425DL9MT7";
     pub const DR: &str = "dr";
+    pub const DR_CHANNEL_ID: &str = "C03U7U9T7HU";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 8] = [
+    pub const AO_LIST: [AO; 9] = [
         AO::Bleach,
         AO::Gem,
         AO::OldGlory,
@@ -172,7 +229,8 @@ pub mod const_names {
         AO::IronMountain,
         AO::Ruckership,
         AO::Backyard,
-        AO::BowlerPark,
+        AO::Rise,
+        AO::LakeViewPark,
     ];
 }
 

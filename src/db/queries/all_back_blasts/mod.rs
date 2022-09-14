@@ -10,17 +10,19 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<BackBlastJsonData>, AppErro
         r#"
     WITH list_view AS (
         SELECT
-            ao,
+            al.name as ao,
             string_to_array(q, ',') as q,
             string_to_array(pax, ',') as pax,
             date,
-            bb_type
-        FROM back_blasts
+            bb_type,
+            bb.channel_id
+        FROM back_blasts bb
+        INNER JOIN ao_list al on bb.channel_id = al.channel_id
+        WHERE bb.bb_type = 'backblast' AND bb.active = true
     )
     
-    SELECT ao, q as "q!", pax as "pax!", date, bb_type
+    SELECT ao, channel_id, q as "q!", pax as "pax!", date, bb_type
     FROM list_view 
-    WHERE bb_type = 'backblast'
     ORDER BY date DESC;
     "#
     )
@@ -32,6 +34,7 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<BackBlastJsonData>, AppErro
 #[derive(Deserialize)]
 pub struct BackBlastJsonData {
     pub ao: String,
+    pub channel_id: String,
     pub q: Vec<String>,
     pub pax: Vec<String>,
     pub date: NaiveDate,
@@ -48,17 +51,20 @@ pub async fn get_list_with_pax(
         r#"
     WITH list_view AS (
         SELECT
-            ao,
+            al.name as ao,
             string_to_array(q, ',') as q,
             string_to_array(pax, ',') as pax,
             date,
-            bb_type
-        FROM back_blasts
+            bb_type,
+            bb.channel_id
+        FROM back_blasts bb
+        INNER JOIN ao_list al on bb.channel_id = al.channel_id
+        WHERE bb.bb_type = 'backblast' AND bb.active = true
     )
     
-    SELECT ao, q as "q!", pax as "pax!", date, bb_type
+    SELECT ao, channel_id, q as "q!", pax as "pax!", date, bb_type
     FROM list_view 
-    WHERE pax @> array[$1] AND bb_type = 'backblast'
+    WHERE pax @> array[$1]
     ORDER BY date DESC;
     "#,
         name

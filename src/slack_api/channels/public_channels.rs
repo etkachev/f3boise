@@ -8,11 +8,12 @@ pub enum PublicChannels {
     Gem,
     IronMountain,
     OldGlory,
-    BowlerPark,
+    Rise,
     Rebel,
     Ruckership,
     DR,
     Welcome,
+    LakeViewPark,
     Unknown(String),
 }
 
@@ -21,12 +22,13 @@ impl From<&AO> for PublicChannels {
         match ao {
             AO::Bleach => PublicChannels::Bleach,
             AO::Backyard => PublicChannels::Backyard,
-            AO::BowlerPark => PublicChannels::BowlerPark,
+            AO::Rise => PublicChannels::Rise,
             AO::Gem => PublicChannels::Gem,
             AO::OldGlory => PublicChannels::OldGlory,
             AO::Rebel => PublicChannels::Rebel,
             AO::IronMountain => PublicChannels::IronMountain,
             AO::Ruckership => PublicChannels::Ruckership,
+            AO::LakeViewPark => PublicChannels::LakeViewPark,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }
@@ -42,7 +44,8 @@ impl From<String> for PublicChannels {
             "ao-gem" => PublicChannels::Gem,
             "ao-iron-mountain" => PublicChannels::IronMountain,
             "ao-old-glory" => PublicChannels::OldGlory,
-            "ao-otb-bowler-park" | "ao-bowler-park" => PublicChannels::BowlerPark,
+            "ao-otb-bowler-park" | "ao-bowler-park" | "ao-rise" => PublicChannels::Rise,
+            "ao-otb-lakeview-park" => PublicChannels::LakeViewPark,
             "ao-rebel" => PublicChannels::Rebel,
             "ao-ruckership" => PublicChannels::Ruckership,
             "downrange" => PublicChannels::DR,
