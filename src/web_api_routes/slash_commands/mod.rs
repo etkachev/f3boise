@@ -1,10 +1,12 @@
 use crate::app_state::MutableAppState;
+use crate::web_api_routes::slash_commands::invite_all::handle_invite_all;
 use crate::web_api_routes::slash_commands::my_stats::handle_my_stats;
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
 use serde::Deserialize;
 use sqlx::PgPool;
 
+pub mod invite_all;
 pub mod my_stats;
 
 /// respond to slash commands
@@ -23,6 +25,10 @@ pub async fn slack_slash_commands_route(
     match form.command.as_str() {
         "/my-stats" => match handle_my_stats(&db_pool, &app_state, &form).await {
             Ok(response) => HttpResponse::Ok().json(response),
+            Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+        },
+        "/invite-all" => match handle_invite_all(&web_state, &app_state, &form).await {
+            Ok(response) => HttpResponse::Ok().body(response),
             Err(err) => HttpResponse::BadRequest().body(err.to_string()),
         },
         _ => HttpResponse::Ok().body("Unknown command"),
