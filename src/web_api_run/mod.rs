@@ -64,10 +64,9 @@ fn init_web_state() -> MutableWebState {
     let client = get_oauth_client();
     let base_api_url = format!("https://{}/api/", SLACK_SERVER);
     MutableWebState {
-        token: auth_token.to_string(),
+        token: auth_token,
         base_api_url,
         oauth: client,
-        bot_auth_token: auth_token,
         signing_secret,
         verify_token,
     }

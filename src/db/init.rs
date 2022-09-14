@@ -107,9 +107,19 @@ pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, A
 }
 
 pub async fn sync_users(db_pool: &PgPool, users: &HashMap<String, F3User>) -> Result<(), AppError> {
+    let existing_users = get_db_users(db_pool).await?;
+    println!(
+        "existing: {} ----- all: {}",
+        existing_users.len(),
+        users.len()
+    );
     println!("Start full sync users");
     let mut transaction = db_pool.begin().await.expect("Failed to begin transaction");
-    for (_, user) in users.iter() {
+    for (_, user) in users
+        .iter()
+        .filter(|(slack_id, _)| !existing_users.contains_key(&slack_id.to_string()))
+    {
+        println!("Inserting new user");
         upsert_user(&mut transaction, &DbUser::from(user)).await?;
     }
     println!("Finishing full sync users");

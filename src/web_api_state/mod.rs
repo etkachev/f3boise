@@ -31,7 +31,6 @@ pub struct MutableWebState {
     pub base_api_url: String,
     pub oauth: BasicClient,
     pub signing_secret: String,
-    pub bot_auth_token: String,
     /// Deprecated verify token
     pub verify_token: String,
 }
@@ -220,7 +219,6 @@ impl Default for MutableWebState {
             base_api_url: String::new(),
             oauth: get_oauth_client(),
             signing_secret: String::new(),
-            bot_auth_token: String::new(),
             verify_token: String::new(),
         }
     }
