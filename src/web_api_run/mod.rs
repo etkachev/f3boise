@@ -4,7 +4,7 @@ use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::auth::get_key;
 use crate::web_api_routes::back_blast_data::{get_all_back_blasts_route, get_missing_back_blasts};
-use crate::web_api_routes::pax_data::{get_pax_info, get_users};
+use crate::web_api_routes::pax_data::{get_bad_data, get_pax_info, get_users};
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::slash_commands::slack_slash_commands_route;
 use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route};
@@ -109,7 +109,8 @@ pub fn run(
             .service(
                 web::scope("/pax")
                     .route("/info", web::get().to(get_pax_info))
-                    .route("/all", web::get().to(get_users)),
+                    .route("/all", web::get().to(get_users))
+                    .route("/bad-data", web::get().to(get_bad_data)),
             )
             .service(
                 web::scope("/back_blasts")

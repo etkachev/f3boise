@@ -2,13 +2,13 @@ use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::BackBlastData;
 use crate::app_state::MutableAppState;
 use crate::db::init::get_db_users;
-use crate::db::queries::all_back_blasts::get_list_with_pax;
+use crate::db::queries::all_back_blasts::{get_all, get_list_with_pax};
 use crate::users::f3_user::F3User;
 use actix_web::{web, HttpResponse, Responder};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Deserialize, Serialize)]
 pub struct PaxInfoQuery {
@@ -126,4 +126,67 @@ pub async fn get_users(db_pool: web::Data<PgPool>) -> impl Responder {
         }
         Err(err) => HttpResponse::NotFound().body(err.to_string()),
     }
+}
+
+#[derive(Serialize)]
+pub struct BadUser {
+    pub user: String,
+    pub ao: String,
+    pub date: NaiveDate,
+}
+
+#[derive(Serialize)]
+pub struct BadUserDataResponse {
+    pub slack_users: HashSet<String>,
+    pub data: Vec<BadUser>,
+}
+
+impl BadUserDataResponse {
+    pub fn new(slack_users: &HashSet<String>) -> Self {
+        BadUserDataResponse {
+            slack_users: slack_users.clone(),
+            data: Vec::new(),
+        }
+    }
+}
+
+impl BadUser {
+    pub fn new(user: String, bb: &BackBlastData) -> Self {
+        BadUser {
+            user,
+            ao: bb.ao.to_string(),
+            date: bb.date,
+        }
+    }
+}
+
+/// Collect some bad user data from backblasts.
+pub async fn get_bad_data(db_pool: web::Data<PgPool>) -> impl Responder {
+    match get_db_users(&db_pool).await {
+        Ok(users) => {
+            let users = users
+                .iter()
+                .fold(HashSet::<String>::new(), |mut acc, (_, user)| {
+                    acc.insert(user.name.to_string());
+                    acc
+                });
+            let mut response = BadUserDataResponse::new(&users);
+            if let Ok(bb_list) = get_all(&db_pool).await {
+                let list: Vec<BackBlastData> =
+                    bb_list.into_iter().map(BackBlastData::from).collect();
+                for item in list {
+                    for bb_user in item.get_pax() {
+                        if !users.contains(bb_user.as_str()) {
+                            response.data.push(BadUser::new(bb_user, &item));
+                        }
+                    }
+                }
+            }
+            return HttpResponse::Ok().json(response);
+        }
+        Err(err) => {
+            println!("Err: {:?}", err);
+        }
+    }
+    HttpResponse::Ok().finish()
 }
