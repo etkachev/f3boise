@@ -56,12 +56,12 @@ pub fn parse_back_blast(
                             back_blast.ao = ao;
                             continue;
                         }
-                        "q" | "qs" => {
+                        "q" | "qs" if back_blast.qs.is_empty() => {
                             let users = parse_users_list(rest_of_line, users);
                             back_blast.qs = users;
                             continue;
                         }
-                        "pax" => {
+                        "pax" if !back_blast.has_pax() => {
                             let users = parse_users_list(rest_of_line, users);
                             back_blast.set_pax(users);
                             continue;
@@ -333,6 +333,39 @@ mod tests {
             NaiveDate::from_ymd(2022, 9, 8),
         );
 
+        assert_eq!(parsed.ao, expected.ao);
+        assert_eq!(parsed.qs, expected.qs);
+        assert_eq!(parsed.date, expected.date);
+        assert_eq!(parsed.get_pax(), expected.get_pax());
+    }
+
+    #[test]
+    fn parse_variant_2_with_futher_q_line() {
+        let text = "*Slackblast*: \n*Iron Mountain BD*\n*DATE*: 2022-09-08\n*AO*: <#C03TZV5RRF1>\n*Q*: <@U041ACAGYDC>\n*PAX*: <@U041Z1HFL1F> <@U04133WBEHG> <@U04173A973L>\n*FNGs*: Atlas (@Stinger)\n*COUNT*: 6\n\n*WARMUP:* \n*THE THANG:* \n*MARY:* \n*ANNOUNCEMENTS:* \n*Q:* Duplicate\n*PAX*: Otherfake";
+        let users = HashMap::<String, F3User>::from([
+            hash_set_user("U041ACAGYDC", "Revere"),
+            hash_set_user("U041Z1HFL1F", "Hightower"),
+            hash_set_user("U04133WBEHG", "Big Sky"),
+            hash_set_user("U04173A973L", "Escobar"),
+        ]);
+        let channels = HashMap::<PublicChannels, ChannelData>::from([(
+            PublicChannels::IronMountain,
+            ChannelData {
+                id: "C03TZV5RRF1".to_string(),
+                name: "ao-iron-mountain".to_string(),
+            },
+        )]);
+        let parsed = parse_back_blast(text, &users, &channels);
+        let expected = BackBlastData::new(
+            AO::IronMountain,
+            HashSet::from(["Revere".to_string()]),
+            HashSet::from([
+                "Hightower".to_string(),
+                "Big Sky".to_string(),
+                "Escobar".to_string(),
+            ]),
+            NaiveDate::from_ymd(2022, 9, 8),
+        );
         assert_eq!(parsed.ao, expected.ao);
         assert_eq!(parsed.qs, expected.qs);
         assert_eq!(parsed.date, expected.date);

@@ -15,6 +15,32 @@
     },
     "query": "\n    INSERT INTO users (id, slack_id, name, email)\n    VALUES($1,$2,$3,$4)\n    ON CONFLICT (slack_id)\n        DO NOTHING;\n    "
   },
+  "17e465839b16cfe389bdd3d027304bd804dbebfba3bed41880d30730776539d9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "ao",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "date",
+          "ordinal": 1,
+          "type_info": "Date"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Date"
+        ]
+      }
+    },
+    "query": "\n        SELECT ao, date\n        FROM back_blasts\n        WHERE bb_type = 'backblast' AND active = true AND date >= $1\n        ORDER BY date DESC;\n        "
+  },
   "286f1afdaeb32bc417262c2dbbdb58d71de6586ad47cfcd4d11e908b561a4920": {
     "describe": {
       "columns": [],
@@ -31,7 +57,7 @@
     },
     "query": "\n    INSERT INTO ao_list (id, name, days, channel_id, active)\n    VALUES($1,$2,$3,$4,$5)\n    ON CONFLICT (name)\n    DO NOTHING;\n    "
   },
-  "993aa3bea1ff17168a39dffc38adf43f61f0ab0cad2bd2048a0fd59d04af2642": {
+  "43bdd8d1d5e1769c5ae142f6a8c6b7fb75796713f0959945e25fc86d96343ac6": {
     "describe": {
       "columns": [
         {
@@ -79,7 +105,7 @@
         ]
       }
     },
-    "query": "\n    WITH list_view AS (\n        SELECT\n            al.name as ao,\n            string_to_array(q, ',') as q,\n            string_to_array(pax, ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = 'backblast' AND bb.active = true\n    )\n    \n    SELECT ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    WHERE pax @> array[$1]\n    ORDER BY date DESC;\n    "
+    "query": "\n    WITH list_view AS (\n        SELECT\n            al.name as ao,\n            string_to_array(lower(q), ',') as q,\n            string_to_array(lower(pax), ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = 'backblast' AND bb.active = true\n    )\n    \n    SELECT ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    WHERE pax @> array[$1]\n    ORDER BY date DESC;\n    "
   },
   "a82fab2c6d84945c51438aad27aa0a0b7729e84475e02ccbaa75f1c13a73c06e": {
     "describe": {
@@ -111,7 +137,7 @@
     },
     "query": "\n        SELECT slack_id, name, email\n        FROM users;\n    "
   },
-  "c2db19a7af5ab2a04fc908f5940b66c5aaa3a9820f941b5979138f384f750499": {
+  "c7e186250ede869eba2642f1bc59fe9f0362587928d246afd403147d6f2c4c80": {
     "describe": {
       "columns": [
         {
@@ -157,7 +183,7 @@
         "Left": []
       }
     },
-    "query": "\n    WITH list_view AS (\n        SELECT\n            al.name as ao,\n            string_to_array(q, ',') as q,\n            string_to_array(pax, ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = 'backblast' AND bb.active = true\n    )\n    \n    SELECT ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    ORDER BY date DESC;\n    "
+    "query": "\n    WITH list_view AS (\n        SELECT\n            al.name as ao,\n            string_to_array(lower(q), ',') as q,\n            string_to_array(lower(pax), ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = 'backblast' AND bb.active = true\n    )\n    \n    SELECT ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    ORDER BY date DESC;\n    "
   },
   "d821e3fd93247e6c85dc55a3ea0239c6901220c0a7c07f54aa3612a57d5b931d": {
     "describe": {
@@ -177,31 +203,5 @@
       }
     },
     "query": "\n    INSERT INTO back_blasts (id, ao, q, pax, date, bb_type, channel_id, active)\n    VALUES($1,$2,$3,$4,$5,$6,$7,$8)\n    ON CONFLICT ON CONSTRAINT back_blasts_channel_id_date_bb_type_key\n        DO NOTHING;\n    "
-  },
-  "db3dbdeb1dfacca1e233371423dba2c1237e9526c1c75c0c1a10396aa9b2c64b": {
-    "describe": {
-      "columns": [
-        {
-          "name": "ao",
-          "ordinal": 0,
-          "type_info": "Text"
-        },
-        {
-          "name": "date",
-          "ordinal": 1,
-          "type_info": "Date"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Date"
-        ]
-      }
-    },
-    "query": "\n        SELECT ao, date\n        FROM back_blasts\n        WHERE bb_type = 'backblast' AND date >= $1\n        ORDER BY date DESC;\n        "
   }
 }

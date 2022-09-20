@@ -18,7 +18,7 @@ pub async fn get_user_stats_by_name(
         |mut acc, item| {
             acc.favorite_ao.for_ao(&item.ao);
             acc.post_count += 1;
-            if item.qs.contains(user_name) {
+            if item.qs.contains(&user_name.to_lowercase()) {
                 acc.q_count += 1;
             }
 

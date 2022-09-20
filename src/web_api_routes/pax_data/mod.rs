@@ -76,6 +76,33 @@ impl Default for PaxInfoResponse {
     }
 }
 
+pub async fn get_pax_back_blasts(
+    db_pool: web::Data<PgPool>,
+    app_state: web::Data<MutableAppState>,
+    req: web::Query<PaxInfoQuery>,
+) -> impl Responder {
+    let user_name = {
+        let app = app_state.app.lock().expect("Could not lock app");
+        app.users
+            .get(req.id.as_str())
+            .map(|user| user.name.to_string())
+    };
+
+    if user_name.is_none() {
+        return HttpResponse::NotFound().body("User not found");
+    }
+
+    let user_name = user_name.unwrap();
+
+    match get_list_with_pax(&db_pool, &user_name).await {
+        Ok(users) => {
+            let data: Vec<BackBlastData> = users.into_iter().map(BackBlastData::from).collect();
+            HttpResponse::Ok().json(data)
+        }
+        Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+    }
+}
+
 pub async fn get_pax_info(
     db_pool: web::Data<PgPool>,
     app_state: web::Data<MutableAppState>,
@@ -99,8 +126,9 @@ pub async fn get_pax_info(
             let response = list.into_iter().map(BackBlastData::from).fold(
                 PaxInfoResponse::new(&user_name),
                 |mut acc, item| {
+                    acc.favorite_ao.for_ao(&item.ao);
                     acc.post_count += 1;
-                    if item.qs.contains(&user_name) {
+                    if item.qs.contains(&user_name.to_lowercase()) {
                         acc.q_count += 1;
                     }
 

@@ -11,8 +11,8 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<BackBlastJsonData>, AppErro
     WITH list_view AS (
         SELECT
             al.name as ao,
-            string_to_array(q, ',') as q,
-            string_to_array(pax, ',') as pax,
+            string_to_array(lower(q), ',') as q,
+            string_to_array(lower(pax), ',') as pax,
             date,
             bb_type,
             bb.channel_id
@@ -46,14 +46,15 @@ pub async fn get_list_with_pax(
     db_pool: &PgPool,
     name: &str,
 ) -> Result<Vec<BackBlastJsonData>, AppError> {
+    let name = name.to_lowercase();
     let rows: Vec<BackBlastJsonData> = sqlx::query_as!(
         BackBlastJsonData,
         r#"
     WITH list_view AS (
         SELECT
             al.name as ao,
-            string_to_array(q, ',') as q,
-            string_to_array(pax, ',') as pax,
+            string_to_array(lower(q), ',') as q,
+            string_to_array(lower(pax), ',') as pax,
             date,
             bb_type,
             bb.channel_id

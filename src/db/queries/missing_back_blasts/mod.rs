@@ -19,7 +19,7 @@ pub async fn get_back_blasts_since(
         r#"
         SELECT ao, date
         FROM back_blasts
-        WHERE bb_type = 'backblast' AND date >= $1
+        WHERE bb_type = 'backblast' AND active = true AND date >= $1
         ORDER BY date DESC;
         "#,
         date
