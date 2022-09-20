@@ -195,7 +195,7 @@ pub async fn get_bad_data(db_pool: web::Data<PgPool>) -> impl Responder {
             let users = users
                 .iter()
                 .fold(HashSet::<String>::new(), |mut acc, (_, user)| {
-                    acc.insert(user.name.to_string());
+                    acc.insert(user.name.to_lowercase());
                     acc
                 });
             let mut response = BadUserDataResponse::new(&users);
