@@ -52,13 +52,11 @@ pub async fn handle_my_stats(
 
     let response = get_user_stats_by_name(db_pool, user_name.as_str()).await?;
     let block_builder = BlockBuilder::new()
-        .add_section_markdown(format!("*Here are your stats {}:*", response.name).as_str())
-        .add_section_markdown(format!("*Total Posts*: {}", response.post_count).as_str())
-        .add_section_markdown(format!("*Q Posts*: {}", response.q_count).as_str())
-        .add_section_markdown(
-            format!("*Favorite AO*: {}", response.favorite_ao.favorite()).as_str(),
-        )
-        .add_section_markdown(format!("*First F3 Boise post*: {:?}", response.start_date).as_str());
+        .section_markdown(format!("*Here are your stats {}:*", response.name).as_str())
+        .section_markdown(format!("*Total Posts*: {}", response.post_count).as_str())
+        .section_markdown(format!("*Q Posts*: {}", response.q_count).as_str())
+        .section_markdown(format!("*Favorite AO*: {}", response.favorite_ao.favorite()).as_str())
+        .section_markdown(format!("*First F3 Boise post*: {:?}", response.start_date).as_str());
 
     Ok(block_builder)
 }

@@ -1,6 +1,9 @@
 //! api for block kit https://api.slack.com/reference/block-kit/blocks and using blocks to create messages for slack, etc.
 
+use crate::slack_api::block_kit::block_elements::BlockElementType;
 use serde::{Deserialize, Serialize};
+
+pub mod block_elements;
 
 #[derive(Serialize, Debug, Default)]
 pub struct BlockBuilder {
@@ -14,15 +17,48 @@ impl BlockBuilder {
         }
     }
 
-    pub fn add_section(mut self, block: SectionBlock) -> Self {
-        self.blocks.push(BlockType::Section(block));
+    pub fn reached_max(&self) -> bool {
+        self.blocks.len() > 40
+    }
+
+    pub fn section(mut self, block: SectionBlock) -> Self {
+        self.add_section(block);
         self
     }
 
-    pub fn add_section_markdown(mut self, text: &str) -> Self {
+    pub fn add_section(&mut self, block: SectionBlock) {
+        self.blocks.push(BlockType::Section(block));
+    }
+
+    pub fn section_markdown(mut self, text: &str) -> Self {
+        self.add_section_markdown(text);
+        self
+    }
+
+    pub fn add_section_markdown(&mut self, text: &str) {
         self.blocks
             .push(BlockType::Section(SectionBlock::new_markdown(text)));
+    }
+
+    pub fn header(mut self, text: &str) -> Self {
+        self.blocks
+            .push(BlockType::Header(HeaderBlock::new_plain_text(text)));
         self
+    }
+
+    pub fn context(mut self, text: &str) -> Self {
+        self.blocks
+            .push(BlockType::Context(ContextBlock::new_markdown(text)));
+        self
+    }
+
+    pub fn divider(mut self) -> Self {
+        self.add_divider();
+        self
+    }
+
+    pub fn add_divider(&mut self) {
+        self.blocks.push(BlockType::Divider);
     }
 }
 
@@ -32,7 +68,7 @@ impl BlockBuilder {
 pub enum BlockType {
     /// TODO
     Actions,
-    Context,
+    Context(ContextBlock),
     Divider,
     File(FileBlock),
     Header(HeaderBlock),
@@ -61,6 +97,9 @@ pub struct SectionBlock {
     /// Maximum number of items is 10. Maximum length for the text in each item is 2000 characters
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fields: Option<Vec<TextObject>>,
+    /// One of the available element objects: https://api.slack.com/reference/messaging/block-elements
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub accessory: Option<BlockElementType>,
 }
 
 impl SectionBlock {
@@ -82,6 +121,34 @@ impl SectionBlock {
         SectionBlock {
             text: TextObject::new_text(text),
             ..Default::default()
+        }
+    }
+
+    pub fn new_markdown_with_btn(text: &str, btn_text: &str, action_id: &str) -> Self {
+        SectionBlock {
+            text: TextObject::new_markdown(text),
+            accessory: Some(BlockElementType::new_btn(btn_text, action_id)),
+            ..Default::default()
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ContextBlock {
+    /// An array of image elements and text objects. Maximum number of items is 10. TODO add image support
+    elements: Vec<TextObject>,
+}
+
+impl ContextBlock {
+    pub fn new_text(text: &str) -> Self {
+        ContextBlock {
+            elements: vec![TextObject::new_text(text)],
+        }
+    }
+
+    pub fn new_markdown(text: &str) -> Self {
+        ContextBlock {
+            elements: vec![TextObject::new_markdown(text)],
         }
     }
 }
@@ -181,8 +248,8 @@ mod tests {
     #[test]
     fn serialize_correctly() {
         let builder = BlockBuilder::new()
-            .add_section_markdown("header")
-            .add_section_markdown("footer");
+            .section_markdown("header")
+            .section_markdown("footer");
         let serialized = serde_json::to_string(&builder).unwrap();
         assert_eq!("{\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"header\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"footer\"}}]}", serialized.as_str());
     }

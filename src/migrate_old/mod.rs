@@ -1,6 +1,7 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::BackBlastData;
-use crate::db::save_back_blast::save;
+use crate::db::save_q_line_up::NewQLineUpDbEntry;
+use crate::db::{save_back_blast, save_q_line_up};
 use crate::shared::common_errors::AppError;
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
@@ -15,6 +16,20 @@ struct OldBackBlast {
     pub count: u16,
     pub fngs: Option<u16>,
     pub pax: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct OldQSheetRow {
+    pub date: String,
+    pub gem: Option<String>,
+    pub oldglory: Option<String>,
+    pub backyard: Option<String>,
+    pub rebel: Option<String>,
+    pub bleach: Option<String>,
+    pub ruckership: Option<String>,
+    pub ironmountain: Option<String>,
+    pub rise: Option<String>,
+    pub lakeview_park: Option<String>,
 }
 
 const BACK_YARD_BB_PATH: &str = "migration_files/old/Backyard";
@@ -38,11 +53,64 @@ pub async fn save_old_back_blasts(db_pool: &PgPool) -> Result<(), AppError> {
     for (ao, file_path) in AOLIST.iter() {
         let ao_name = ao.to_string();
         let bb = read_back_blasts(ao, &back_blast_path(file_path))?;
-        save(db_pool, &bb).await?;
+        save_back_blast::save(db_pool, &bb).await?;
         println!("Saved: {}", ao_name);
     }
 
     Ok(())
+}
+
+pub async fn save_old_q_line_up(db_pool: &PgPool) -> Result<(), AppError> {
+    let mut rdr = csv::ReaderBuilder::new().from_path("migration_files/q_line_up/q_sheet.csv")?;
+    let mut results = Vec::<NewQLineUpDbEntry>::new();
+    for record in rdr.deserialize() {
+        let record: OldQSheetRow = record?;
+        let date = NaiveDate::parse_from_str(record.date.as_str(), "%m/%d/%Y").unwrap();
+        if let Some(q) = record.gem {
+            add_q_entry(&mut results, AO::Gem, q, &date);
+        }
+
+        if let Some(q) = record.oldglory {
+            add_q_entry(&mut results, AO::OldGlory, q, &date);
+        }
+
+        if let Some(q) = record.backyard {
+            add_q_entry(&mut results, AO::Backyard, q, &date);
+        }
+
+        if let Some(q) = record.rebel {
+            add_q_entry(&mut results, AO::Rebel, q, &date);
+        }
+
+        if let Some(q) = record.bleach {
+            add_q_entry(&mut results, AO::Bleach, q, &date);
+        }
+
+        if let Some(q) = record.ruckership {
+            add_q_entry(&mut results, AO::Ruckership, q, &date);
+        }
+
+        if let Some(q) = record.ironmountain {
+            add_q_entry(&mut results, AO::IronMountain, q, &date);
+        }
+
+        if let Some(q) = record.rise {
+            add_q_entry(&mut results, AO::Rise, q, &date);
+        }
+
+        if let Some(q) = record.lakeview_park {
+            add_q_entry(&mut results, AO::LakeViewPark, q, &date);
+        }
+    }
+
+    println!("saving {} entries for q line up", results.len());
+    save_q_line_up::save_list(db_pool, &results).await?;
+    Ok(())
+}
+
+fn add_q_entry(list: &mut Vec<NewQLineUpDbEntry>, ao: AO, q: String, date: &NaiveDate) {
+    let new_entry = NewQLineUpDbEntry::new(vec![q], &ao, date, ao.channel_id());
+    list.push(new_entry);
 }
 
 fn read_back_blasts(ao: &AO, path: &str) -> Result<Vec<BackBlastData>, AppError> {

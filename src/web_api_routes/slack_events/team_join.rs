@@ -35,7 +35,7 @@ async fn post_message_to_welcome_channel(
     user_id: &str,
     web_app: &MutableWebState,
 ) {
-    let block_builder = BlockBuilder::new().add_section_markdown(
+    let block_builder = BlockBuilder::new().section_markdown(
         format!(
             "Please welcome new member to F3 Boise! :wave: <@{}>",
             user_id

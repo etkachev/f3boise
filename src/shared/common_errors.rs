@@ -1,6 +1,5 @@
 //! Module containing implementations for the common `AppError` wrapper to better consume different error types.
 
-use serde_json::Error;
 use std::{error, fmt, io};
 
 /// Wrapper for common errors that may be encountered in application
@@ -11,6 +10,7 @@ pub enum AppError {
     Csv(csv::Error),
     Sqlx(sqlx::Error),
     Serde(serde_json::Error),
+    ChronoParse(chrono::ParseError),
     General(String),
 }
 
@@ -41,7 +41,13 @@ impl From<sqlx::Error> for AppError {
 }
 
 impl From<serde_json::Error> for AppError {
-    fn from(err: Error) -> Self {
+    fn from(err: serde_json::Error) -> Self {
         AppError::Serde(err)
+    }
+}
+
+impl From<chrono::ParseError> for AppError {
+    fn from(err: chrono::ParseError) -> Self {
+        AppError::ChronoParse(err)
     }
 }

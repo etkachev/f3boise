@@ -121,7 +121,12 @@ impl From<String> for AO {
         } else {
             ao.to_lowercase()
         };
-        match cleaned_ao.as_str() {
+
+        let cleaned_ao = cleaned_ao
+            .strip_prefix("ao-")
+            .unwrap_or(cleaned_ao.as_str());
+
+        match cleaned_ao {
             const_names::BLEACH => AO::Bleach,
             const_names::GEM => AO::Gem,
             const_names::OLD_GLORY | "oldglory" => AO::OldGlory,
@@ -129,7 +134,7 @@ impl From<String> for AO {
             const_names::IRON_MOUNTAIN | "ironmountain" => AO::IronMountain,
             const_names::RUCKERSHIP | "rucker-ship" => AO::Ruckership,
             const_names::RISE | "bowler-park" => AO::Rise,
-            const_names::LAKE_VIEW_PARK => AO::LakeViewPark,
+            const_names::LAKE_VIEW_PARK | "lakeview_park" => AO::LakeViewPark,
             const_names::BACKYARD => AO::Backyard,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),

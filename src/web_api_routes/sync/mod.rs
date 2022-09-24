@@ -1,6 +1,6 @@
 use crate::app_state::MutableAppState;
 use crate::db::init::{get_db_users, sync_ao_list};
-use crate::migrate_old::save_old_back_blasts;
+use crate::migrate_old::{save_old_back_blasts, save_old_q_line_up};
 use crate::shared::common_errors::AppError;
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
@@ -12,6 +12,15 @@ pub async fn sync_old_data_route(db_pool: web::Data<PgPool>) -> impl Responder {
         return HttpResponse::BadRequest().body(err.to_string());
     }
     HttpResponse::Ok().finish()
+}
+
+/// sync q line up
+pub async fn sync_q_line_up(db_pool: web::Data<PgPool>) -> impl Responder {
+    if let Err(err) = save_old_q_line_up(&db_pool).await {
+        return HttpResponse::BadRequest().body(err.to_string());
+    }
+
+    HttpResponse::Ok().body("Finished")
 }
 
 /// external call to sync data to state.

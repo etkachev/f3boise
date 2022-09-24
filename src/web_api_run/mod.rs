@@ -4,10 +4,11 @@ use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::auth::get_key;
 use crate::web_api_routes::back_blast_data::{get_all_back_blasts_route, get_missing_back_blasts};
+use crate::web_api_routes::interactive_events::{interactive_events, test_btn_message};
 use crate::web_api_routes::pax_data::{get_bad_data, get_pax_back_blasts, get_pax_info, get_users};
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::slash_commands::slack_slash_commands_route;
-use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route};
+use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route, sync_q_line_up};
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::dev::Server;
@@ -100,8 +101,11 @@ pub fn run(
             .route("/", web::get().to(index))
             .route("/health_check", web::get().to(health_check))
             .route("/events", web::post().to(slack_events))
+            .route("/interactive", web::post().to(interactive_events))
+            .route("/test-btn", web::post().to(test_btn_message))
             .route("/sync", web::get().to(sync_data_route))
             .route("/sync-old", web::get().to(sync_old_data_route))
+            .route("/sync-q", web::get().to(sync_q_line_up))
             .route(
                 "/slash-commands",
                 web::post().to(slack_slash_commands_route),

@@ -88,4 +88,24 @@ impl AppState {
     pub fn get_channel_data(&self, channel: PublicChannels) -> Option<&ChannelData> {
         self.channels.get(&channel)
     }
+
+    /// get hashmap where key is slack id and value is f3 name
+    pub fn get_slack_id_map(&self) -> HashMap<String, String> {
+        self.users
+            .iter()
+            .fold(HashMap::<String, String>::new(), |mut acc, (id, user)| {
+                acc.insert(id.to_string(), user.name.to_lowercase());
+                acc
+            })
+    }
+
+    /// get hashmap where key is f3 name and value is slack id
+    pub fn get_user_name_map(&self) -> HashMap<String, String> {
+        self.users
+            .iter()
+            .fold(HashMap::<String, String>::new(), |mut acc, (id, user)| {
+                acc.insert(user.name.to_lowercase(), id.to_string());
+                acc
+            })
+    }
 }
