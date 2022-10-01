@@ -1,20 +1,5 @@
 {
   "db": "PostgreSQL",
-  "052e2aa40ccee153f0b9934982fae74f9945e20f1ff80da4d7598d6bf14a016d": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "\n    INSERT INTO users (id, slack_id, name, email)\n    VALUES($1,$2,$3,$4)\n    ON CONFLICT (slack_id)\n        DO NOTHING;\n    "
-  },
   "17e465839b16cfe389bdd3d027304bd804dbebfba3bed41880d30730776539d9": {
     "describe": {
       "columns": [
@@ -41,6 +26,46 @@
     },
     "query": "\n        SELECT ao, date\n        FROM back_blasts\n        WHERE bb_type = 'backblast' AND active = true AND date >= $1\n        ORDER BY date DESC;\n        "
   },
+  "1c4419d889e0f690ce69708d2dab386b76411a72514643dee6ee1515f575567e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "ao",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "qs!",
+          "ordinal": 1,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "date",
+          "ordinal": 2,
+          "type_info": "Date"
+        },
+        {
+          "name": "closed",
+          "ordinal": 3,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Date",
+          "Date"
+        ]
+      }
+    },
+    "query": "\n        WITH list_view AS (\n            SELECT\n                al.name as ao,\n                string_to_array(lower(qlu.qs), ',') as qs,\n                qlu.date,\n                qlu.closed\n            FROM q_line_up qlu\n                INNER JOIN ao_list al on qlu.channel_id = al.channel_id\n        )\n        \n        SELECT ao, qs as \"qs!\", date, closed\n        FROM list_view\n        WHERE ao = $1 AND date BETWEEN $2 AND $3\n        ORDER BY date ASC;\n        "
+  },
   "286f1afdaeb32bc417262c2dbbdb58d71de6586ad47cfcd4d11e908b561a4920": {
     "describe": {
       "columns": [],
@@ -56,6 +81,23 @@
       }
     },
     "query": "\n    INSERT INTO ao_list (id, name, days, channel_id, active)\n    VALUES($1,$2,$3,$4,$5)\n    ON CONFLICT (name)\n    DO NOTHING;\n    "
+  },
+  "3ab37473cd0da75beac4784d59a3d988b5977a29370120f3c58c669985b138ea": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Date",
+          "Bool",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO q_line_up (id, qs, ao, date, closed, channel_id)\n        VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT ON CONSTRAINT q_line_up_channel_id_date_key\n            DO NOTHING;\n        "
   },
   "43bdd8d1d5e1769c5ae142f6a8c6b7fb75796713f0959945e25fc86d96343ac6": {
     "describe": {
@@ -107,6 +149,73 @@
     },
     "query": "\n    WITH list_view AS (\n        SELECT\n            al.name as ao,\n            string_to_array(lower(q), ',') as q,\n            string_to_array(lower(pax), ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = 'backblast' AND bb.active = true\n    )\n    \n    SELECT ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    WHERE pax @> array[$1]\n    ORDER BY date DESC;\n    "
   },
+  "47a5eb9f83d239795aff338f124d4e22f2b3ddc62c6a0eb771daa618a80c782e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n    INSERT INTO users (id, slack_id, name, email)\n    VALUES($1,$2,$3,$4)\n    ON CONFLICT (slack_id)\n        DO UPDATE\n        SET name = EXCLUDED.name;\n    "
+  },
+  "5440d790b55d5a56da30748d2a8b9a3db44e56731a5918130052943b8a83b9b2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "ao",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "qs!",
+          "ordinal": 1,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "date",
+          "ordinal": 2,
+          "type_info": "Date"
+        },
+        {
+          "name": "closed",
+          "ordinal": 3,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Date",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        WITH list_view AS (\n            SELECT\n                al.name as ao,\n                string_to_array(lower(qlu.qs), ',') as qs,\n                qlu.date,\n                qlu.closed\n            FROM q_line_up qlu\n                INNER JOIN ao_list al on qlu.channel_id = al.channel_id\n            WHERE al.channel_id = $2\n        )\n        \n    SELECT ao, qs as \"qs!\", date, closed\n    FROM list_view\n    WHERE date = $1;\n    "
+  },
+  "86f69ee1f740e9baaae1a482f2c0f3d46f8ea39fa707266cfbf03a6f8fb4e30b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Date"
+        ]
+      }
+    },
+    "query": "\n        DELETE \n        FROM q_line_up\n        WHERE channel_id = $1 AND date = $2;\n        "
+  },
   "a82fab2c6d84945c51438aad27aa0a0b7729e84475e02ccbaa75f1c13a73c06e": {
     "describe": {
       "columns": [
@@ -136,6 +245,45 @@
       }
     },
     "query": "\n        SELECT slack_id, name, email\n        FROM users;\n    "
+  },
+  "b21ec7dcab3d13ccf2f3ffe5893016e00f001e5ba1b78a5c70b30643c29c3784": {
+    "describe": {
+      "columns": [
+        {
+          "name": "ao",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "qs!",
+          "ordinal": 1,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "date",
+          "ordinal": 2,
+          "type_info": "Date"
+        },
+        {
+          "name": "closed",
+          "ordinal": 3,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Date",
+          "Date"
+        ]
+      }
+    },
+    "query": "\n        WITH list_view AS (\n            SELECT\n                al.name as ao,\n                string_to_array(lower(qlu.qs), ',') as qs,\n                qlu.date,\n                qlu.closed\n            FROM q_line_up qlu\n                INNER JOIN ao_list al on qlu.channel_id = al.channel_id\n        )\n        \n        SELECT ao, qs as \"qs!\", date, closed\n        FROM list_view\n        WHERE date BETWEEN $1 AND $2\n        ORDER BY date ASC;\n        "
   },
   "c7e186250ede869eba2642f1bc59fe9f0362587928d246afd403147d6f2c4c80": {
     "describe": {
