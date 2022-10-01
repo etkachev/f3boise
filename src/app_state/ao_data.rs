@@ -250,4 +250,10 @@ mod tests {
         let ao = AO::from("#bleach\n".to_string());
         assert_eq!(ao, AO::Bleach);
     }
+
+    #[test]
+    fn gem_test() {
+        let ao = AO::from("gem".to_string());
+        assert_eq!(ao, AO::Gem);
+    }
 }

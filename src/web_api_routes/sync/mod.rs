@@ -2,9 +2,11 @@ use crate::app_state::MutableAppState;
 use crate::db::init::{get_db_users, sync_ao_list};
 use crate::migrate_old::{save_old_back_blasts, save_old_q_line_up};
 use crate::shared::common_errors::AppError;
+use crate::users::f3_user::F3User;
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
 use sqlx::PgPool;
+use std::collections::HashMap;
 
 /// sync old backblasts to db.
 pub async fn sync_old_data_route(db_pool: web::Data<PgPool>) -> impl Responder {
@@ -29,19 +31,17 @@ pub async fn sync_data_to_state(
     web_state: &MutableWebState,
     app_state: &MutableAppState,
 ) -> Result<(), AppError> {
+    let mut all_users: HashMap<String, F3User> = HashMap::new();
     let db_users = get_db_users(db_pool).await?;
-    // scoped to limit lock
-    {
-        let mut app = app_state.app.lock().expect("Could not lock app state");
-        app.users.extend(db_users);
-    }
-    println!("set db users");
+    all_users.extend(db_users);
 
     let slack_users = web_state.get_users().await?;
+    all_users.extend(slack_users.users);
+
     // scoped to limit lock
     {
         let mut app = app_state.app.lock().expect("Could not lock app state");
-        app.users.extend(slack_users.users);
+        app.users = all_users;
         app.bots = slack_users.bots;
         app.set_self_bot_id();
     }

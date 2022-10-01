@@ -1,4 +1,4 @@
-use crate::db::init::DbUser;
+use crate::db::save_user::DbUser;
 use crate::slack_api::users::users_list::response::SlackUserData;
 use serde::{Deserialize, Serialize};
 

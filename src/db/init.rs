@@ -7,6 +7,7 @@
 
 use crate::app_state::ao_data::const_names::AO_LIST;
 use crate::app_state::ao_data::AoData;
+use crate::db::save_user::{upsert_user, DbUser};
 use crate::shared::common_errors::AppError;
 use crate::users::f3_user::F3User;
 use sqlx::{PgPool, Postgres, Transaction};
@@ -64,28 +65,6 @@ async fn insert_ao_record(
     Ok(())
 }
 
-/// user represented in db.
-pub struct DbUser {
-    pub slack_id: String,
-    pub name: String,
-    pub email: String,
-}
-
-impl From<&F3User> for DbUser {
-    fn from(user: &F3User) -> Self {
-        let id = if let Some(id) = &user.id {
-            id.to_string()
-        } else {
-            String::new()
-        };
-        DbUser {
-            slack_id: id,
-            name: user.name.to_string(),
-            email: user.email.to_string(),
-        }
-    }
-}
-
 /// get existing db users
 pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, AppError> {
     let mut results = HashMap::<String, F3User>::new();
@@ -128,28 +107,5 @@ pub async fn sync_users(db_pool: &PgPool, users: &HashMap<String, F3User>) -> Re
         .await
         .expect("Could not commit transaction");
     println!("Finished full sync users");
-    Ok(())
-}
-
-async fn upsert_user(
-    transaction: &mut Transaction<'_, Postgres>,
-    user: &DbUser,
-) -> Result<(), AppError> {
-    let id = Uuid::new_v4();
-    sqlx::query!(
-        r#"
-    INSERT INTO users (id, slack_id, name, email)
-    VALUES($1,$2,$3,$4)
-    ON CONFLICT (slack_id)
-        DO NOTHING;
-    "#,
-        id,
-        user.slack_id,
-        user.name,
-        user.email,
-    )
-    .execute(transaction)
-    .await?;
-
     Ok(())
 }

@@ -1,6 +1,6 @@
 //! api for block kit https://api.slack.com/reference/block-kit/blocks and using blocks to create messages for slack, etc.
 
-use crate::slack_api::block_kit::block_elements::BlockElementType;
+use crate::slack_api::block_kit::block_elements::{BlockElementType, OptionElement};
 use serde::{Deserialize, Serialize};
 
 pub mod block_elements;
@@ -62,7 +62,7 @@ impl BlockBuilder {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum BlockType {
@@ -78,7 +78,7 @@ pub enum BlockType {
     Video,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FileBlock {
     /// The external unique ID for this file
     pub external_id: String,
@@ -86,7 +86,7 @@ pub struct FileBlock {
     pub source: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct SectionBlock {
     /// The text for the block, in the form of a text object.
     /// Maximum length for the text in this field is 3000 characters.
@@ -100,6 +100,8 @@ pub struct SectionBlock {
     /// One of the available element objects: https://api.slack.com/reference/messaging/block-elements
     #[serde(skip_serializing_if = "Option::is_none")]
     pub accessory: Option<BlockElementType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub block_id: Option<String>,
 }
 
 impl SectionBlock {
@@ -131,9 +133,29 @@ impl SectionBlock {
             ..Default::default()
         }
     }
+
+    pub fn new_markdown_with_danger_btn(text: &str, btn_text: &str, action_id: &str) -> Self {
+        SectionBlock {
+            text: TextObject::new_markdown(text),
+            accessory: Some(BlockElementType::new_danger_btn(btn_text, action_id)),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_markdown_with_overflow(
+        text: &str,
+        action_id: &str,
+        options: Vec<OptionElement>,
+    ) -> Self {
+        SectionBlock {
+            text: TextObject::new_markdown(text),
+            accessory: Some(BlockElementType::new_overflow(action_id, options)),
+            ..Default::default()
+        }
+    }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ContextBlock {
     /// An array of image elements and text objects. Maximum number of items is 10. TODO add image support
     elements: Vec<TextObject>,
@@ -153,7 +175,7 @@ impl ContextBlock {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HeaderBlock {
     /// The text for the block, in the form of a plain_text text object. Maximum length for the text in this field is 150 characters
     text: TextObject,
@@ -177,7 +199,7 @@ impl HeaderBlock {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ImageBlock {
     /// The URL of the image to be displayed. Maximum length for this field is 3000 characters
     pub image_url: String,
@@ -187,7 +209,7 @@ pub struct ImageBlock {
     pub title: Option<TextObject>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TextObject {
     #[serde(rename = "type", flatten)]
     pub text_type: TextType,
@@ -231,7 +253,7 @@ impl Default for TextObject {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum TextType {

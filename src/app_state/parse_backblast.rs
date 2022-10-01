@@ -496,4 +496,13 @@ mod tests {
             ])
         )
     }
+
+    #[test]
+    fn slack_user_with_dash() {
+        let text = "<@U041Z1HFL1F>";
+        let users = HashMap::<String, F3User>::from([hash_set_user("U041Z1HFL1F", "O-H")]);
+
+        let parsed = parse_users_list(text, &users);
+        assert_eq!(parsed, HashSet::from(["O-H".to_string()]));
+    }
 }

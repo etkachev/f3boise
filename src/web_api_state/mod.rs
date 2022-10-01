@@ -11,6 +11,8 @@ use crate::slack_api::channels::reactions_add::response::ReactionsAddResponse;
 use crate::slack_api::channels::types::ChannelTypes;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
 use crate::slack_api::chat::post_message::response::PostMessageResponse;
+use crate::slack_api::chat::update_message::request::UpdateMessageRequest;
+use crate::slack_api::chat::update_message::response::UpdateMessageResponse;
 use crate::slack_api::url_requests::SlackUrlRequest;
 use crate::slack_api::users::users_list::request::UsersListRequest;
 use crate::slack_api::users::users_list::response::UsersListResponse;
@@ -153,6 +155,20 @@ impl MutableWebState {
         let body = serde_json::to_vec(&request)?;
         let response = self.make_post_request(url, body).await;
         let response: PostMessageResponse = serde_json::from_slice(&response.body)?;
+        if let Some(err) = response.error {
+            Err(AppError::General(err))
+        } else {
+            Ok(())
+        }
+    }
+
+    /// update message that exists in slack
+    pub async fn update_message(&self, request: UpdateMessageRequest) -> Result<(), AppError> {
+        let url = request.get_plain_url_request(&self.base_api_url);
+        println!("Calling: {:?}", url.as_str());
+        let body = serde_json::to_vec(&request)?;
+        let response = self.make_post_request(url, body).await;
+        let response: UpdateMessageResponse = serde_json::from_slice(&response.body)?;
         if let Some(err) = response.error {
             Err(AppError::General(err))
         } else {

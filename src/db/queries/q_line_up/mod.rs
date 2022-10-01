@@ -12,6 +12,39 @@ pub struct QLineUpDbData {
     pub closed: bool,
 }
 
+/// get single q line up if exists based on ao and date
+pub async fn get_single_q_line_up(
+    db_pool: &PgPool,
+    date: &NaiveDate,
+    channel_id: &str,
+) -> Result<Option<QLineUpDbData>, AppError> {
+    let item: Option<QLineUpDbData> = sqlx::query_as!(
+        QLineUpDbData,
+        r#"
+        WITH list_view AS (
+            SELECT
+                al.name as ao,
+                string_to_array(lower(qlu.qs), ',') as qs,
+                qlu.date,
+                qlu.closed
+            FROM q_line_up qlu
+                INNER JOIN ao_list al on qlu.channel_id = al.channel_id
+            WHERE al.channel_id = $2
+        )
+        
+    SELECT ao, qs as "qs!", date, closed
+    FROM list_view
+    WHERE date = $1;
+    "#,
+        date,
+        channel_id
+    )
+    .fetch_optional(db_pool)
+    .await?;
+
+    Ok(item)
+}
+
 /// Get q line up between 2 dates
 pub async fn get_q_line_up_between_dates(
     db_pool: &PgPool,

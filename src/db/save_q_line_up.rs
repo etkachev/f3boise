@@ -94,3 +94,37 @@ async fn save_entry(
 
     Ok(())
 }
+
+pub async fn delete_q_line_up_entry(
+    db_pool: &PgPool,
+    channel_id: &str,
+    date: &NaiveDate,
+) -> Result<(), AppError> {
+    let mut transaction = db_pool.begin().await.expect("Failed to begin transaction");
+    delete_single_q_line_up(&mut transaction, channel_id, date).await?;
+    transaction
+        .commit()
+        .await
+        .expect("Could not commit transaction");
+    Ok(())
+}
+
+/// delete single q line up by date and channel_id (ao).
+async fn delete_single_q_line_up(
+    transaction: &mut Transaction<'_, Postgres>,
+    channel_id: &str,
+    date: &NaiveDate,
+) -> Result<(), AppError> {
+    sqlx::query!(
+        r#"
+        DELETE 
+        FROM q_line_up
+        WHERE channel_id = $1 AND date = $2;
+        "#,
+        channel_id,
+        date
+    )
+    .execute(transaction)
+    .await?;
+    Ok(())
+}

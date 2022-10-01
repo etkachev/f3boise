@@ -3,7 +3,7 @@ use crate::shared::time::local_boise_time;
 use crate::web_api_routes::slash_commands::invite_all::handle_invite_all;
 use crate::web_api_routes::slash_commands::my_stats::handle_my_stats;
 use crate::web_api_routes::slash_commands::q_line_up::{
-    get_q_line_up_for_ao, get_q_line_up_message_all, QLineUpCommand,
+    send_all_q_line_up_message, send_ao_q_line_up_message, QLineUpCommand,
 };
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
@@ -36,27 +36,50 @@ pub async fn slack_slash_commands_route(
             Ok(response) => HttpResponse::Ok().body(response),
             Err(err) => HttpResponse::BadRequest().body(err.to_string()),
         },
-        // TODO update
-        "/btn-test" => match QLineUpCommand::from(form.text.as_str()) {
-            QLineUpCommand { ao: None, .. } => {
+        "/q-sheet" => match QLineUpCommand::from(form.text.as_str()) {
+            QLineUpCommand { ao: None, month } => {
                 let users = {
                     let app = app_state.app.lock().expect("Could not lock app");
                     app.get_user_name_map()
                 };
-                let now = local_boise_time().date_naive();
-                match get_q_line_up_message_all(&db_pool, &now, &users).await {
-                    Ok(block_builder) => HttpResponse::Ok().json(block_builder),
+                let start_date = month
+                    .map(|date| date.pred())
+                    .unwrap_or_else(|| local_boise_time().date_naive());
+                match send_all_q_line_up_message(
+                    &db_pool,
+                    &start_date,
+                    &users,
+                    form.channel_id.as_str(),
+                    &web_state,
+                )
+                .await
+                {
+                    Ok(_) => HttpResponse::Ok().body("Posting Q Line up"),
                     Err(_) => HttpResponse::BadRequest().body("Invalid command"),
                 }
             }
-            QLineUpCommand { ao: Some(ao), .. } => {
+            QLineUpCommand {
+                ao: Some(ao),
+                month,
+            } => {
                 let users = {
                     let app = app_state.app.lock().expect("Could not lock app");
                     app.get_user_name_map()
                 };
-                let now = local_boise_time().date_naive();
-                match get_q_line_up_for_ao(&db_pool, ao, &now, &users).await {
-                    Ok(block_builder) => HttpResponse::Ok().json(block_builder),
+                let start_date = month
+                    .map(|date| date.pred())
+                    .unwrap_or_else(|| local_boise_time().date_naive());
+                match send_ao_q_line_up_message(
+                    &db_pool,
+                    ao,
+                    &start_date,
+                    &users,
+                    form.channel_id.as_str(),
+                    &web_state,
+                )
+                .await
+                {
+                    Ok(_) => HttpResponse::Ok().body("Posting Q Line Up"),
                     Err(_) => HttpResponse::BadRequest().body("Invalid command"),
                 }
             }
