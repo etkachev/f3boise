@@ -1,3 +1,4 @@
+use crate::app_state::ao_data::AO;
 use crate::app_state::MutableAppState;
 use crate::shared::time::local_boise_time;
 use crate::web_api_routes::slash_commands::invite_all::handle_invite_all;
@@ -45,17 +46,42 @@ pub async fn slack_slash_commands_route(
                 let start_date = month
                     .map(|date| date.pred())
                     .unwrap_or_else(|| local_boise_time().date_naive());
-                match send_all_q_line_up_message(
-                    &db_pool,
-                    &start_date,
-                    &users,
-                    form.channel_id.as_str(),
-                    &web_state,
-                )
-                .await
-                {
-                    Ok(_) => HttpResponse::Ok().body("Posting Q Line up"),
-                    Err(_) => HttpResponse::BadRequest().body("Invalid command"),
+
+                // see if request came from ao channel, then filter to ao data only, otherwise all
+
+                let possible_ao = AO::from_channel_id(form.channel_id.as_str());
+                let possible_ao = match possible_ao {
+                    AO::Unknown(_) => None,
+                    _ => Some(possible_ao),
+                };
+
+                if let Some(ao) = possible_ao {
+                    match send_ao_q_line_up_message(
+                        &db_pool,
+                        ao,
+                        &start_date,
+                        &users,
+                        form.channel_id.as_str(),
+                        &web_state,
+                    )
+                    .await
+                    {
+                        Ok(_) => HttpResponse::Ok().body("Posting Q Line up"),
+                        Err(_) => HttpResponse::BadRequest().body("Invalid command"),
+                    }
+                } else {
+                    match send_all_q_line_up_message(
+                        &db_pool,
+                        &start_date,
+                        &users,
+                        form.channel_id.as_str(),
+                        &web_state,
+                    )
+                    .await
+                    {
+                        Ok(_) => HttpResponse::Ok().body("Posting Q Line up"),
+                        Err(_) => HttpResponse::BadRequest().body("Invalid command"),
+                    }
                 }
             }
             QLineUpCommand {

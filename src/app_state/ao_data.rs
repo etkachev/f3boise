@@ -33,6 +33,7 @@ impl AO {
             AO::Ruckership => HashSet::from([Weekday::Fri]),
             AO::Backyard => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::Rise => HashSet::from([Weekday::Mon, Weekday::Wed]),
+            AO::LakeViewPark => HashSet::from([Weekday::Mon, Weekday::Wed]),
             _ => HashSet::new(),
         }
     }
@@ -220,7 +221,7 @@ pub mod const_names {
     pub const RISE: &str = "rise";
     pub const RISE_CHANNEL_ID: &str = "C03UT46303T";
     /// TODO otb
-    pub const LAKE_VIEW_PARK: &str = "lakeview-park";
+    pub const LAKE_VIEW_PARK: &str = "otb-lakeview-park";
     pub const LAKE_VIEW_PARK_CHANNEL_ID: &str = "C0425DL9MT7";
     pub const DR: &str = "dr";
     pub const DR_CHANNEL_ID: &str = "C03U7U9T7HU";
@@ -255,5 +256,11 @@ mod tests {
     fn gem_test() {
         let ao = AO::from("gem".to_string());
         assert_eq!(ao, AO::Gem);
+    }
+
+    #[test]
+    fn otb_lakeview() {
+        let ao = AO::from("#ao-otb-lakeview-park".to_string());
+        assert_eq!(ao, AO::LakeViewPark);
     }
 }
