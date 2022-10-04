@@ -4,7 +4,8 @@ use crate::shared::time::local_boise_time;
 use crate::web_api_routes::slash_commands::invite_all::handle_invite_all;
 use crate::web_api_routes::slash_commands::my_stats::handle_my_stats;
 use crate::web_api_routes::slash_commands::q_line_up::{
-    send_all_q_line_up_message, send_ao_q_line_up_message, QLineUpCommand,
+    get_q_line_up_for_ao, get_q_line_up_message_all, send_all_q_line_up_message,
+    send_ao_q_line_up_message, QLineUpCommand,
 };
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
@@ -37,7 +38,7 @@ pub async fn slack_slash_commands_route(
             Ok(response) => HttpResponse::Ok().body(response),
             Err(err) => HttpResponse::BadRequest().body(err.to_string()),
         },
-        "/q-sheet" => match QLineUpCommand::from(form.text.as_str()) {
+        "/q-sheet" | "/post-q-sheet" => match QLineUpCommand::from(form.text.as_str()) {
             QLineUpCommand { ao: None, month } => {
                 let users = {
                     let app = app_state.app.lock().expect("Could not lock app");
@@ -55,33 +56,53 @@ pub async fn slack_slash_commands_route(
                     _ => Some(possible_ao),
                 };
 
-                if let Some(ao) = possible_ao {
-                    match send_ao_q_line_up_message(
-                        &db_pool,
-                        ao,
-                        &start_date,
-                        &users,
-                        form.channel_id.as_str(),
-                        &web_state,
-                    )
-                    .await
-                    {
-                        Ok(_) => HttpResponse::Ok().body("Posting Q Line up"),
-                        Err(_) => HttpResponse::BadRequest().body("Invalid command"),
+                match form.command.as_str() {
+                    // this will actually post to slack and be visible to everyone
+                    "/post-q-sheet" => {
+                        if let Some(ao) = possible_ao {
+                            match send_ao_q_line_up_message(
+                                &db_pool,
+                                ao,
+                                &start_date,
+                                &users,
+                                form.channel_id.as_str(),
+                                &web_state,
+                            )
+                            .await
+                            {
+                                Ok(_) => HttpResponse::Ok().body("Posting Q Line up"),
+                                Err(_) => HttpResponse::BadRequest().body("Invalid command"),
+                            }
+                        } else {
+                            match send_all_q_line_up_message(
+                                &db_pool,
+                                &start_date,
+                                &users,
+                                form.channel_id.as_str(),
+                                &web_state,
+                            )
+                            .await
+                            {
+                                Ok(_) => HttpResponse::Ok().body("Posting Q Line up"),
+                                Err(_) => HttpResponse::BadRequest().body("Invalid command"),
+                            }
+                        }
                     }
-                } else {
-                    match send_all_q_line_up_message(
-                        &db_pool,
-                        &start_date,
-                        &users,
-                        form.channel_id.as_str(),
-                        &web_state,
-                    )
-                    .await
-                    {
-                        Ok(_) => HttpResponse::Ok().body("Posting Q Line up"),
-                        Err(_) => HttpResponse::BadRequest().body("Invalid command"),
+                    // this will be the silent response where only the requester will see.
+                    "/q-sheet" => {
+                        if let Some(ao) = possible_ao {
+                            match get_q_line_up_for_ao(&db_pool, ao, &start_date, &users).await {
+                                Ok(builder) => HttpResponse::Ok().json(builder.blocks),
+                                Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+                            }
+                        } else {
+                            match get_q_line_up_message_all(&db_pool, &start_date, &users).await {
+                                Ok(builder) => HttpResponse::Ok().json(builder.blocks),
+                                Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+                            }
+                        }
                     }
+                    _ => HttpResponse::BadRequest().body("Unknown command"),
                 }
             }
             QLineUpCommand {
