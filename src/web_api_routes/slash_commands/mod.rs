@@ -92,12 +92,12 @@ pub async fn slack_slash_commands_route(
                     "/q-sheet" => {
                         if let Some(ao) = possible_ao {
                             match get_q_line_up_for_ao(&db_pool, ao, &start_date, &users).await {
-                                Ok(builder) => HttpResponse::Ok().json(builder.blocks),
+                                Ok(builder) => HttpResponse::Ok().json(builder),
                                 Err(err) => HttpResponse::BadRequest().body(err.to_string()),
                             }
                         } else {
                             match get_q_line_up_message_all(&db_pool, &start_date, &users).await {
-                                Ok(builder) => HttpResponse::Ok().json(builder.blocks),
+                                Ok(builder) => HttpResponse::Ok().json(builder),
                                 Err(err) => HttpResponse::BadRequest().body(err.to_string()),
                             }
                         }
