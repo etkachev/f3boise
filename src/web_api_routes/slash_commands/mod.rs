@@ -7,6 +7,7 @@ use crate::web_api_routes::slash_commands::q_line_up::{
     get_q_line_up_for_ao, get_q_line_up_message_all, send_all_q_line_up_message,
     send_ao_q_line_up_message, QLineUpCommand,
 };
+use crate::web_api_routes::slash_commands::top_pax::handle_top_pax;
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
 use serde::Deserialize;
@@ -15,6 +16,7 @@ use sqlx::PgPool;
 pub mod invite_all;
 pub mod my_stats;
 pub mod q_line_up;
+pub mod top_pax;
 
 /// respond to slash commands
 pub async fn slack_slash_commands_route(
@@ -130,6 +132,10 @@ pub async fn slack_slash_commands_route(
                     Err(_) => HttpResponse::BadRequest().body("Invalid command"),
                 }
             }
+        },
+        "/top-pax" => match handle_top_pax(&db_pool, form.text.as_str()).await {
+            Ok(builder) => HttpResponse::Ok().json(builder),
+            Err(err) => HttpResponse::BadRequest().body(err.to_string()),
         },
         _ => {
             println!("command not accepted: {}", form.command);

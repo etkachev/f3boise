@@ -31,6 +31,40 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<BackBlastJsonData>, AppErro
     Ok(rows)
 }
 
+/// get all back_blasts within an ao range
+pub async fn get_all_within_date_range(
+    db_pool: &PgPool,
+    start_date: &NaiveDate,
+    end_date: &NaiveDate,
+) -> Result<Vec<BackBlastJsonData>, AppError> {
+    let rows: Vec<BackBlastJsonData> = sqlx::query_as!(
+        BackBlastJsonData,
+        r#"
+    WITH list_view AS (
+        SELECT
+            al.name as ao,
+            string_to_array(lower(q), ',') as q,
+            string_to_array(lower(pax), ',') as pax,
+            date,
+            bb_type,
+            bb.channel_id
+        FROM back_blasts bb
+        INNER JOIN ao_list al on bb.channel_id = al.channel_id
+        WHERE bb.bb_type = 'backblast' AND bb.active = true AND bb.date >= $1 AND bb.date <= $2
+    )
+    
+    SELECT ao, channel_id, q as "q!", pax as "pax!", date, bb_type
+    FROM list_view 
+    ORDER BY date DESC;
+    "#,
+        start_date,
+        end_date
+    )
+    .fetch_all(db_pool)
+    .await?;
+    Ok(rows)
+}
+
 #[derive(Deserialize)]
 pub struct BackBlastJsonData {
     pub ao: String,

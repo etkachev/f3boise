@@ -3,7 +3,9 @@ use crate::configuration::{DatabaseSettings, Settings};
 use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::auth::get_key;
-use crate::web_api_routes::back_blast_data::{get_all_back_blasts_route, get_missing_back_blasts};
+use crate::web_api_routes::back_blast_data::{
+    get_all_back_blasts_route, get_missing_back_blasts, get_top_pax_data_route,
+};
 use crate::web_api_routes::interactive_events::interactive_events;
 use crate::web_api_routes::pax_data::{get_bad_data, get_pax_back_blasts, get_pax_info, get_users};
 use crate::web_api_routes::slack_events::slack_events;
@@ -119,7 +121,8 @@ pub fn run(
             .service(
                 web::scope("/back_blasts")
                     .route("/all", web::get().to(get_all_back_blasts_route))
-                    .route("/missing", web::get().to(get_missing_back_blasts)),
+                    .route("/missing", web::get().to(get_missing_back_blasts))
+                    .route("/top-pax", web::get().to(get_top_pax_data_route)),
             )
             .app_data(web_app_data.clone())
             .app_data(app_state_data.clone())
