@@ -14,6 +14,7 @@ pub enum PublicChannels {
     DR,
     Welcome,
     LakeViewPark,
+    KleinerPark,
     Unknown(String),
 }
 
@@ -29,6 +30,7 @@ impl From<&AO> for PublicChannels {
             AO::IronMountain => PublicChannels::IronMountain,
             AO::Ruckership => PublicChannels::Ruckership,
             AO::LakeViewPark => PublicChannels::LakeViewPark,
+            AO::KleinerPark => PublicChannels::KleinerPark,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }
@@ -46,6 +48,7 @@ impl From<String> for PublicChannels {
             "ao-old-glory" => PublicChannels::OldGlory,
             "ao-otb-bowler-park" | "ao-bowler-park" | "ao-rise" => PublicChannels::Rise,
             "ao-otb-lakeview-park" => PublicChannels::LakeViewPark,
+            "ao-otb-kleiner-park" => PublicChannels::KleinerPark,
             "ao-rebel" => PublicChannels::Rebel,
             "ao-ruckership" => PublicChannels::Ruckership,
             "downrange" => PublicChannels::DR,
