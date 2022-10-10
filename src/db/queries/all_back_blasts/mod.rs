@@ -1,6 +1,6 @@
 use crate::shared::common_errors::AppError;
 use chrono::NaiveDate;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
 /// get all back blast data (with type 'backblast')
@@ -65,7 +65,7 @@ pub async fn get_all_within_date_range(
     Ok(rows)
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct BackBlastJsonData {
     pub ao: String,
     pub channel_id: String,

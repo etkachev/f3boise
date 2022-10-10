@@ -9,6 +9,7 @@ use serde::Serialize;
 use sqlx::PgPool;
 use std::ops::Sub;
 
+pub mod csv_download_all;
 pub mod top_pax_per_ao;
 
 /// route to get all back blast data
