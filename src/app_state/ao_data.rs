@@ -231,7 +231,7 @@ pub mod const_names {
     /// TODO otb
     pub const LAKE_VIEW_PARK: &str = "otb-lakeview-park";
     pub const LAKE_VIEW_PARK_CHANNEL_ID: &str = "C0425DL9MT7";
-    pub const KLEINER_PARK: &str = "otb-kleiner-park";
+    pub const KLEINER_PARK: &str = "otb-bellagio";
     pub const KLEINER_PARK_CHANNEL_ID: &str = "C045SMRL43X";
     pub const DR: &str = "dr";
     pub const DR_CHANNEL_ID: &str = "C03U7U9T7HU";

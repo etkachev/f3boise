@@ -48,7 +48,7 @@ impl From<String> for PublicChannels {
             "ao-old-glory" => PublicChannels::OldGlory,
             "ao-otb-bowler-park" | "ao-bowler-park" | "ao-rise" => PublicChannels::Rise,
             "ao-otb-lakeview-park" => PublicChannels::LakeViewPark,
-            "ao-otb-kleiner-park" => PublicChannels::KleinerPark,
+            "ao-otb-kleiner-park" | "ao-otb-bellagio" => PublicChannels::KleinerPark,
             "ao-rebel" => PublicChannels::Rebel,
             "ao-ruckership" => PublicChannels::Ruckership,
             "downrange" => PublicChannels::DR,
