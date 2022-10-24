@@ -3,6 +3,9 @@ use crate::configuration::{DatabaseSettings, Settings};
 use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::auth::get_key;
+use crate::web_api_routes::back_blast_data::csv_download_all::{
+    back_blasts_csv_html, download_back_blasts_csv_route,
+};
 use crate::web_api_routes::back_blast_data::{
     get_all_back_blasts_route, get_missing_back_blasts, get_top_pax_data_route,
 };
@@ -122,7 +125,12 @@ pub fn run(
                 web::scope("/back_blasts")
                     .route("/all", web::get().to(get_all_back_blasts_route))
                     .route("/missing", web::get().to(get_missing_back_blasts))
-                    .route("/top-pax", web::get().to(get_top_pax_data_route)),
+                    .route("/top-pax", web::get().to(get_top_pax_data_route))
+                    .route("/download", web::get().to(back_blasts_csv_html))
+                    .route(
+                        "/download-csv",
+                        web::get().to(download_back_blasts_csv_route),
+                    ),
             )
             .app_data(web_app_data.clone())
             .app_data(app_state_data.clone())

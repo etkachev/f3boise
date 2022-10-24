@@ -166,6 +166,7 @@ pub struct BadUser {
 #[derive(Serialize)]
 pub struct BadUserDataResponse {
     pub slack_users: HashSet<String>,
+    pub missing_pax: HashSet<String>,
     pub data: Vec<BadUser>,
 }
 
@@ -173,6 +174,7 @@ impl BadUserDataResponse {
     pub fn new(slack_users: &HashSet<String>) -> Self {
         BadUserDataResponse {
             slack_users: slack_users.clone(),
+            missing_pax: HashSet::new(),
             data: Vec::new(),
         }
     }
@@ -205,6 +207,7 @@ pub async fn get_bad_data(db_pool: web::Data<PgPool>) -> impl Responder {
                 for item in list {
                     for bb_user in item.get_pax() {
                         if !users.contains(bb_user.as_str()) {
+                            response.missing_pax.insert(bb_user.to_string());
                             response.data.push(BadUser::new(bb_user, &item));
                         }
                     }

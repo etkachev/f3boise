@@ -65,7 +65,7 @@ pub async fn get_all_within_date_range(
     Ok(rows)
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct BackBlastJsonData {
     pub ao: String,
     pub channel_id: String,
