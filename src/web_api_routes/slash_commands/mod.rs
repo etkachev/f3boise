@@ -8,6 +8,7 @@ use crate::web_api_routes::slash_commands::q_line_up::{
     send_ao_q_line_up_message, QLineUpCommand,
 };
 use crate::web_api_routes::slash_commands::top_pax::handle_top_pax;
+use crate::web_api_routes::sync::sync_data_to_state;
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
 use serde::Deserialize;
@@ -135,6 +136,10 @@ pub async fn slack_slash_commands_route(
         },
         "/top-pax" => match handle_top_pax(&db_pool, form.text.as_str()).await {
             Ok(builder) => HttpResponse::Ok().json(builder),
+            Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+        },
+        "/resync-bot" => match sync_data_to_state(&db_pool, &web_state, &app_state).await {
+            Ok(()) => HttpResponse::Ok().body("Re-synced Boise bot"),
             Err(err) => HttpResponse::BadRequest().body(err.to_string()),
         },
         _ => {

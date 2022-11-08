@@ -42,7 +42,7 @@ impl AO {
 
     /// whether or not AO is otb.
     pub fn is_otb(&self) -> bool {
-        matches!(self, AO::Rise | AO::LakeViewPark | AO::KleinerPark)
+        matches!(self, AO::LakeViewPark | AO::KleinerPark)
     }
 
     pub fn channel_id(&self) -> &str {
