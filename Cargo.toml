@@ -19,7 +19,7 @@ path = "src/bin/migrate_old_data.rs"
 
 [dependencies]
 actix-web = "4"
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
 actix-session = { version = "0.7.1", features = ["cookie-session"] }
 tracing-actix-web = "0.6"
 oauth2 = "4.2.3"

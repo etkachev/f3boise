@@ -1,5 +1,6 @@
 use chrono::{DateTime, FixedOffset, TimeZone, Utc};
 
+/// Get local Boise time
 pub fn local_boise_time() -> DateTime<FixedOffset> {
     let now = Utc::now().naive_utc();
     let hour = 3600;

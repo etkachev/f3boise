@@ -1,6 +1,7 @@
 pub mod app_state;
 pub mod bot_data;
 pub mod configuration;
+pub mod cron_jobs;
 pub mod db;
 pub mod migrate_old;
 pub mod oauth_client;
