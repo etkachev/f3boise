@@ -99,7 +99,7 @@ pub async fn save_old_q_line_up(db_pool: &PgPool) -> Result<(), AppError> {
         }
 
         if let Some(q) = record.lakeview_park {
-            add_q_entry(&mut results, AO::LakeViewPark, q, &date);
+            add_q_entry(&mut results, AO::WarHorse, q, &date);
         }
     }
 

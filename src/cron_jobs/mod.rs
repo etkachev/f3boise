@@ -52,7 +52,6 @@ fn get_dev_time() -> DateTime<FixedOffset> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
     #[tokio::test]
     async fn first_time_test() {

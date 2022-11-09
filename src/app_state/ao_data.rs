@@ -14,9 +14,9 @@ pub enum AO {
     Ruckership,
     Backyard,
     Rise,
+    WarHorse,
+    Bellagio,
     DR,
-    LakeViewPark,
-    KleinerPark,
     Unknown(String),
 }
 
@@ -34,15 +34,15 @@ impl AO {
             AO::Ruckership => HashSet::from([Weekday::Fri]),
             AO::Backyard => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::Rise => HashSet::from([Weekday::Mon, Weekday::Wed]),
-            AO::LakeViewPark => HashSet::from([Weekday::Mon, Weekday::Wed]),
-            AO::KleinerPark => HashSet::from([Weekday::Tue, Weekday::Thu]),
+            AO::WarHorse => HashSet::from([Weekday::Mon, Weekday::Wed]),
+            AO::Bellagio => HashSet::from([Weekday::Tue, Weekday::Thu]),
             _ => HashSet::new(),
         }
     }
 
     /// whether or not AO is otb.
     pub fn is_otb(&self) -> bool {
-        matches!(self, AO::LakeViewPark | AO::KleinerPark)
+        matches!(self, AO::WarHorse | AO::Bellagio)
     }
 
     pub fn channel_id(&self) -> &str {
@@ -55,8 +55,8 @@ impl AO {
             AO::Ruckership => const_names::RUCKERSHIP_CHANNEL_ID,
             AO::Backyard => const_names::BACKYARD_CHANNEL_ID,
             AO::Rise => const_names::RISE_CHANNEL_ID,
-            AO::LakeViewPark => const_names::LAKE_VIEW_PARK_CHANNEL_ID,
-            AO::KleinerPark => const_names::KLEINER_PARK_CHANNEL_ID,
+            AO::WarHorse => const_names::WAR_HORSE_CHANNEL_ID,
+            AO::Bellagio => const_names::BELLAGIO_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -72,8 +72,8 @@ impl AO {
             const_names::RUCKERSHIP_CHANNEL_ID => AO::Ruckership,
             const_names::BACKYARD_CHANNEL_ID => AO::Backyard,
             const_names::RISE_CHANNEL_ID => AO::Rise,
-            const_names::LAKE_VIEW_PARK_CHANNEL_ID => AO::LakeViewPark,
-            const_names::KLEINER_PARK_CHANNEL_ID => AO::KleinerPark,
+            const_names::WAR_HORSE_CHANNEL_ID => AO::WarHorse,
+            const_names::BELLAGIO_CHANNEL_ID => AO::Bellagio,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
         }
@@ -92,8 +92,8 @@ impl Clone for AO {
             AO::Backyard => AO::Backyard,
             AO::Rise => AO::Rise,
             AO::DR => AO::DR,
-            AO::LakeViewPark => AO::LakeViewPark,
-            AO::KleinerPark => AO::KleinerPark,
+            AO::WarHorse => AO::WarHorse,
+            AO::Bellagio => AO::Bellagio,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
     }
@@ -110,8 +110,8 @@ impl ToString for AO {
             AO::Ruckership => const_names::RUCKERSHIP,
             AO::Backyard => const_names::BACKYARD,
             AO::Rise => const_names::RISE,
-            AO::LakeViewPark => const_names::LAKE_VIEW_PARK,
-            AO::KleinerPark => const_names::KLEINER_PARK,
+            AO::WarHorse => const_names::WAR_HORSE,
+            AO::Bellagio => const_names::BELLAGIO,
             AO::DR => "",
             AO::Unknown(_) => "",
         };
@@ -141,8 +141,8 @@ impl From<String> for AO {
             const_names::IRON_MOUNTAIN | "ironmountain" => AO::IronMountain,
             const_names::RUCKERSHIP | "rucker-ship" => AO::Ruckership,
             const_names::RISE | "bowler-park" => AO::Rise,
-            const_names::LAKE_VIEW_PARK | "lakeview_park" => AO::LakeViewPark,
-            const_names::KLEINER_PARK => AO::KleinerPark,
+            const_names::WAR_HORSE | "lakeview_park" => AO::WarHorse,
+            const_names::BELLAGIO => AO::Bellagio,
             const_names::BACKYARD => AO::Backyard,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
@@ -173,8 +173,8 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::Gem => AO::Gem,
         PublicChannels::OldGlory => AO::OldGlory,
         PublicChannels::Rise => AO::Rise,
-        PublicChannels::LakeViewPark => AO::LakeViewPark,
-        PublicChannels::KleinerPark => AO::KleinerPark,
+        PublicChannels::WarHorse => AO::WarHorse,
+        PublicChannels::Bellagio => AO::Bellagio,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
@@ -229,10 +229,10 @@ pub mod const_names {
     pub const RISE: &str = "rise";
     pub const RISE_CHANNEL_ID: &str = "C03UT46303T";
     /// TODO otb
-    pub const LAKE_VIEW_PARK: &str = "otb-lakeview-park";
-    pub const LAKE_VIEW_PARK_CHANNEL_ID: &str = "C0425DL9MT7";
-    pub const KLEINER_PARK: &str = "otb-bellagio";
-    pub const KLEINER_PARK_CHANNEL_ID: &str = "C045SMRL43X";
+    pub const WAR_HORSE: &str = "warhorse";
+    pub const WAR_HORSE_CHANNEL_ID: &str = "C0425DL9MT7";
+    pub const BELLAGIO: &str = "bellagio";
+    pub const BELLAGIO_CHANNEL_ID: &str = "C045SMRL43X";
     pub const DR: &str = "dr";
     pub const DR_CHANNEL_ID: &str = "C03U7U9T7HU";
 
@@ -246,8 +246,8 @@ pub mod const_names {
         AO::Ruckership,
         AO::Backyard,
         AO::Rise,
-        AO::LakeViewPark,
-        AO::KleinerPark,
+        AO::WarHorse,
+        AO::Bellagio,
     ];
 }
 
@@ -270,8 +270,8 @@ mod tests {
     }
 
     #[test]
-    fn otb_lakeview() {
-        let ao = AO::from("#ao-otb-lakeview-park".to_string());
-        assert_eq!(ao, AO::LakeViewPark);
+    fn warhorse() {
+        let ao = AO::from("#ao-warhorse".to_string());
+        assert_eq!(ao, AO::WarHorse);
     }
 }
