@@ -42,7 +42,7 @@ impl AO {
 
     /// whether or not AO is otb.
     pub fn is_otb(&self) -> bool {
-        matches!(self, AO::WarHorse | AO::Bellagio)
+        matches!(self, AO::Unknown(_) | AO::DR)
     }
 
     pub fn channel_id(&self) -> &str {

@@ -22,7 +22,7 @@ fn verify(message: &[u8], code: &str, key: &[u8]) -> bool {
 
     let result = mac.finalize();
     let code_bytes = result.into_bytes();
-    let r2 = hex::encode(&code_bytes);
+    let r2 = hex::encode(code_bytes);
     r2 == code
 }
 
