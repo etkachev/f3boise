@@ -3,6 +3,7 @@ use crate::configuration::{DatabaseSettings, Settings};
 use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::auth::get_key;
+use crate::web_api_routes::back_blast_data::ao_back_blast_stats::get_back_blast_stats_by_ao;
 use crate::web_api_routes::back_blast_data::csv_download_all::{
     back_blasts_csv_html, download_back_blasts_csv_route,
 };
@@ -130,7 +131,8 @@ pub fn run(
                     .route(
                         "/download-csv",
                         web::get().to(download_back_blasts_csv_route),
-                    ),
+                    )
+                    .route("/{ao_name}", web::get().to(get_back_blast_stats_by_ao)),
             )
             .app_data(web_app_data.clone())
             .app_data(app_state_data.clone())

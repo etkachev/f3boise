@@ -3,6 +3,8 @@ use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
+pub mod back_blasts_by_ao;
+
 /// get all back blast data (with type 'backblast')
 pub async fn get_all(db_pool: &PgPool) -> Result<Vec<BackBlastJsonData>, AppError> {
     let rows: Vec<BackBlastJsonData> = sqlx::query_as!(
