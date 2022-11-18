@@ -155,6 +155,12 @@ impl From<&BackBlastDbEntry> for BackBlastData {
 
 impl From<BackBlastJsonData> for BackBlastData {
     fn from(data: BackBlastJsonData) -> Self {
+        BackBlastData::from(&data)
+    }
+}
+
+impl From<&BackBlastJsonData> for BackBlastData {
+    fn from(data: &BackBlastJsonData) -> Self {
         let qs = string_vec_to_hash(&data.q);
         let pax = string_vec_to_hash(&data.pax);
         BackBlastData {

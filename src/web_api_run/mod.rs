@@ -11,6 +11,7 @@ use crate::web_api_routes::back_blast_data::{
     get_all_back_blasts_route, get_missing_back_blasts, get_top_pax_data_route,
 };
 use crate::web_api_routes::interactive_events::interactive_events;
+use crate::web_api_routes::pax_data::stats::pax_stats_route;
 use crate::web_api_routes::pax_data::{get_bad_data, get_pax_back_blasts, get_pax_info, get_users};
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::slash_commands::slack_slash_commands_route;
@@ -120,7 +121,8 @@ pub fn run(
                     .route("/info", web::get().to(get_pax_info))
                     .route("/back_blasts", web::get().to(get_pax_back_blasts))
                     .route("/all", web::get().to(get_users))
-                    .route("/bad-data", web::get().to(get_bad_data)),
+                    .route("/bad-data", web::get().to(get_bad_data))
+                    .route("/stats/{name}", web::get().to(pax_stats_route)),
             )
             .service(
                 web::scope("/back_blasts")

@@ -10,6 +10,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::{HashMap, HashSet};
 
+pub mod stats;
+
 #[derive(Deserialize, Serialize)]
 pub struct PaxInfoQuery {
     id: String,

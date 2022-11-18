@@ -77,7 +77,7 @@ pub struct BackBlastJsonData {
     pub bb_type: String,
 }
 
-/// get list test
+/// get list of BD's where pax (name passed in) is included.
 pub async fn get_list_with_pax(
     db_pool: &PgPool,
     name: &str,

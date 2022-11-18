@@ -1,6 +1,6 @@
 use crate::app_state::backblast_data::BackBlastData;
 use crate::app_state::MutableAppState;
-use crate::db::queries::all_back_blasts::get_list_with_pax;
+use crate::db::queries::all_back_blasts::{get_list_with_pax, BackBlastJsonData};
 use crate::shared::common_errors::AppError;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::web_api_routes::pax_data::PaxInfoResponse;
@@ -13,9 +13,14 @@ pub async fn get_user_stats_by_name(
     user_name: &str,
 ) -> Result<PaxInfoResponse, AppError> {
     let list = get_list_with_pax(db_pool, user_name).await?;
-    let response = list.into_iter().map(BackBlastData::from).fold(
-        PaxInfoResponse::new(user_name),
-        |mut acc, item| {
+    let response = get_pax_info_from_bb_data(&list, user_name);
+    Ok(response)
+}
+
+pub fn get_pax_info_from_bb_data(list: &[BackBlastJsonData], user_name: &str) -> PaxInfoResponse {
+    list.iter()
+        .map(BackBlastData::from)
+        .fold(PaxInfoResponse::new(user_name), |mut acc, item| {
             acc.favorite_ao.for_ao(&item.ao);
             acc.post_count += 1;
             if item.qs.contains(&user_name.to_lowercase()) {
@@ -26,9 +31,7 @@ pub async fn get_user_stats_by_name(
                 acc.start_date = item.date;
             }
             acc
-        },
-    );
-    Ok(response)
+        })
 }
 
 /// handle getting response for my stats.

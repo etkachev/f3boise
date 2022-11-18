@@ -1,6 +1,7 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::MutableAppState;
 use crate::shared::time::local_boise_time;
+use crate::web_api_routes::slash_commands::ao_stats::get_ao_stats_block;
 use crate::web_api_routes::slash_commands::invite_all::handle_invite_all;
 use crate::web_api_routes::slash_commands::my_stats::handle_my_stats;
 use crate::web_api_routes::slash_commands::q_line_up::{
@@ -14,6 +15,7 @@ use actix_web::{web, HttpResponse, Responder};
 use serde::Deserialize;
 use sqlx::PgPool;
 
+pub mod ao_stats;
 pub mod invite_all;
 pub mod my_stats;
 pub mod q_line_up;
@@ -140,6 +142,10 @@ pub async fn slack_slash_commands_route(
         },
         "/resync-bot" => match sync_data_to_state(&db_pool, &web_state, &app_state).await {
             Ok(()) => HttpResponse::Ok().body("Re-synced Boise bot"),
+            Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+        },
+        "/ao-stats" => match get_ao_stats_block(&db_pool, &form).await {
+            Ok(response) => HttpResponse::Ok().json(response),
             Err(err) => HttpResponse::BadRequest().body(err.to_string()),
         },
         _ => {
