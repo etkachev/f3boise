@@ -9,6 +9,7 @@ use crate::web_api_routes::slash_commands::q_line_up::{
     send_ao_q_line_up_message, QLineUpCommand,
 };
 use crate::web_api_routes::slash_commands::top_pax::handle_top_pax;
+use crate::web_api_routes::slash_commands::wheres_freighter::get_wheres_freighter_message;
 use crate::web_api_routes::sync::sync_data_to_state;
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
@@ -20,6 +21,7 @@ pub mod invite_all;
 pub mod my_stats;
 pub mod q_line_up;
 pub mod top_pax;
+pub mod wheres_freighter;
 
 /// respond to slash commands
 pub async fn slack_slash_commands_route(
@@ -145,6 +147,10 @@ pub async fn slack_slash_commands_route(
             Err(err) => HttpResponse::BadRequest().body(err.to_string()),
         },
         "/ao-stats" => match get_ao_stats_block(&db_pool, &form).await {
+            Ok(response) => HttpResponse::Ok().json(response),
+            Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+        },
+        "/wheres-freighter" => match get_wheres_freighter_message(&db_pool).await {
             Ok(response) => HttpResponse::Ok().json(response),
             Err(err) => HttpResponse::BadRequest().body(err.to_string()),
         },

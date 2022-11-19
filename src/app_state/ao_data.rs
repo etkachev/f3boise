@@ -62,6 +62,24 @@ impl AO {
         }
     }
 
+    /// get google maps link for ao
+    pub fn google_maps_link(&self) -> &str {
+        match self {
+            AO::Bleach => const_names::BLEACH_GOOGLE_MAPS,
+            AO::Gem => const_names::GEM_GOOGLE_MAPS,
+            AO::OldGlory => const_names::OLD_GLORY_GOOGLE_MAPS,
+            AO::Rebel => const_names::REBEL_GOOGLE_MAPS,
+            AO::IronMountain => const_names::IRON_MOUNTAIN_GOOGLE_MAPS,
+            AO::Ruckership => "Location Varies",
+            AO::Backyard => const_names::BACKYARD_GOOGLE_MAPS,
+            AO::Rise => const_names::RISE_GOOGLE_MAPS,
+            AO::WarHorse => const_names::WAR_HORSE_GOOGLE_MAPS,
+            AO::Bellagio => const_names::BELLAGIO_GOOGLE_MAPS,
+            AO::DR => "Location Varies",
+            AO::Unknown(_) => "Unknown",
+        }
+    }
+
     pub fn from_channel_id(channel_id: &str) -> Self {
         match channel_id {
             const_names::BLEACH_CHANNEL_ID => AO::Bleach,
@@ -214,25 +232,33 @@ pub mod const_names {
 
     pub const BLEACH: &str = "bleach";
     pub const BLEACH_CHANNEL_ID: &str = "C03UR7GM7Q9";
+    pub const BLEACH_GOOGLE_MAPS: &str = "https://goo.gl/maps/G7u9tB36R3w6bdwr9";
     pub const GEM: &str = "gem";
     pub const GEM_CHANNEL_ID: &str = "C03UBFXVBGD";
+    pub const GEM_GOOGLE_MAPS: &str = "https://goo.gl/maps/3UgKoKid9BhPPfyP7";
     pub const OLD_GLORY: &str = "old-glory";
     pub const OLD_GLORY_CHANNEL_ID: &str = "C03TZTPUFRV";
+    pub const OLD_GLORY_GOOGLE_MAPS: &str = "https://goo.gl/maps/9CqybhwKbRFKRpst8";
     pub const REBEL: &str = "rebel";
     pub const REBEL_CHANNEL_ID: &str = "C03V463RFRN";
+    pub const REBEL_GOOGLE_MAPS: &str = "https://goo.gl/maps/ndw7v3WpFZqfijfZ7";
     pub const IRON_MOUNTAIN: &str = "iron-mountain";
     pub const IRON_MOUNTAIN_CHANNEL_ID: &str = "C03TZTTHDPZ";
+    pub const IRON_MOUNTAIN_GOOGLE_MAPS: &str = "https://goo.gl/maps/V3ubQNeSkm8KhGx46";
     pub const RUCKERSHIP: &str = "ruckership";
     pub const RUCKERSHIP_CHANNEL_ID: &str = "C03V46DGXMW";
     pub const BACKYARD: &str = "backyard";
     pub const BACKYARD_CHANNEL_ID: &str = "C03UEBT1QRZ";
+    pub const BACKYARD_GOOGLE_MAPS: &str = "https://goo.gl/maps/i7DDdNY6jspdJaBa9";
     pub const RISE: &str = "rise";
     pub const RISE_CHANNEL_ID: &str = "C03UT46303T";
-    /// TODO otb
+    pub const RISE_GOOGLE_MAPS: &str = "https://goo.gl/maps/wqZ1UD8DEAUCJTku9";
     pub const WAR_HORSE: &str = "warhorse";
     pub const WAR_HORSE_CHANNEL_ID: &str = "C0425DL9MT7";
+    pub const WAR_HORSE_GOOGLE_MAPS: &str = "https://goo.gl/maps/oariasYawYa5o7zs9";
     pub const BELLAGIO: &str = "bellagio";
     pub const BELLAGIO_CHANNEL_ID: &str = "C045SMRL43X";
+    pub const BELLAGIO_GOOGLE_MAPS: &str = "https://goo.gl/maps/a7EcVdttBEi1kiQx7";
     pub const DR: &str = "dr";
     pub const DR_CHANNEL_ID: &str = "C03U7U9T7HU";
 
