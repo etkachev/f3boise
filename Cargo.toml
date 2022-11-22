@@ -46,6 +46,9 @@ tracing-log = "0.1"
 log = "0.4"
 secrecy = { version = "0.8", features = ["serde"] }
 env_logger = "0.9"
+charts = "0.3.0"
+resvg = "0.26.1"
+reqwest = { version = "0.11", features = ["multipart"] }
 
 [dependencies.sqlx]
 version = "0.6"

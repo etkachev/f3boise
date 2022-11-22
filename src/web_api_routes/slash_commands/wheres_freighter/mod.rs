@@ -1,14 +1,13 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::BackBlastData;
-use crate::db::queries::all_back_blasts::get_list_with_pax;
+use crate::db::queries::all_back_blasts::recent_bd_for_pax::get_recent_bd_for_pax;
 use crate::shared::common_errors::AppError;
 use crate::slack_api::block_kit::BlockBuilder;
 use sqlx::PgPool;
 
 /// get message on where Freighter is at
 pub async fn get_wheres_freighter_message(db_pool: &PgPool) -> Result<BlockBuilder, AppError> {
-    let freighters_posts = get_list_with_pax(db_pool, "freighter").await?;
-    let most_recent = freighters_posts.first();
+    let most_recent = get_recent_bd_for_pax(db_pool, "freighter").await?;
     if let Some(most_recent) = most_recent {
         let bd = BackBlastData::from(most_recent);
         let text = match bd.ao {

@@ -1,6 +1,8 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::MutableAppState;
 use crate::shared::time::local_boise_time;
+use crate::web_api_routes::back_blast_data::ao_monthly_leaderboard::get_ao_monthly_stats_graph;
+use crate::web_api_routes::slash_commands::ao_monthly_stats_graph::AOMonthlyStatsGraphCommand;
 use crate::web_api_routes::slash_commands::ao_stats::get_ao_stats_block;
 use crate::web_api_routes::slash_commands::invite_all::handle_invite_all;
 use crate::web_api_routes::slash_commands::my_stats::handle_my_stats;
@@ -16,6 +18,7 @@ use actix_web::{web, HttpResponse, Responder};
 use serde::Deserialize;
 use sqlx::PgPool;
 
+pub mod ao_monthly_stats_graph;
 pub mod ao_stats;
 pub mod invite_all;
 pub mod my_stats;
@@ -154,6 +157,20 @@ pub async fn slack_slash_commands_route(
             Ok(response) => HttpResponse::Ok().json(response),
             Err(err) => HttpResponse::BadRequest().body(err.to_string()),
         },
+        "/ao-month-graph" => {
+            let command = AOMonthlyStatsGraphCommand::new(form.text.as_str());
+            match get_ao_monthly_stats_graph(
+                &db_pool,
+                &Some(command.month),
+                &web_state,
+                form.channel_id.to_string(),
+            )
+            .await
+            {
+                Ok(_) => HttpResponse::Ok().body("Posting Monthly Stats"),
+                Err(err) => HttpResponse::Ok().body(err.to_string()),
+            }
+        }
         _ => {
             println!("command not accepted: {}", form.command);
             HttpResponse::Ok().body("Unknown command")

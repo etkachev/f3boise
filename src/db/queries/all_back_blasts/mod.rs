@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
 pub mod back_blasts_by_ao;
+pub mod calculate_bb_list_stats;
+pub mod recent_bd_for_pax;
 
 /// get all back blast data (with type 'backblast')
 pub async fn get_all(db_pool: &PgPool) -> Result<Vec<BackBlastJsonData>, AppError> {

@@ -203,6 +203,56 @@
     },
     "query": "\n        WITH list_view AS (\n            SELECT\n                al.name as ao,\n                string_to_array(lower(qlu.qs), ',') as qs,\n                qlu.date,\n                qlu.closed\n            FROM q_line_up qlu\n                INNER JOIN ao_list al on qlu.channel_id = al.channel_id\n            WHERE al.channel_id = $2\n        )\n        \n    SELECT ao, qs as \"qs!\", date, closed\n    FROM list_view\n    WHERE date = $1;\n    "
   },
+  "5cf289ade009ec58c12553de995194456c268caa62edcd815fc1b57b52aff8a1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "ao",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "q!",
+          "ordinal": 2,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "pax!",
+          "ordinal": 3,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "date",
+          "ordinal": 4,
+          "type_info": "Date"
+        },
+        {
+          "name": "bb_type",
+          "ordinal": 5,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        null,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n    WITH list_view AS (\n        SELECT\n            al.name as ao,\n            string_to_array(lower(q), ',') as q,\n            string_to_array(lower(pax), ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = 'backblast' AND bb.active = true\n    )\n    \n    SELECT ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    WHERE pax @> array[$1]\n    ORDER BY date DESC\n    LIMIT 1;\n    "
+  },
   "86f69ee1f740e9baaae1a482f2c0f3d46f8ea39fa707266cfbf03a6f8fb4e30b": {
     "describe": {
       "columns": [],

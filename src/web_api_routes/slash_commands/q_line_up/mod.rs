@@ -6,8 +6,8 @@ use crate::db::queries::q_line_up::{
 use crate::shared::common_errors::AppError;
 use crate::shared::constants::Q_LINE_UP_BTN_TEXT;
 use crate::shared::string_utils::{
-    format_q_empty_row, format_q_line_up_date, map_month_str_to_date, map_q_line_up_existing,
-    map_slack_id_to_link,
+    format_q_empty_row, format_q_line_up_date, map_month_str_to_future_date,
+    map_q_line_up_existing, map_slack_id_to_link,
 };
 use crate::shared::time::local_boise_time;
 use crate::slack_api::block_kit::{BlockBuilder, SectionBlock};
@@ -30,7 +30,7 @@ impl From<&str> for QLineUpCommand {
     fn from(text: &str) -> Self {
         let (ao, month) = text.split_once(' ').unwrap_or((text, ""));
         let now = local_boise_time().date_naive();
-        let month = map_month_str_to_date(month, &now);
+        let month = map_month_str_to_future_date(month, &now);
         let possible_ao = AO::from(ao.to_string());
         let ao = if let AO::Unknown(_) = possible_ao {
             None

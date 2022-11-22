@@ -10,6 +10,7 @@ use sqlx::PgPool;
 use std::ops::Sub;
 
 pub mod ao_back_blast_stats;
+pub mod ao_monthly_leaderboard;
 pub mod csv_download_all;
 pub mod top_pax_per_ao;
 

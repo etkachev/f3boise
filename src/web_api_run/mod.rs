@@ -4,6 +4,7 @@ use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::auth::get_key;
 use crate::web_api_routes::back_blast_data::ao_back_blast_stats::get_back_blast_stats_by_ao;
+use crate::web_api_routes::back_blast_data::ao_monthly_leaderboard::ao_monthly_leaderboard_route;
 use crate::web_api_routes::back_blast_data::csv_download_all::{
     back_blasts_csv_html, download_back_blasts_csv_route,
 };
@@ -129,6 +130,10 @@ pub fn run(
                     .route("/all", web::get().to(get_all_back_blasts_route))
                     .route("/missing", web::get().to(get_missing_back_blasts))
                     .route("/top-pax", web::get().to(get_top_pax_data_route))
+                    .route(
+                        "/monthly-leaderboard",
+                        web::get().to(ao_monthly_leaderboard_route),
+                    )
                     .route("/download", web::get().to(back_blasts_csv_html))
                     .route(
                         "/download-csv",

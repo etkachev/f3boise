@@ -29,8 +29,8 @@ pub fn json_value_to_string_vec(data: JsonValue) -> Vec<String> {
     }
 }
 
-/// convert month string to date that represents month to check against. Helpful for slash command inputs
-pub fn map_month_str_to_date(month: &str, now: &NaiveDate) -> Option<NaiveDate> {
+/// convert month string to date that represents future month to check against. Helpful for slash command inputs
+pub fn map_month_str_to_future_date(month: &str, now: &NaiveDate) -> Option<NaiveDate> {
     let possible_date = format!("{}/{}", now.year(), month);
     NaiveDate::parse_from_str(&possible_date, "%Y/%m/%d")
         .map(|date| {
@@ -79,10 +79,10 @@ mod tests {
     #[test]
     fn map_month_str_letters() {
         let now = NaiveDate::from_ymd(2022, 9, 1);
-        let date = map_month_str_to_date("11/01", &now);
+        let date = map_month_str_to_future_date("11/01", &now);
         assert_eq!(date, Some(NaiveDate::from_ymd(2022, 11, 1)));
 
-        let date = map_month_str_to_date("08/15", &now);
+        let date = map_month_str_to_future_date("08/15", &now);
         assert_eq!(date, Some(NaiveDate::from_ymd(2023, 8, 15)));
     }
 }

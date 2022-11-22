@@ -11,6 +11,8 @@ pub enum AppError {
     Sqlx(sqlx::Error),
     Serde(serde_json::Error),
     ChronoParse(chrono::ParseError),
+    Usvg(resvg::usvg::Error),
+    Reqwest(reqwest::Error),
     General(String),
 }
 
@@ -49,5 +51,23 @@ impl From<serde_json::Error> for AppError {
 impl From<chrono::ParseError> for AppError {
     fn from(err: chrono::ParseError) -> Self {
         AppError::ChronoParse(err)
+    }
+}
+
+impl From<String> for AppError {
+    fn from(err: String) -> Self {
+        AppError::General(err)
+    }
+}
+
+impl From<resvg::usvg::Error> for AppError {
+    fn from(err: resvg::usvg::Error) -> Self {
+        AppError::Usvg(err)
+    }
+}
+
+impl From<reqwest::Error> for AppError {
+    fn from(err: reqwest::Error) -> Self {
+        AppError::Reqwest(err)
     }
 }

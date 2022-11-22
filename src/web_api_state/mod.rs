@@ -13,6 +13,8 @@ use crate::slack_api::chat::post_message::request::PostMessageRequest;
 use crate::slack_api::chat::post_message::response::PostMessageResponse;
 use crate::slack_api::chat::update_message::request::UpdateMessageRequest;
 use crate::slack_api::chat::update_message::response::UpdateMessageResponse;
+use crate::slack_api::files::request::FileUploadRequest;
+use crate::slack_api::files::response::FileUploadResponse;
 use crate::slack_api::url_requests::SlackUrlRequest;
 use crate::slack_api::users::users_list::request::UsersListRequest;
 use crate::slack_api::users::users_list::response::UsersListResponse;
@@ -162,6 +164,19 @@ impl MutableWebState {
         }
     }
 
+    /// upload file to slack channel(s)
+    pub async fn upload_file(&self, request: FileUploadRequest) -> Result<(), AppError> {
+        let url = request.get_plain_url_request(&self.base_api_url);
+        let response = self.make_form_post(url, request.get_form_request()).await;
+        let bytes = response.bytes().await?;
+        let response: FileUploadResponse = serde_json::from_slice(&bytes)?;
+        if let Some(err) = response.error {
+            Err(AppError::General(err))
+        } else {
+            Ok(())
+        }
+    }
+
     /// update message that exists in slack
     pub async fn update_message(&self, request: UpdateMessageRequest) -> Result<(), AppError> {
         let url = request.get_plain_url_request(&self.base_api_url);
@@ -223,6 +238,22 @@ impl MutableWebState {
             .headers
             .insert(CONTENT_TYPE, "application/json".parse().unwrap());
         async_http_client(request)
+            .await
+            .expect("Failed to make request")
+    }
+
+    /// make post request using multipart/form-data
+    async fn make_form_post(
+        &self,
+        url: url::Url,
+        form: reqwest::multipart::Form,
+    ) -> reqwest::Response {
+        let client = reqwest::Client::new();
+        client
+            .post(url)
+            .headers(self.get_auth_header())
+            .multipart(form)
+            .send()
             .await
             .expect("Failed to make request")
     }
