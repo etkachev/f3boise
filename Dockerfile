@@ -44,6 +44,8 @@ COPY --from=builder /app/target/release/f3webapi f3webapi
 COPY configuration configuration
 # We will need migration files as well for syncing old
 COPY migration_files migration_files
+# Copy assets like fonts to be used
+COPY assets assets
 ENV APP_ENVIRONMENT production
 # When `docker run` is executed, launch the binary!
 ENTRYPOINT ["./f3webapi"]

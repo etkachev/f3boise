@@ -123,6 +123,7 @@ fn convert_svg(file_name: &str) -> Result<Vec<u8>, AppError> {
     let file = std::fs::read(file_name)?;
     let mut options = resvg::usvg::Options::default();
     options.fontdb.load_system_fonts();
+    options.fontdb.load_fonts_dir("./assets/fonts/");
     let tree = resvg::usvg::Tree::from_data(&file, &options.to_ref())?;
     let mut pixmap = resvg::tiny_skia::Pixmap::new(800, 600).unwrap();
     resvg::render(
