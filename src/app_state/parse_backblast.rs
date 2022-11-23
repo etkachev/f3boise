@@ -179,6 +179,7 @@ mod tests {
                 id: Some(id.to_string()),
                 name: name.to_string(),
                 email: "email@test.com".to_string(),
+                img_url: None,
             },
         )
     }

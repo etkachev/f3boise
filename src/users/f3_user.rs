@@ -7,6 +7,7 @@ pub struct F3User {
     pub id: Option<String>,
     pub name: String,
     pub email: String,
+    pub img_url: Option<String>,
 }
 
 impl F3User {
@@ -15,6 +16,7 @@ impl F3User {
             id: None,
             name: name.to_string(),
             email: email.to_string(),
+            img_url: None,
         }
     }
 }
@@ -26,7 +28,7 @@ impl From<&SlackUserData> for F3User {
         } else {
             user.profile.display_name.to_string()
         };
-        let cleaned_name = if let Some((split_name, _)) = name.split_once(&['-', '('][..]) {
+        let cleaned_name = if let Some((split_name, _)) = name.split_once(&['('][..]) {
             split_name.trim()
         } else {
             name.trim()
@@ -34,6 +36,7 @@ impl From<&SlackUserData> for F3User {
         F3User {
             id: Some(user.id.to_string()),
             name: cleaned_name.to_string(),
+            img_url: user.profile.image_24.clone(),
             email: user
                 .profile
                 .email
@@ -50,6 +53,7 @@ impl From<DbUser> for F3User {
             id: Some(user.slack_id.to_string()),
             name: user.name.to_string(),
             email: user.email,
+            img_url: user.img_url,
         }
     }
 }

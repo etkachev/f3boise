@@ -1,5 +1,6 @@
 use crate::app_state::MutableAppState;
-use crate::db::init::{get_db_users, sync_ao_list};
+use crate::db::init::sync_ao_list;
+use crate::db::queries::users::get_db_users;
 use crate::migrate_old::{save_old_back_blasts, save_old_q_line_up};
 use crate::shared::common_errors::AppError;
 use crate::users::f3_user::F3User;

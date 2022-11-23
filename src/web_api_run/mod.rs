@@ -17,6 +17,7 @@ use crate::web_api_routes::pax_data::{get_bad_data, get_pax_back_blasts, get_pax
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::slash_commands::slack_slash_commands_route;
 use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route, sync_q_line_up};
+use crate::web_api_routes::sync_user_img::sync_user_imgs_route;
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::dev::Server;
@@ -111,6 +112,7 @@ pub fn run(
             .route("/events", web::post().to(slack_events))
             .route("/interactions", web::post().to(interactive_events))
             .route("/sync", web::get().to(sync_data_route))
+            .route("/sync-user-img", web::get().to(sync_user_imgs_route))
             .route("/sync-old", web::get().to(sync_old_data_route))
             .route("/sync-q", web::get().to(sync_q_line_up))
             .route(

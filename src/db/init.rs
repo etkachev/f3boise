@@ -7,12 +7,13 @@
 
 use crate::app_state::ao_data::const_names::AO_LIST;
 use crate::app_state::ao_data::AoData;
+use crate::db::insert_ao::insert_ao_record;
+use crate::db::queries::users::get_db_users;
 use crate::db::save_user::{upsert_user, DbUser};
 use crate::shared::common_errors::AppError;
 use crate::users::f3_user::F3User;
-use sqlx::{PgPool, Postgres, Transaction};
+use sqlx::PgPool;
 use std::collections::HashMap;
-use uuid::Uuid;
 
 /// Sync full ao list
 pub async fn sync_ao_list(db_pool: &PgPool) -> Result<(), AppError> {
@@ -38,53 +39,6 @@ pub async fn sync_ao_list(db_pool: &PgPool) -> Result<(), AppError> {
     }
 }
 
-async fn insert_ao_record(
-    transaction: &mut Transaction<'_, Postgres>,
-    ao: &AoData,
-    channel_id: &str,
-) -> Result<(), AppError> {
-    let id = Uuid::new_v4();
-    let name = &ao.name;
-    let days = &ao.days;
-    let active = &ao.active;
-    sqlx::query!(
-        r#"
-    INSERT INTO ao_list (id, name, days, channel_id, active)
-    VALUES($1,$2,$3,$4,$5)
-    ON CONFLICT (name)
-    DO NOTHING;
-    "#,
-        id,
-        name,
-        days,
-        channel_id,
-        active
-    )
-    .execute(transaction)
-    .await?;
-    Ok(())
-}
-
-/// get existing db users
-pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, AppError> {
-    let mut results = HashMap::<String, F3User>::new();
-    println!("Fetch all users from db");
-    let rows: Vec<DbUser> = sqlx::query_as!(
-        DbUser,
-        r#"
-        SELECT slack_id, name, email
-        FROM users;
-    "#
-    )
-    .fetch_all(db_pool)
-    .await?;
-    println!("Finished fetching users");
-    for item in rows {
-        results.insert(item.slack_id.to_string(), F3User::from(item));
-    }
-    Ok(results)
-}
-
 pub async fn sync_users(db_pool: &PgPool, users: &HashMap<String, F3User>) -> Result<(), AppError> {
     let existing_users = get_db_users(db_pool).await?;
     println!(
@@ -98,7 +52,7 @@ pub async fn sync_users(db_pool: &PgPool, users: &HashMap<String, F3User>) -> Re
         .iter()
         .filter(|(slack_id, _)| !existing_users.contains_key(&slack_id.to_string()))
     {
-        println!("Inserting new user");
+        println!("Upsert user");
         upsert_user(&mut transaction, &DbUser::from(user)).await?;
     }
     println!("Finishing full sync users");

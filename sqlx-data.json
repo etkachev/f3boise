@@ -1,5 +1,95 @@
 {
   "db": "PostgreSQL",
+  "0df992566217d5cbf2953fdeb2d63b3a2c0a17c8c4133957b293da1ec0bbfb27": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n    INSERT INTO users (id, slack_id, name, email, img_url)\n    VALUES($1,$2,$3,$4,$5)\n    ON CONFLICT (slack_id)\n        DO UPDATE\n        SET img_url = EXCLUDED.img_url;\n    "
+  },
+  "13204ebbc5bfff0333e10082829f8de546f10b2d9ada6e18dca3aab17eec25ed": {
+    "describe": {
+      "columns": [
+        {
+          "name": "slack_id",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "email",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "img_url",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        SELECT slack_id, name, email, img_url\n        FROM users;\n    "
+  },
+  "15ad2e14f9ebfe89ec3a4b59e03e18bb0dc19b1f66c03868868f30c6c1bf8341": {
+    "describe": {
+      "columns": [
+        {
+          "name": "slack_id",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "email",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "img_url",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        SELECT slack_id, name, email, img_url\n        FROM users\n        WHERE lower(name) = $1\n        LIMIT 1;\n        "
+  },
   "17e465839b16cfe389bdd3d027304bd804dbebfba3bed41880d30730776539d9": {
     "describe": {
       "columns": [
@@ -149,21 +239,6 @@
     },
     "query": "\n    WITH list_view AS (\n        SELECT\n            al.name as ao,\n            string_to_array(lower(q), ',') as q,\n            string_to_array(lower(pax), ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = 'backblast' AND bb.active = true\n    )\n    \n    SELECT ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    WHERE pax @> array[$1]\n    ORDER BY date DESC;\n    "
   },
-  "47a5eb9f83d239795aff338f124d4e22f2b3ddc62c6a0eb771daa618a80c782e": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "\n    INSERT INTO users (id, slack_id, name, email)\n    VALUES($1,$2,$3,$4)\n    ON CONFLICT (slack_id)\n        DO UPDATE\n        SET name = EXCLUDED.name;\n    "
-  },
   "5440d790b55d5a56da30748d2a8b9a3db44e56731a5918130052943b8a83b9b2": {
     "describe": {
       "columns": [
@@ -265,36 +340,6 @@
       }
     },
     "query": "\n        DELETE \n        FROM q_line_up\n        WHERE channel_id = $1 AND date = $2;\n        "
-  },
-  "a82fab2c6d84945c51438aad27aa0a0b7729e84475e02ccbaa75f1c13a73c06e": {
-    "describe": {
-      "columns": [
-        {
-          "name": "slack_id",
-          "ordinal": 0,
-          "type_info": "Text"
-        },
-        {
-          "name": "name",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "email",
-          "ordinal": 2,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\n        SELECT slack_id, name, email\n        FROM users;\n    "
   },
   "b21ec7dcab3d13ccf2f3ffe5893016e00f001e5ba1b78a5c70b30643c29c3784": {
     "describe": {
@@ -452,6 +497,22 @@
       }
     },
     "query": "\n    INSERT INTO back_blasts (id, ao, q, pax, date, bb_type, channel_id, active)\n    VALUES($1,$2,$3,$4,$5,$6,$7,$8)\n    ON CONFLICT ON CONSTRAINT back_blasts_channel_id_date_bb_type_key\n        DO NOTHING;\n    "
+  },
+  "e1dd009d9ce0e2e636ad19696f2e811b3474015488d7daaf81d83e10a542c52a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n    INSERT INTO users (id, slack_id, name, email, img_url)\n    VALUES($1,$2,$3,$4,$5)\n    ON CONFLICT (slack_id)\n        DO UPDATE\n        SET name = EXCLUDED.name,\n            img_url = EXCLUDED.img_url;\n    "
   },
   "e9752807b9ea1b74716a9c860e4a5fa31a543dfef35132d859f2679258deec39": {
     "describe": {

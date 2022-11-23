@@ -1,8 +1,8 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::BackBlastData;
 use crate::app_state::MutableAppState;
-use crate::db::init::get_db_users;
 use crate::db::queries::all_back_blasts::{get_all, get_list_with_pax};
+use crate::db::queries::users::get_db_users;
 use crate::users::f3_user::F3User;
 use actix_web::{web, HttpResponse, Responder};
 use chrono::NaiveDate;
