@@ -328,6 +328,58 @@
     },
     "query": "\n    WITH list_view AS (\n        SELECT\n            al.name as ao,\n            string_to_array(lower(q), ',') as q,\n            string_to_array(lower(pax), ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = 'backblast' AND bb.active = true\n    )\n    \n    SELECT ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    WHERE pax @> array[$1]\n    ORDER BY date DESC\n    LIMIT 1;\n    "
   },
+  "7051c8f86a02b5832a84a450411e74d5f40141fb7880c05e4cd3a55bb4c64c24": {
+    "describe": {
+      "columns": [
+        {
+          "name": "ao",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "q!",
+          "ordinal": 2,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "pax!",
+          "ordinal": 3,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "date",
+          "ordinal": 4,
+          "type_info": "Date"
+        },
+        {
+          "name": "bb_type",
+          "ordinal": 5,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        null,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Date",
+          "Date"
+        ]
+      }
+    },
+    "query": "\n    WITH list_view AS (\n        SELECT\n            al.name as ao,\n            string_to_array(lower(q), ',') as q,\n            string_to_array(lower(pax), ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = 'backblast' \n            AND bb.active = true \n            AND bb.channel_id = $1\n            AND bb.date >= $2\n            AND bb.date <= $3\n    )\n    \n    SELECT ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    ORDER BY date DESC;\n    "
+  },
   "86f69ee1f740e9baaae1a482f2c0f3d46f8ea39fa707266cfbf03a6f8fb4e30b": {
     "describe": {
       "columns": [],

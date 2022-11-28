@@ -8,6 +8,7 @@ use crate::web_api_routes::back_blast_data::ao_monthly_leaderboard::ao_monthly_l
 use crate::web_api_routes::back_blast_data::csv_download_all::{
     back_blasts_csv_html, download_back_blasts_csv_route,
 };
+use crate::web_api_routes::back_blast_data::pax_leaderboard_graph::pax_leaderboard_route;
 use crate::web_api_routes::back_blast_data::{
     get_all_back_blasts_route, get_missing_back_blasts, get_top_pax_data_route,
 };
@@ -135,6 +136,10 @@ pub fn run(
                     .route(
                         "/monthly-leaderboard",
                         web::get().to(ao_monthly_leaderboard_route),
+                    )
+                    .route(
+                        "/pax-leaderboard-graph",
+                        web::get().to(pax_leaderboard_route),
                     )
                     .route("/download", web::get().to(back_blasts_csv_html))
                     .route(

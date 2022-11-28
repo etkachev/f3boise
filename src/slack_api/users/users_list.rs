@@ -75,5 +75,6 @@ pub mod response {
         pub first_name: String,
         pub last_name: String,
         pub image_24: Option<String>,
+        pub image_72: Option<String>,
     }
 }

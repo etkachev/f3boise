@@ -46,6 +46,10 @@ impl BackBlastData {
         !self.pax.is_empty()
     }
 
+    pub fn includes_pax(&self, name: &str) -> bool {
+        self.get_pax().contains(name)
+    }
+
     /// get all pax (including qs)
     pub fn get_pax(&self) -> HashSet<String> {
         self.pax

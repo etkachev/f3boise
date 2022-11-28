@@ -36,7 +36,7 @@ impl From<&SlackUserData> for F3User {
         F3User {
             id: Some(user.id.to_string()),
             name: cleaned_name.to_string(),
-            img_url: user.profile.image_24.clone(),
+            img_url: user.profile.image_72.clone(),
             email: user
                 .profile
                 .email

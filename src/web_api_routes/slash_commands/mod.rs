@@ -2,6 +2,7 @@ use crate::app_state::ao_data::AO;
 use crate::app_state::MutableAppState;
 use crate::shared::time::local_boise_time;
 use crate::web_api_routes::back_blast_data::ao_monthly_leaderboard::get_ao_monthly_stats_graph;
+use crate::web_api_routes::graphs::ao_pax_leaderboard::post_ao_pax_leaderboard_graph;
 use crate::web_api_routes::slash_commands::ao_monthly_stats_graph::AOMonthlyStatsGraphCommand;
 use crate::web_api_routes::slash_commands::ao_stats::get_ao_stats_block;
 use crate::web_api_routes::slash_commands::invite_all::handle_invite_all;
@@ -168,6 +169,14 @@ pub async fn slack_slash_commands_route(
             .await
             {
                 Ok(_) => HttpResponse::Ok().body("Posting Monthly Stats"),
+                Err(err) => HttpResponse::Ok().body(err.to_string()),
+            }
+        }
+        "/top-pax-30-days" => {
+            match post_ao_pax_leaderboard_graph(&db_pool, &web_state, form.channel_id.to_string())
+                .await
+            {
+                Ok(_) => HttpResponse::Ok().body("Posting Top Pax stats"),
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
             }
         }
