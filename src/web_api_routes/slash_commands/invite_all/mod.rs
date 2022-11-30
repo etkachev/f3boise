@@ -9,10 +9,14 @@ pub async fn handle_invite_all(
     app_state: &MutableAppState,
     form: &SlashCommandForm,
 ) -> Result<String, AppError> {
-    let request = {
+    let existing = web_state
+        .get_channel_members(form.channel_id.as_str())
+        .await?;
+    let users = {
         let app = app_state.app.lock().expect("Could not lock app state");
-        InviteToConvoRequest::new(form.channel_id.as_str(), &app.users)
+        app.get_slack_id_map()
     };
+    let request = InviteToConvoRequest::new(form.channel_id.as_str(), users, existing);
     web_state.invite_users_to_channel(request).await?;
     Ok(String::from("Successfully invited all users"))
 }

@@ -5,6 +5,8 @@ use crate::slack_api::channels::invite::request::InviteToConvoRequest;
 use crate::slack_api::channels::invite::response::InviteToConvoResponse;
 use crate::slack_api::channels::list::request::ConversationListRequest;
 use crate::slack_api::channels::list::response::{ChannelData, ChannelsListResponse};
+use crate::slack_api::channels::members::request::ConversationMembersRequest;
+use crate::slack_api::channels::members::response::ConversationMembersResponse;
 use crate::slack_api::channels::public_channels::PublicChannels;
 use crate::slack_api::channels::reactions_add::request::ReactionsAddRequest;
 use crate::slack_api::channels::reactions_add::response::ReactionsAddResponse;
@@ -92,6 +94,21 @@ impl MutableWebState {
         } else {
             Err(AppError::General(
                 response.error.unwrap_or_else(|| "No Error".to_string()),
+            ))
+        }
+    }
+
+    /// get list of slack ids that are part of requested channel_id
+    pub async fn get_channel_members(&self, channel_id: &str) -> Result<Vec<String>, AppError> {
+        let url = ConversationMembersRequest::new(channel_id).get_url_request(&self.base_api_url);
+        let response = self.make_get_url_request(url).await;
+        let response: ConversationMembersResponse =
+            serde_json::from_slice(&response.body).expect("Could not parse response");
+        if let Some(members) = response.members {
+            Ok(members)
+        } else {
+            Err(AppError::General(
+                response.error.unwrap_or_else(|| "No error".to_string()),
             ))
         }
     }
