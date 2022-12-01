@@ -1,7 +1,5 @@
-use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::BackBlastData;
-use crate::db::queries::all_back_blasts::back_blasts_by_ao::back_blasts_by_channel_id_and_date_range;
-use crate::db::queries::all_back_blasts::BackBlastJsonData;
+use crate::db::queries::all_back_blasts::{get_all_within_date_range, BackBlastJsonData};
 use crate::shared::common_errors::AppError;
 use crate::shared::time::local_boise_time;
 use crate::slack_api::files::request::FileUploadRequest;
@@ -13,46 +11,62 @@ use sqlx::PgPool;
 use std::collections::HashSet;
 use std::ops::Sub;
 
-/// post ao pax leaderboard graph
-pub async fn post_ao_pax_leaderboard_graph(
+/// post overall pax leaderboard graph
+pub async fn post_overall_pax_leaderboard_graph(
     db_pool: &PgPool,
     web_state: &MutableWebState,
     channel_id: String,
+    date_range_text: &str,
 ) -> Result<(), AppError> {
-    let ao = AO::from_channel_id(channel_id.as_str());
-    let now = local_boise_time().date_naive();
-    // TODO temp
-    // let now = now.sub(Months::new(3));
-    let thirty_days_ago = now.sub(Months::new(1));
-    let bb = back_blasts_by_channel_id_and_date_range(
-        db_pool,
-        channel_id.as_str(),
-        (thirty_days_ago, now),
-    )
-    .await?;
-    let ao_name = ao.to_string();
-    let graph = AoPaxGraph::new(ao, bb, (thirty_days_ago, now));
+    let (start, end) = resolve_date_range(date_range_text);
+    let back_blasts = get_all_within_date_range(db_pool, &start, &end).await?;
+    let graph = OverallPaxGraph::new(back_blasts, (start, end));
     let png = graph_generator(graph)?;
+    let start_formatted = friendly_date(start);
+    let end_formatted = friendly_date(end);
     let text = format!(
-        "Here are top 10 PAX for {}. From {} to {}",
-        ao_name, thirty_days_ago, now
+        "Here are top 10 PAX overall. From {} to {}",
+        start_formatted, end_formatted
     );
-    let file_request =
-        FileUploadRequest::new(vec![channel_id], png, "top-10-pax.png", text.as_str());
+    let file_request = FileUploadRequest::new(
+        vec![channel_id],
+        png,
+        "top-10-pax-overall.png",
+        text.as_str(),
+    );
     web_state.upload_file(file_request).await?;
-    // std::fs::write("pax.png", png)?;
     Ok(())
 }
 
-struct AoPaxGraph {
-    ao: AO,
-    bb: Vec<BackBlastData>,
-    date_range: (NaiveDate, NaiveDate),
-    pax: HashSet<String>,
+/// TODO util?
+fn resolve_date_range(possible_range: &str) -> (NaiveDate, NaiveDate) {
+    let now = local_boise_time().date_naive();
+    let thirty_days_ago = now.sub(Months::new(1));
+    possible_range
+        .split_once('-')
+        .map(|(start, end)| {
+            let date_format = "%Y/%m/%d";
+            let start_date =
+                NaiveDate::parse_from_str(start, date_format).unwrap_or(thirty_days_ago);
+            let end_date = NaiveDate::parse_from_str(end, date_format).unwrap_or(now);
+            (start_date, end_date)
+        })
+        .unwrap_or((thirty_days_ago, now))
 }
 
-impl AoPaxGraph {
-    fn new(ao: AO, bb: Vec<BackBlastJsonData>, date_range: (NaiveDate, NaiveDate)) -> Self {
+/// TODO util?
+fn friendly_date(date: NaiveDate) -> String {
+    date.format("%b %d, %Y").to_string()
+}
+
+struct OverallPaxGraph {
+    bb: Vec<BackBlastData>,
+    pax: HashSet<String>,
+    date_range: (NaiveDate, NaiveDate),
+}
+
+impl OverallPaxGraph {
+    fn new(bb: Vec<BackBlastJsonData>, date_range: (NaiveDate, NaiveDate)) -> Self {
         let (bb, pax) = bb.iter().fold(
             (Vec::<BackBlastData>::new(), HashSet::<String>::new()),
             |mut acc, bb_item| {
@@ -62,15 +76,13 @@ impl AoPaxGraph {
                 acc
             },
         );
-        AoPaxGraph {
-            ao,
+        OverallPaxGraph {
             bb,
-            date_range,
             pax,
+            date_range,
         }
     }
 
-    /// get pax and their post counts. Order by top posts and top 10.
     fn get_data(&self) -> Vec<(String, f32, String)> {
         let mut list: Vec<(String, f32, String)> = self
             .get_pax_list()
@@ -87,13 +99,12 @@ impl AoPaxGraph {
 
         list.sort_by(|(_, a, _), (_, b, _)| b.partial_cmp(a).unwrap());
         if list.len() > 10 {
-            let top_top = &list[..10];
-            top_top.to_vec()
+            let top_ten = &list[..10];
+            top_ten.to_vec()
         } else {
             list
         }
     }
-
     fn get_pax_list(&self) -> Vec<String> {
         self.pax
             .iter()
@@ -102,9 +113,10 @@ impl AoPaxGraph {
     }
 }
 
-impl GraphWrapper for AoPaxGraph {
-    const WIDTH: u32 = 600;
-    const HEIGHT: u32 = 800;
+impl GraphWrapper for OverallPaxGraph {
+    const WIDTH: u32 = 800;
+    const HEIGHT: u32 = 600;
+
     fn generate_chart(&self) -> Result<(), String> {
         let width = self.width() as isize;
         let height = self.height() as isize;
@@ -120,7 +132,7 @@ impl GraphWrapper for AoPaxGraph {
             .set_outer_padding(0.1);
 
         let x = charts::ScaleLinear::new()
-            .set_domain(vec![0.0, 15.0])
+            .set_domain(vec![0.0, 25.0])
             .set_range(vec![0, width - left - right]);
 
         let view = charts::HorizontalBarView::new()
@@ -135,7 +147,7 @@ impl GraphWrapper for AoPaxGraph {
             .set_width(width)
             .set_height(height)
             .set_margins(top, right, bottom, left)
-            .add_title(format!("Top 10 PAX Posts for {}", self.ao.to_string()))
+            .add_title("Top 10 PAX Posts overall".to_string())
             .add_view(&view)
             .add_axis_bottom(&x)
             .add_axis_left(&y)
@@ -145,10 +157,8 @@ impl GraphWrapper for AoPaxGraph {
 
     fn file_name(&self) -> String {
         format!(
-            "ao-pax-leaderboard-{}-{}-{}",
-            self.ao.to_string(),
-            self.date_range.0,
-            self.date_range.1
+            "overall-pax-leaderboard-{}-{}",
+            self.date_range.0, self.date_range.1
         )
     }
 }

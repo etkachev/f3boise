@@ -1,6 +1,7 @@
 use crate::shared::common_errors::AppError;
 
 pub mod ao_pax_leaderboard;
+pub mod overall_pax_leaderboard;
 
 /// Trait for building graph with common methods like generating chart and declaring file name.
 pub trait GraphWrapper {
