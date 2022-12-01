@@ -240,6 +240,11 @@ impl TextObject {
             ..Default::default()
         }
     }
+
+    /// has less than or equal to character amount
+    pub fn has_le_chars(&self, char_count: usize) -> bool {
+        self.text.chars().count() <= char_count
+    }
 }
 
 impl Default for TextObject {

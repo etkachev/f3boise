@@ -22,6 +22,7 @@ pub mod interaction_payload;
 pub mod interaction_types;
 pub mod message_utils;
 pub mod q_line_up;
+pub mod view_submission;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EventBody {

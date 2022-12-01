@@ -7,3 +7,4 @@ pub const CHAT_POST_MESSAGE: &str = "chat.postMessage";
 pub const CHAT_UPDATE_MESSAGE: &str = "chat.update";
 pub const CONVERSATION_INVITE: &str = "conversations.invite";
 pub const FILES_UPLOAD: &str = "files.upload";
+pub const VIEWS_OPEN: &str = "views.open";

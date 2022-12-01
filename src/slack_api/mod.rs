@@ -6,3 +6,4 @@ pub mod cursor_data;
 pub mod files;
 pub mod url_requests;
 pub mod users;
+pub mod views;
