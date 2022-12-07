@@ -40,6 +40,7 @@ impl From<&AO> for PublicChannels {
 }
 
 impl From<String> for PublicChannels {
+    // TODO use AO from
     fn from(name: String) -> Self {
         match name.as_str() {
             "bot-playground" => PublicChannels::BotPlayground,
@@ -50,7 +51,9 @@ impl From<String> for PublicChannels {
             "ao-old-glory" => PublicChannels::OldGlory,
             "ao-otb-bowler-park" | "ao-bowler-park" | "ao-rise" => PublicChannels::Rise,
             "ao-otb-lakeview-park" | "ao-warhorse" => PublicChannels::WarHorse,
-            "ao-otb-kleiner-park" | "ao-otb-bellagio" | "ao-bellagio" => PublicChannels::Bellagio,
+            "ao-otb-kleiner-park" | "ao-otb-bellagio" | "ao-bellagio" | "ao-bellagio-resort" => {
+                PublicChannels::Bellagio
+            }
             "ao-rebel" => PublicChannels::Rebel,
             "ao-ruckership" => PublicChannels::Ruckership,
             "ao-discovery-park" => PublicChannels::Discovery,

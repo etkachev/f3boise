@@ -167,7 +167,7 @@ impl From<String> for AO {
             const_names::RUCKERSHIP | "rucker-ship" => AO::Ruckership,
             const_names::RISE | "bowler-park" => AO::Rise,
             const_names::WAR_HORSE | "lakeview_park" => AO::WarHorse,
-            const_names::BELLAGIO => AO::Bellagio,
+            const_names::BELLAGIO | "bellagio-resort" => AO::Bellagio,
             const_names::BACKYARD => AO::Backyard,
             const_names::DISCOVERY => AO::Discovery,
             const_names::DR => AO::DR,
@@ -312,5 +312,13 @@ mod tests {
     fn warhorse() {
         let ao = AO::from("#ao-warhorse".to_string());
         assert_eq!(ao, AO::WarHorse);
+    }
+
+    #[test]
+    fn bellagio() {
+        let ao = AO::from("ao-bellagio-resort".to_string());
+        assert_eq!(ao, AO::Bellagio);
+        let ao = AO::from("ao-bellagio".to_string());
+        assert_eq!(ao, AO::Bellagio);
     }
 }
