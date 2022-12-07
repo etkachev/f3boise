@@ -13,6 +13,7 @@ pub enum PublicChannels {
     Ruckership,
     WarHorse,
     Bellagio,
+    Discovery,
     DR,
     Welcome,
     Unknown(String),
@@ -31,6 +32,7 @@ impl From<&AO> for PublicChannels {
             AO::Ruckership => PublicChannels::Ruckership,
             AO::WarHorse => PublicChannels::WarHorse,
             AO::Bellagio => PublicChannels::Bellagio,
+            AO::Discovery => PublicChannels::Discovery,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }
@@ -51,6 +53,7 @@ impl From<String> for PublicChannels {
             "ao-otb-kleiner-park" | "ao-otb-bellagio" | "ao-bellagio" => PublicChannels::Bellagio,
             "ao-rebel" => PublicChannels::Rebel,
             "ao-ruckership" => PublicChannels::Ruckership,
+            "ao-discovery-park" => PublicChannels::Discovery,
             "downrange" => PublicChannels::DR,
             "welcome" => PublicChannels::Welcome,
             _ => PublicChannels::Unknown(name),

@@ -16,6 +16,7 @@ pub enum AO {
     Rise,
     WarHorse,
     Bellagio,
+    Discovery,
     DR,
     Unknown(String),
 }
@@ -36,13 +37,14 @@ impl AO {
             AO::Rise => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::WarHorse => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::Bellagio => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
-            _ => HashSet::new(),
+            AO::Discovery => HashSet::from([Weekday::Sat]),
+            AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
 
     /// whether or not AO is otb.
     pub fn is_otb(&self) -> bool {
-        matches!(self, AO::Unknown(_) | AO::DR)
+        matches!(self, AO::Unknown(_) | AO::DR | AO::Discovery)
     }
 
     pub fn channel_id(&self) -> &str {
@@ -57,6 +59,7 @@ impl AO {
             AO::Rise => const_names::RISE_CHANNEL_ID,
             AO::WarHorse => const_names::WAR_HORSE_CHANNEL_ID,
             AO::Bellagio => const_names::BELLAGIO_CHANNEL_ID,
+            AO::Discovery => const_names::DISCOVERY_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -75,6 +78,7 @@ impl AO {
             AO::Rise => const_names::RISE_GOOGLE_MAPS,
             AO::WarHorse => const_names::WAR_HORSE_GOOGLE_MAPS,
             AO::Bellagio => const_names::BELLAGIO_GOOGLE_MAPS,
+            AO::Discovery => const_names::DISCOVERY_GOOGLE_MAPS,
             AO::DR => "Location Varies",
             AO::Unknown(_) => "Unknown",
         }
@@ -92,6 +96,7 @@ impl AO {
             const_names::RISE_CHANNEL_ID => AO::Rise,
             const_names::WAR_HORSE_CHANNEL_ID => AO::WarHorse,
             const_names::BELLAGIO_CHANNEL_ID => AO::Bellagio,
+            const_names::DISCOVERY_CHANNEL_ID => AO::Discovery,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
         }
@@ -112,6 +117,7 @@ impl Clone for AO {
             AO::DR => AO::DR,
             AO::WarHorse => AO::WarHorse,
             AO::Bellagio => AO::Bellagio,
+            AO::Discovery => AO::Discovery,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
     }
@@ -130,6 +136,7 @@ impl ToString for AO {
             AO::Rise => const_names::RISE,
             AO::WarHorse => const_names::WAR_HORSE,
             AO::Bellagio => const_names::BELLAGIO,
+            AO::Discovery => const_names::DISCOVERY,
             AO::DR => "",
             AO::Unknown(_) => "",
         };
@@ -162,6 +169,7 @@ impl From<String> for AO {
             const_names::WAR_HORSE | "lakeview_park" => AO::WarHorse,
             const_names::BELLAGIO => AO::Bellagio,
             const_names::BACKYARD => AO::Backyard,
+            const_names::DISCOVERY => AO::Discovery,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
         }
@@ -193,6 +201,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::Rise => AO::Rise,
         PublicChannels::WarHorse => AO::WarHorse,
         PublicChannels::Bellagio => AO::Bellagio,
+        PublicChannels::Discovery => AO::Discovery,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
@@ -259,11 +268,14 @@ pub mod const_names {
     pub const BELLAGIO: &str = "bellagio";
     pub const BELLAGIO_CHANNEL_ID: &str = "C045SMRL43X";
     pub const BELLAGIO_GOOGLE_MAPS: &str = "https://goo.gl/maps/a7EcVdttBEi1kiQx7";
+    pub const DISCOVERY: &str = "discovery-park";
+    pub const DISCOVERY_CHANNEL_ID: &str = "C04B2DX8CCW";
+    pub const DISCOVERY_GOOGLE_MAPS: &str = "https://goo.gl/maps/zJkeWpgpS93MqhEU7";
     pub const DR: &str = "dr";
     pub const DR_CHANNEL_ID: &str = "C03U7U9T7HU";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 10] = [
+    pub const AO_LIST: [AO; 11] = [
         AO::Bleach,
         AO::Gem,
         AO::OldGlory,
@@ -274,6 +286,7 @@ pub mod const_names {
         AO::Rise,
         AO::WarHorse,
         AO::Bellagio,
+        AO::Discovery,
     ];
 }
 
