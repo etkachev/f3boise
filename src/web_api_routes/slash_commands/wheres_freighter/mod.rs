@@ -12,7 +12,7 @@ pub async fn get_wheres_freighter_message(db_pool: &PgPool) -> Result<BlockBuild
         let bd = BackBlastData::from(most_recent);
         let text = match bd.ao {
             AO::DR | AO::Unknown(_) => "Who knows :man-shrugging:".to_string(),
-            AO::Ruckership => "Somewhere at Ruckership".to_string(),
+            AO::RuckershipWest | AO::RuckershipEast => "Somewhere at Ruckership".to_string(),
             ao => format!("Was last seen here {}", ao.google_maps_link()),
         };
         let blocks = BlockBuilder::new()

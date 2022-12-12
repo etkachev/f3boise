@@ -46,7 +46,7 @@ pub const AOLIST: [(AO, &str); 7] = [
     (AO::IronMountain, IR_BB_PATH),
     (AO::OldGlory, OLD_GLORY_BB_PATH),
     (AO::Rebel, REBEL_BB_PATH),
-    (AO::Ruckership, RUCKERSHIP_BB_PATH),
+    (AO::RuckershipWest, RUCKERSHIP_BB_PATH),
 ];
 
 pub async fn save_old_back_blasts(db_pool: &PgPool) -> Result<(), AppError> {
@@ -87,7 +87,7 @@ pub async fn save_old_q_line_up(db_pool: &PgPool) -> Result<(), AppError> {
         }
 
         if let Some(q) = record.ruckership {
-            add_q_entry(&mut results, AO::Ruckership, q, &date);
+            add_q_entry(&mut results, AO::RuckershipWest, q, &date);
         }
 
         if let Some(q) = record.ironmountain {

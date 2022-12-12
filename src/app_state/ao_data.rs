@@ -11,7 +11,8 @@ pub enum AO {
     OldGlory,
     Rebel,
     IronMountain,
-    Ruckership,
+    RuckershipWest,
+    RuckershipEast,
     Backyard,
     Rise,
     WarHorse,
@@ -32,7 +33,8 @@ impl AO {
             AO::OldGlory => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::Rebel => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::IronMountain => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
-            AO::Ruckership => HashSet::from([Weekday::Fri]),
+            AO::RuckershipWest => HashSet::from([Weekday::Fri]),
+            AO::RuckershipEast => HashSet::from([Weekday::Fri]),
             AO::Backyard => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::Rise => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::WarHorse => HashSet::from([Weekday::Mon, Weekday::Wed]),
@@ -54,7 +56,8 @@ impl AO {
             AO::OldGlory => const_names::OLD_GLORY_CHANNEL_ID,
             AO::Rebel => const_names::REBEL_CHANNEL_ID,
             AO::IronMountain => const_names::IRON_MOUNTAIN_CHANNEL_ID,
-            AO::Ruckership => const_names::RUCKERSHIP_CHANNEL_ID,
+            AO::RuckershipWest => const_names::RUCKERSHIP_WEST_CHANNEL_ID,
+            AO::RuckershipEast => const_names::RUCKERSHIP_EAST_CHANNEL_ID,
             AO::Backyard => const_names::BACKYARD_CHANNEL_ID,
             AO::Rise => const_names::RISE_CHANNEL_ID,
             AO::WarHorse => const_names::WAR_HORSE_CHANNEL_ID,
@@ -73,7 +76,7 @@ impl AO {
             AO::OldGlory => const_names::OLD_GLORY_GOOGLE_MAPS,
             AO::Rebel => const_names::REBEL_GOOGLE_MAPS,
             AO::IronMountain => const_names::IRON_MOUNTAIN_GOOGLE_MAPS,
-            AO::Ruckership => "Location Varies",
+            AO::RuckershipWest | AO::RuckershipEast => "Location Varies",
             AO::Backyard => const_names::BACKYARD_GOOGLE_MAPS,
             AO::Rise => const_names::RISE_GOOGLE_MAPS,
             AO::WarHorse => const_names::WAR_HORSE_GOOGLE_MAPS,
@@ -91,7 +94,8 @@ impl AO {
             const_names::OLD_GLORY_CHANNEL_ID => AO::OldGlory,
             const_names::REBEL_CHANNEL_ID => AO::Rebel,
             const_names::IRON_MOUNTAIN_CHANNEL_ID => AO::IronMountain,
-            const_names::RUCKERSHIP_CHANNEL_ID => AO::Ruckership,
+            const_names::RUCKERSHIP_WEST_CHANNEL_ID => AO::RuckershipWest,
+            const_names::RUCKERSHIP_EAST_CHANNEL_ID => AO::RuckershipEast,
             const_names::BACKYARD_CHANNEL_ID => AO::Backyard,
             const_names::RISE_CHANNEL_ID => AO::Rise,
             const_names::WAR_HORSE_CHANNEL_ID => AO::WarHorse,
@@ -111,7 +115,8 @@ impl Clone for AO {
             AO::OldGlory => AO::OldGlory,
             AO::Rebel => AO::Rebel,
             AO::IronMountain => AO::IronMountain,
-            AO::Ruckership => AO::Ruckership,
+            AO::RuckershipWest => AO::RuckershipWest,
+            AO::RuckershipEast => AO::RuckershipEast,
             AO::Backyard => AO::Backyard,
             AO::Rise => AO::Rise,
             AO::DR => AO::DR,
@@ -131,7 +136,8 @@ impl ToString for AO {
             AO::OldGlory => const_names::OLD_GLORY,
             AO::Rebel => const_names::REBEL,
             AO::IronMountain => const_names::IRON_MOUNTAIN,
-            AO::Ruckership => const_names::RUCKERSHIP,
+            AO::RuckershipWest => const_names::RUCKERSHIP_WEST,
+            AO::RuckershipEast => const_names::RUCKERSHIP_EAST,
             AO::Backyard => const_names::BACKYARD,
             AO::Rise => const_names::RISE,
             AO::WarHorse => const_names::WAR_HORSE,
@@ -164,7 +170,8 @@ impl From<String> for AO {
             const_names::OLD_GLORY | "oldglory" => AO::OldGlory,
             const_names::REBEL => AO::Rebel,
             const_names::IRON_MOUNTAIN | "ironmountain" => AO::IronMountain,
-            const_names::RUCKERSHIP | "rucker-ship" => AO::Ruckership,
+            const_names::RUCKERSHIP_WEST | "rucker-ship" => AO::RuckershipWest,
+            const_names::RUCKERSHIP_EAST => AO::RuckershipEast,
             const_names::RISE | "bowler-park" => AO::Rise,
             const_names::WAR_HORSE | "lakeview_park" => AO::WarHorse,
             const_names::BELLAGIO | "bellagio-resort" => AO::Bellagio,
@@ -192,7 +199,8 @@ impl From<&PublicChannels> for AO {
 fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
     match channel {
         PublicChannels::Rebel => AO::Rebel,
-        PublicChannels::Ruckership => AO::Ruckership,
+        PublicChannels::RuckershipWest => AO::RuckershipWest,
+        PublicChannels::RuckershipEast => AO::RuckershipEast,
         PublicChannels::Backyard => AO::Backyard,
         PublicChannels::IronMountain => AO::IronMountain,
         PublicChannels::Bleach => AO::Bleach,
@@ -254,8 +262,10 @@ pub mod const_names {
     pub const IRON_MOUNTAIN: &str = "iron-mountain";
     pub const IRON_MOUNTAIN_CHANNEL_ID: &str = "C03TZTTHDPZ";
     pub const IRON_MOUNTAIN_GOOGLE_MAPS: &str = "https://goo.gl/maps/V3ubQNeSkm8KhGx46";
-    pub const RUCKERSHIP: &str = "ruckership";
-    pub const RUCKERSHIP_CHANNEL_ID: &str = "C03V46DGXMW";
+    pub const RUCKERSHIP_WEST: &str = "ruckership-west";
+    pub const RUCKERSHIP_WEST_CHANNEL_ID: &str = "C03V46DGXMW";
+    pub const RUCKERSHIP_EAST: &str = "ruckership-east";
+    pub const RUCKERSHIP_EAST_CHANNEL_ID: &str = "C04EQQZSFQA";
     pub const BACKYARD: &str = "backyard";
     pub const BACKYARD_CHANNEL_ID: &str = "C03UEBT1QRZ";
     pub const BACKYARD_GOOGLE_MAPS: &str = "https://goo.gl/maps/i7DDdNY6jspdJaBa9";
@@ -275,13 +285,14 @@ pub mod const_names {
     pub const DR_CHANNEL_ID: &str = "C03U7U9T7HU";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 11] = [
+    pub const AO_LIST: [AO; 12] = [
         AO::Bleach,
         AO::Gem,
         AO::OldGlory,
         AO::Rebel,
         AO::IronMountain,
-        AO::Ruckership,
+        AO::RuckershipWest,
+        AO::RuckershipEast,
         AO::Backyard,
         AO::Rise,
         AO::WarHorse,
