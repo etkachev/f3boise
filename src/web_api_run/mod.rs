@@ -9,6 +9,7 @@ use crate::web_api_routes::back_blast_data::csv_download_all::{
     back_blasts_csv_html, download_back_blasts_csv_route,
 };
 use crate::web_api_routes::back_blast_data::pax_leaderboard_graph::pax_leaderboard_route;
+use crate::web_api_routes::back_blast_data::yearly_stats::get_yearly_stats_route;
 use crate::web_api_routes::back_blast_data::{
     get_all_back_blasts_route, get_missing_back_blasts, get_top_pax_data_route,
 };
@@ -45,7 +46,7 @@ impl Application {
             "{}:{}",
             configuration.application.host, configuration.application.port
         );
-        let listener = TcpListener::bind(&address)?;
+        let listener = TcpListener::bind(address)?;
         let port = listener.local_addr().unwrap().port();
 
         let server = run(web_state, app_state, listener, connection_pool)?;
@@ -120,6 +121,7 @@ pub fn run(
                 "/slash-commands",
                 web::post().to(slack_slash_commands_route),
             )
+            .route("/region-stats", web::get().to(get_yearly_stats_route))
             .service(
                 web::scope("/pax")
                     .route("/info", web::get().to(get_pax_info))

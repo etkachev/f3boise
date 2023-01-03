@@ -35,7 +35,7 @@ pub async fn get_all(db_pool: &PgPool) -> Result<Vec<BackBlastJsonData>, AppErro
     Ok(rows)
 }
 
-/// get all back_blasts within an ao range
+/// get all back_blasts within a date range
 pub async fn get_all_within_date_range(
     db_pool: &PgPool,
     start_date: &NaiveDate,

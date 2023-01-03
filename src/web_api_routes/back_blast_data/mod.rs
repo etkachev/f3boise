@@ -14,6 +14,7 @@ pub mod ao_monthly_leaderboard;
 pub mod csv_download_all;
 pub mod pax_leaderboard_graph;
 pub mod top_pax_per_ao;
+pub mod yearly_stats;
 
 /// route to get all back blast data
 pub async fn get_all_back_blasts_route(db_pool: web::Data<PgPool>) -> impl Responder {
