@@ -58,8 +58,13 @@ impl YearlyStatIterCollection {
 
     /// get average daily attendance.
     fn get_avg_daily_attendance(&self) -> usize {
+        let value_counts = self.bb_dates.values().count();
+        // can't divide by zero
+        if value_counts == 0 {
+            return 0;
+        }
         let sum = self.bb_dates.values().sum::<usize>();
-        sum / self.bb_dates.values().count()
+        sum / value_counts
     }
 }
 
