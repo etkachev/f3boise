@@ -1,15 +1,9 @@
-use crate::app_state::ao_data::const_names::AO_LIST;
-use crate::db::queries::all_back_blasts::{get_all_within_date_range, BackBlastJsonData};
-use crate::shared::common_errors::AppError;
-use crate::shared::time::local_boise_time;
-use crate::slack_api::files::request::FileUploadRequest;
-use crate::web_api_routes::graphs::{graph_generator, GraphWrapper};
+use crate::web_api_routes::graphs::ao_monthly_leaderboard::get_ao_monthly_stats_graph;
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
-use chrono::{Datelike, NaiveDate};
+use chrono::NaiveDate;
 use serde::Deserialize;
 use sqlx::PgPool;
-use std::time::Instant;
 
 #[derive(Deserialize)]
 pub struct MonthLeaderboardQuery {
@@ -33,131 +27,4 @@ pub async fn ao_monthly_leaderboard_route(
         Ok(_) => HttpResponse::Ok().body("Saved"),
         Err(err) => HttpResponse::BadRequest().body(err.to_string()),
     }
-}
-
-/// send monthly ao leaderboard graph
-pub async fn get_ao_monthly_stats_graph(
-    db_pool: &PgPool,
-    date: &Option<NaiveDate>,
-    web_state: &MutableWebState,
-    channel_id: String,
-) -> Result<(), AppError> {
-    let default_end_date = local_boise_time().date_naive();
-    let end_date = date.unwrap_or(default_end_date);
-    let start_date = NaiveDate::from_ymd(end_date.year(), end_date.month(), 1);
-    let bb_list = get_all_within_date_range(db_pool, &start_date, &end_date).await?;
-    let ao_monthly_stats = AoMonthlyStatsGraph::new(bb_list, start_date);
-    let file = graph_generator(ao_monthly_stats)?;
-
-    let file_request = FileUploadRequest::new(
-        vec![channel_id],
-        file,
-        "monthly-leaderboard.png",
-        start_date
-            .format("Here are some stats for our AOs. Showing avg posts per BD for month of %b %Y")
-            .to_string()
-            .as_str(),
-    );
-    let start = Instant::now();
-    web_state.upload_file(file_request).await?;
-    println!("upload file done: {:?}", start.elapsed());
-    Ok(())
-}
-
-struct AoMonthlyStatsGraph {
-    bb_list: Vec<BackBlastJsonData>,
-    date: NaiveDate,
-}
-
-impl AoMonthlyStatsGraph {
-    fn new(bb_list: Vec<BackBlastJsonData>, date: NaiveDate) -> Self {
-        AoMonthlyStatsGraph { bb_list, date }
-    }
-
-    /// get chart data from back blasts to consume into charts. This is to get BD post avg.
-    fn get_chart_data(&self) -> Vec<(String, f32, String)> {
-        let aos: Vec<(String, f32, String)> = get_ao_list()
-            .iter()
-            .map(|ao| {
-                let filtered = self.bb_list.iter().filter_map(|bb| {
-                    if &bb.ao == ao {
-                        Some(bb.pax.len())
-                    } else {
-                        None
-                    }
-                });
-                let sum = filtered.sum::<usize>() as u16;
-                let filtered = self.bb_list.iter().filter_map(|bb| {
-                    if &bb.ao == ao {
-                        Some(bb.pax.len())
-                    } else {
-                        None
-                    }
-                });
-                let total = f32::from(filtered.count() as u16);
-                let avg = if total == 0.0 {
-                    0.0
-                } else {
-                    f32::from(sum) / total
-                };
-                (ao.to_string(), avg, ao.to_string())
-            })
-            .collect();
-        aos
-    }
-}
-
-impl GraphWrapper for AoMonthlyStatsGraph {
-    const WIDTH: u32 = 800;
-    const HEIGHT: u32 = 600;
-
-    fn generate_chart(&self) -> Result<(), String> {
-        let width = 800;
-        let height = 600;
-        let (top, right, bottom, left) = (90, 40, 50, 60);
-
-        let x = charts::ScaleBand::new()
-            .set_domain(get_ao_list())
-            .set_range(vec![0, width - left - right])
-            .set_inner_padding(0.1)
-            .set_outer_padding(0.1);
-
-        let y = charts::ScaleLinear::new()
-            .set_domain(vec![0.0, 20.0])
-            .set_range(vec![height - top - bottom, 0]);
-
-        let data = self.get_chart_data();
-
-        let view = charts::VerticalBarView::new()
-            .set_x_scale(&x)
-            .set_y_scale(&y)
-            .set_colors(charts::Color::color_scheme_dark())
-            .set_label_rounding_precision(2)
-            .load_data(&data)
-            .unwrap();
-
-        charts::Chart::new()
-            .set_width(width)
-            .set_height(height)
-            .set_margins(top, right, bottom, left)
-            .add_title(self.date.format("Monthly Stats for %b %Y").to_string())
-            .add_view(&view)
-            .add_axis_bottom(&x)
-            .add_axis_left(&y)
-            .add_left_axis_label("Avg Pax per BD")
-            .add_bottom_axis_label("AOs")
-            .save(self.file_path())
-    }
-
-    fn file_name(&self) -> String {
-        format!(
-            "ao-monthly-leaderboard-{}-{}",
-            self.date.month(),
-            self.date.year()
-        )
-    }
-}
-
-fn get_ao_list() -> Vec<String> {
-    AO_LIST.map(|ao| ao.to_string()).to_vec()
 }

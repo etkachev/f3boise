@@ -1,7 +1,7 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::MutableAppState;
 use crate::shared::time::local_boise_time;
-use crate::web_api_routes::back_blast_data::ao_monthly_leaderboard::get_ao_monthly_stats_graph;
+use crate::web_api_routes::graphs::ao_monthly_leaderboard::get_ao_monthly_stats_graph;
 use crate::web_api_routes::graphs::ao_pax_leaderboard::post_ao_pax_leaderboard_graph;
 use crate::web_api_routes::graphs::overall_pax_leaderboard::post_overall_pax_leaderboard_graph;
 use crate::web_api_routes::slash_commands::ao_monthly_stats_graph::AOMonthlyStatsGraphCommand;

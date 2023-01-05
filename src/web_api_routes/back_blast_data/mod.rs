@@ -44,12 +44,12 @@ pub struct MissingBackBlastData {
 /// get missing back blast data.
 pub async fn get_missing_back_blasts(db_pool: web::Data<PgPool>) -> impl Responder {
     let now = Utc::now().date_naive();
-    let two_months_ago = now.sub(Months::new(2));
-    match get_back_blasts_since(&db_pool, &two_months_ago).await {
+    let six_months_ago = now.sub(Months::new(6));
+    match get_back_blasts_since(&db_pool, &six_months_ago).await {
         Ok(list) => {
             let mut results: Vec<MissingBackBlastData> = vec![];
             for ao in AO_LIST {
-                let mut date_to_check = two_months_ago;
+                let mut date_to_check = six_months_ago;
 
                 while date_to_check < now {
                     if ao.week_days().contains(&date_to_check.weekday()) {

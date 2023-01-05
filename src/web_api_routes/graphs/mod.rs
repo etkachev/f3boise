@@ -1,5 +1,6 @@
 use crate::shared::common_errors::AppError;
 
+pub mod ao_monthly_leaderboard;
 pub mod ao_pax_leaderboard;
 pub mod overall_pax_leaderboard;
 
