@@ -1,4 +1,12 @@
-use chrono::{DateTime, FixedOffset, TimeZone, Utc};
+use chrono::{DateTime, FixedOffset, NaiveDate, TimeZone, Utc};
+use serde::Deserialize;
+
+/// Basic date range struct
+#[derive(Deserialize)]
+pub struct DateRange {
+    pub start: NaiveDate,
+    pub end: NaiveDate,
+}
 
 /// Get local Boise time
 pub fn local_boise_time() -> DateTime<FixedOffset> {

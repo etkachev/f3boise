@@ -1,8 +1,6 @@
 use crate::app_state::ao_data::const_names::AO_LIST;
 use crate::app_state::ao_data::AO;
-use crate::db::queries::q_line_up::{
-    get_q_line_up_between_dates, get_q_line_up_between_dates_for_ao, QLineUpDbData,
-};
+use crate::db::queries::q_line_up::{get_q_line_up_between_dates_for_ao, QLineUpDbData};
 use crate::shared::common_errors::AppError;
 use crate::shared::constants::Q_LINE_UP_BTN_TEXT;
 use crate::shared::string_utils::{
@@ -14,6 +12,7 @@ use crate::slack_api::block_kit::{BlockBuilder, SectionBlock};
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
 use crate::web_api_routes::interactive_events::interaction_types::ActionComboData;
 use crate::web_api_routes::interactive_events::q_line_up::utils::get_existing_q_overflow_options;
+use crate::web_api_routes::q_line_up::get_line_up_map;
 use crate::web_api_state::MutableWebState;
 use chrono::{Datelike, Duration, NaiveDate};
 use sqlx::PgPool;
@@ -287,24 +286,4 @@ fn map_words_to_slack_names(words: Vec<&str>, users: &HashMap<String, String>) -
         })
         .collect();
     words.join(" ")
-}
-
-async fn get_line_up_map(
-    db_pool: &PgPool,
-    start_date: &NaiveDate,
-    end_date: &NaiveDate,
-) -> Result<HashMap<String, Vec<QLineUpDbData>>, AppError> {
-    let all = get_q_line_up_between_dates(db_pool, start_date, end_date).await?;
-    let results = all.into_iter().fold(
-        HashMap::<String, Vec<QLineUpDbData>>::new(),
-        |mut acc, item| {
-            if let Some(existing) = acc.get_mut(item.ao.as_str()) {
-                existing.push(item);
-            } else {
-                acc.insert(item.ao.to_string(), vec![item]);
-            }
-            acc
-        },
-    );
-    Ok(results)
 }
