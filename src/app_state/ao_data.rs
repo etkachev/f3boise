@@ -18,6 +18,7 @@ pub enum AO {
     WarHorse,
     Bellagio,
     Discovery,
+    BlackDiamond,
     DR,
     Unknown(String),
 }
@@ -40,6 +41,7 @@ impl AO {
             AO::WarHorse => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::Bellagio => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Discovery => HashSet::from([Weekday::Sat]),
+            AO::BlackDiamond => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
@@ -63,6 +65,7 @@ impl AO {
             AO::WarHorse => const_names::WAR_HORSE_CHANNEL_ID,
             AO::Bellagio => const_names::BELLAGIO_CHANNEL_ID,
             AO::Discovery => const_names::DISCOVERY_CHANNEL_ID,
+            AO::BlackDiamond => const_names::BLACK_DIAMOND_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -82,6 +85,7 @@ impl AO {
             AO::WarHorse => const_names::WAR_HORSE_GOOGLE_MAPS,
             AO::Bellagio => const_names::BELLAGIO_GOOGLE_MAPS,
             AO::Discovery => const_names::DISCOVERY_GOOGLE_MAPS,
+            AO::BlackDiamond => const_names::BLACK_DIAMOND_GOOGLE_MAPS,
             AO::DR => "Location Varies",
             AO::Unknown(_) => "Unknown",
         }
@@ -101,6 +105,7 @@ impl AO {
             const_names::WAR_HORSE_CHANNEL_ID => AO::WarHorse,
             const_names::BELLAGIO_CHANNEL_ID => AO::Bellagio,
             const_names::DISCOVERY_CHANNEL_ID => AO::Discovery,
+            const_names::BLACK_DIAMOND_CHANNEL_ID => AO::BlackDiamond,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
         }
@@ -123,6 +128,7 @@ impl Clone for AO {
             AO::WarHorse => AO::WarHorse,
             AO::Bellagio => AO::Bellagio,
             AO::Discovery => AO::Discovery,
+            AO::BlackDiamond => AO::BlackDiamond,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
     }
@@ -143,6 +149,7 @@ impl ToString for AO {
             AO::WarHorse => const_names::WAR_HORSE,
             AO::Bellagio => const_names::BELLAGIO,
             AO::Discovery => const_names::DISCOVERY,
+            AO::BlackDiamond => const_names::BLACK_DIAMOND,
             AO::DR => "",
             AO::Unknown(_) => "",
         };
@@ -177,6 +184,7 @@ impl From<String> for AO {
             const_names::BELLAGIO | "bellagio-resort" => AO::Bellagio,
             const_names::BACKYARD => AO::Backyard,
             const_names::DISCOVERY => AO::Discovery,
+            const_names::BLACK_DIAMOND => AO::BlackDiamond,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
         }
@@ -210,6 +218,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::WarHorse => AO::WarHorse,
         PublicChannels::Bellagio => AO::Bellagio,
         PublicChannels::Discovery => AO::Discovery,
+        PublicChannels::BlackDiamond => AO::BlackDiamond,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
@@ -283,9 +292,12 @@ pub mod const_names {
     pub const DISCOVERY_GOOGLE_MAPS: &str = "https://goo.gl/maps/zJkeWpgpS93MqhEU7";
     pub const DR: &str = "dr";
     pub const DR_CHANNEL_ID: &str = "C03U7U9T7HU";
+    pub const BLACK_DIAMOND: &str = "black-diamond";
+    pub const BLACK_DIAMOND_CHANNEL_ID: &str = "C04QQF5M8GL";
+    pub const BLACK_DIAMOND_GOOGLE_MAPS: &str = "https://goo.gl/maps/a7EcVdttBEi1kiQx7";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 12] = [
+    pub const AO_LIST: [AO; 13] = [
         AO::Bleach,
         AO::Gem,
         AO::OldGlory,
@@ -298,6 +310,7 @@ pub mod const_names {
         AO::WarHorse,
         AO::Bellagio,
         AO::Discovery,
+        AO::BlackDiamond,
     ];
 }
 

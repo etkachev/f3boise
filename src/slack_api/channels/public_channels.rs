@@ -15,6 +15,7 @@ pub enum PublicChannels {
     WarHorse,
     Bellagio,
     Discovery,
+    BlackDiamond,
     DR,
     Welcome,
     Unknown(String),
@@ -35,6 +36,7 @@ impl From<&AO> for PublicChannels {
             AO::WarHorse => PublicChannels::WarHorse,
             AO::Bellagio => PublicChannels::Bellagio,
             AO::Discovery => PublicChannels::Discovery,
+            AO::BlackDiamond => PublicChannels::BlackDiamond,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }
@@ -45,24 +47,63 @@ impl From<String> for PublicChannels {
     // TODO use AO from
     fn from(name: String) -> Self {
         match name.as_str() {
-            "bot-playground" => PublicChannels::BotPlayground,
-            "ao-backyard" => PublicChannels::Backyard,
-            "ao-bleach" => PublicChannels::Bleach,
-            "ao-gem" => PublicChannels::Gem,
-            "ao-iron-mountain" => PublicChannels::IronMountain,
-            "ao-old-glory" => PublicChannels::OldGlory,
-            "ao-otb-bowler-park" | "ao-bowler-park" | "ao-rise" => PublicChannels::Rise,
-            "ao-otb-lakeview-park" | "ao-warhorse" => PublicChannels::WarHorse,
-            "ao-otb-kleiner-park" | "ao-otb-bellagio" | "ao-bellagio" | "ao-bellagio-resort" => {
-                PublicChannels::Bellagio
-            }
-            "ao-rebel" => PublicChannels::Rebel,
-            "ao-ruckership-west" => PublicChannels::RuckershipWest,
-            "ao-ruckership-east" => PublicChannels::RuckershipEast,
-            "ao-discovery-park" => PublicChannels::Discovery,
             "downrange" => PublicChannels::DR,
             "welcome" => PublicChannels::Welcome,
-            _ => PublicChannels::Unknown(name),
+            "bot-playground" => PublicChannels::BotPlayground,
+            "ao-bellagio" | "ao-bellagio-resort" => PublicChannels::Bellagio,
+            _ => {
+                let ao = AO::from(name);
+                PublicChannels::from(&ao)
+            }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_channel_name(name: &str, expected: PublicChannels) {
+        let channel = PublicChannels::from(name.to_string());
+        assert_eq!(expected, channel);
+    }
+
+    #[test]
+    fn test_all() {
+        test_channel_name("downrange", PublicChannels::DR);
+        test_channel_name("ao-bleach", PublicChannels::Bleach);
+        test_channel_name("ao-backyard", PublicChannels::Backyard);
+        test_channel_name("ao-gem", PublicChannels::Gem);
+        test_channel_name("ao-iron-mountain", PublicChannels::IronMountain);
+        test_channel_name("ao-old-glory", PublicChannels::OldGlory);
+        test_channel_name("ao-rise", PublicChannels::Rise);
+        test_channel_name("ao-warhorse", PublicChannels::WarHorse);
+        test_channel_name("ao-bellagio-resort", PublicChannels::Bellagio);
+        test_channel_name("ao-bellagio", PublicChannels::Bellagio);
+        test_channel_name("ao-rebel", PublicChannels::Rebel);
+        test_channel_name("ao-ruckership-west", PublicChannels::RuckershipWest);
+        test_channel_name("ao-ruckership-east", PublicChannels::RuckershipEast);
+        test_channel_name("ao-discovery-park", PublicChannels::Discovery);
+        test_channel_name("ao-black-diamond", PublicChannels::BlackDiamond);
+    }
+
+    #[test]
+    fn string_to_channel_bleach() {
+        let name = "ao-bleach".to_string();
+        let channel = PublicChannels::from(name);
+        assert_eq!(PublicChannels::Bleach, channel);
+    }
+
+    #[test]
+    fn string_to_channel_bot_playground() {
+        let name = "bot-playground".to_string();
+        let channel = PublicChannels::from(name);
+        assert_eq!(PublicChannels::BotPlayground, channel);
+    }
+
+    #[test]
+    fn string_fake_channel() {
+        let channel = PublicChannels::from("fake".to_string());
+        assert_eq!(PublicChannels::Unknown("fake".to_string()), channel);
     }
 }
