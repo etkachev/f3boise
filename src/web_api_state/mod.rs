@@ -20,6 +20,8 @@ use crate::slack_api::files::response::FileUploadResponse;
 use crate::slack_api::url_requests::SlackUrlRequest;
 use crate::slack_api::users::users_list::request::UsersListRequest;
 use crate::slack_api::users::users_list::response::UsersListResponse;
+use crate::slack_api::views::request::ViewsOpenRequest;
+use crate::slack_api::views::response::ViewsOpenResponse;
 use crate::users::f3_user::F3User;
 use http::header::CONTENT_TYPE;
 use http::{HeaderMap, Method};
@@ -176,6 +178,22 @@ impl MutableWebState {
         let response: PostMessageResponse = serde_json::from_slice(&response.body)?;
         if let Some(err) = response.error {
             Err(AppError::General(err))
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Open view like modal or home view
+    pub async fn open_view(&self, request: ViewsOpenRequest) -> Result<(), AppError> {
+        let url = request.get_plain_url_request(&self.base_api_url);
+        let body = serde_json::to_vec(&request)?;
+        let response = self.make_post_request(url, body).await;
+        let response: ViewsOpenResponse = serde_json::from_slice(&response.body)?;
+        if let Some(err) = response.error {
+            Err(AppError::General(err))
+        } else if let Some(re) = response.view {
+            println!("id: {:?}", re.id);
+            Ok(())
         } else {
             Ok(())
         }

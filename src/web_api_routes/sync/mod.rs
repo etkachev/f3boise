@@ -73,7 +73,7 @@ pub async fn sync_data_route(
     app_state: web::Data<MutableAppState>,
 ) -> impl Responder {
     match sync_data_to_state(&db_pool, &web_state, &app_state).await {
-        Ok(_) => HttpResponse::Ok().finish(),
+        Ok(_) => HttpResponse::Ok().body("Synced!"),
         Err(err) => HttpResponse::BadRequest().body(err.to_string()),
     }
 }

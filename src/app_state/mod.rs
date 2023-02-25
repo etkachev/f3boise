@@ -9,6 +9,7 @@ use std::sync::Mutex;
 
 pub mod ao_data;
 pub mod backblast_data;
+pub mod equipment;
 pub mod parse_backblast;
 
 pub struct MutableAppState {

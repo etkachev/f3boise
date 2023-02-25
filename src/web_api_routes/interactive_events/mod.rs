@@ -5,13 +5,17 @@ use crate::slack_api::block_kit::block_elements::OptionElement;
 use crate::slack_api::channels::public_channels::PublicChannels;
 use crate::web_api_routes::interactive_events::interaction_payload::{
     Action, ActionChannel, ActionType, ActionUser, BlockAction, ButtonAction,
-    InteractionMessageTypes, InteractionPayload, OverflowAction,
+    InteractionMessageTypes, InteractionPayload, OverflowAction, ViewSubmissionPayload,
+    ViewSubmissionPayloadView,
 };
 use crate::web_api_routes::interactive_events::interaction_types::{
     ActionComboData, InteractionTypes,
 };
 use crate::web_api_routes::interactive_events::q_line_up::{
     clear_and_update_message, process_q_line_up_event, update_existing_q_line_up_message,
+};
+use crate::web_api_routes::slash_commands::pre_blast::pre_blast_post::{
+    convert_to_message, PreBlastPost,
 };
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
@@ -85,6 +89,21 @@ pub async fn interactive_events(
                         )
                         .await
                         {
+                            return HttpResponse::BadRequest().body(err.to_string());
+                        }
+                    }
+                }
+            }
+            InteractionPayload::ViewSubmission(ViewSubmissionPayload { user, view }) => {
+                match view {
+                    ViewSubmissionPayloadView::Modal(modal) => {
+                        let form_values = modal.state.get_values();
+                        let post = PreBlastPost::from(form_values);
+                        println!("from user {:?}", user.username);
+                        let message = convert_to_message(post);
+                        if let Err(err) = web_state.post_message(message).await {
+                            println!("error posting pre blast");
+                            println!("{:?}", err);
                             return HttpResponse::BadRequest().body(err.to_string());
                         }
                     }

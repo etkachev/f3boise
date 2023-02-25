@@ -1,5 +1,6 @@
+use crate::app_state::equipment::AoEquipment;
 use crate::slack_api::channels::public_channels::PublicChannels;
-use chrono::Weekday;
+use chrono::{Datelike, NaiveDate, NaiveTime, Weekday};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -26,6 +27,56 @@ pub enum AO {
 /// days of the week the ao is open
 pub type AoDays = HashSet<Weekday>;
 
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub enum AoType {
+    Bootcamp,
+    Heavy,
+    Running,
+    Rucking,
+}
+
+impl ToString for AoType {
+    fn to_string(&self) -> String {
+        match self {
+            AoType::Bootcamp => String::from("Bootcamp"),
+            AoType::Heavy => String::from("Ruck/Sandbag"),
+            AoType::Running => String::from("Running"),
+            AoType::Rucking => String::from("Ruck/Hike"),
+        }
+    }
+}
+
+impl AoType {
+    pub fn equipment(&self) -> HashSet<AoEquipment> {
+        match self {
+            AoType::Bootcamp => HashSet::from([AoEquipment::Coupons]),
+            AoType::Heavy => HashSet::from([AoEquipment::Ruck, AoEquipment::Sandbag]),
+            AoType::Running => HashSet::from([AoEquipment::RunningShoes]),
+            AoType::Rucking => HashSet::from([AoEquipment::Ruck]),
+        }
+    }
+}
+
+mod ao_times {
+    use chrono::NaiveTime;
+
+    pub fn five_fifteen() -> NaiveTime {
+        NaiveTime::from_hms(5, 15, 0)
+    }
+
+    pub fn six() -> NaiveTime {
+        NaiveTime::from_hms(6, 0, 0)
+    }
+
+    pub fn five() -> NaiveTime {
+        NaiveTime::from_hms(5, 0, 0)
+    }
+
+    pub fn five_thirty() -> NaiveTime {
+        NaiveTime::from_hms(5, 30, 0)
+    }
+}
+
 impl AO {
     pub fn week_days(&self) -> AoDays {
         match self {
@@ -43,6 +94,68 @@ impl AO {
             AO::Discovery => HashSet::from([Weekday::Sat]),
             AO::BlackDiamond => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
+        }
+    }
+
+    pub fn default_time(&self, date: &NaiveDate) -> Option<NaiveTime> {
+        let week_day = date.weekday();
+        let five = ao_times::five();
+        let five_fifteen = ao_times::five_fifteen();
+        let five_thirty = ao_times::five_thirty();
+        let six = ao_times::six();
+
+        match week_day {
+            Weekday::Mon => match self {
+                AO::OldGlory => Some(six),
+                AO::BlackDiamond => Some(five),
+                ao if ao.week_days().contains(&week_day) => Some(five_fifteen),
+                _ => None,
+            },
+            Weekday::Tue => match self {
+                AO::IronMountain => Some(five_thirty),
+                ao if ao.week_days().contains(&week_day) => Some(five_fifteen),
+                _ => None,
+            },
+            Weekday::Wed => match self {
+                AO::OldGlory => Some(six),
+                AO::BlackDiamond => Some(five),
+                ao if ao.week_days().contains(&week_day) => Some(five_fifteen),
+                _ => None,
+            },
+            Weekday::Thu => match self {
+                AO::IronMountain => Some(five_thirty),
+                ao if ao.week_days().contains(&week_day) => Some(five_fifteen),
+                _ => None,
+            },
+            Weekday::Fri => match self {
+                AO::RuckershipWest | AO::RuckershipEast => Some(five_thirty),
+                ao if ao.week_days().contains(&week_day) => Some(five_fifteen),
+                _ => None,
+            },
+            Weekday::Sat => match self {
+                ao if ao.week_days().contains(&week_day) => Some(six),
+                _ => None,
+            },
+            Weekday::Sun => None,
+        }
+    }
+
+    pub fn ao_type(&self) -> AoType {
+        match self {
+            AO::Bleach => AoType::Heavy,
+            AO::BlackDiamond => AoType::Heavy,
+            AO::Bellagio => AoType::Bootcamp,
+            AO::Backyard => AoType::Bootcamp,
+            AO::OldGlory => AoType::Bootcamp,
+            AO::Rebel => AoType::Running,
+            AO::Discovery => AoType::Bootcamp,
+            AO::RuckershipEast | AO::RuckershipWest => AoType::Rucking,
+            AO::Rise => AoType::Bootcamp,
+            AO::WarHorse => AoType::Bootcamp,
+            AO::Gem => AoType::Bootcamp,
+            AO::IronMountain => AoType::Bootcamp,
+            AO::DR => AoType::Bootcamp,
+            AO::Unknown(_) => AoType::Bootcamp,
         }
     }
 

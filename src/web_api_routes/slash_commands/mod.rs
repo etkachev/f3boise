@@ -24,6 +24,7 @@ pub mod ao_monthly_stats_graph;
 pub mod ao_stats;
 pub mod invite_all;
 pub mod my_stats;
+pub mod pre_blast;
 pub mod q_line_up;
 pub mod top_pax;
 pub mod wheres_freighter;
@@ -191,6 +192,19 @@ pub async fn slack_slash_commands_route(
             .await
             {
                 Ok(_) => HttpResponse::Ok().body("Posting Top pax overall"),
+                Err(err) => HttpResponse::Ok().body(err.to_string()),
+            }
+        }
+        "/dd" => {
+            match pre_blast::generate_modal(
+                form.trigger_id.as_str(),
+                &web_state,
+                &form.channel_id,
+                &form.user_id,
+            )
+            .await
+            {
+                Ok(_) => HttpResponse::Ok().body("Opening Preblast modal"),
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
             }
         }

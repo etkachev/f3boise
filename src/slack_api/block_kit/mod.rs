@@ -1,6 +1,8 @@
 //! api for block kit https://api.slack.com/reference/block-kit/blocks and using blocks to create messages for slack, etc.
 
-use crate::slack_api::block_kit::block_elements::{BlockElementType, OptionElement};
+use crate::slack_api::block_kit::block_elements::{
+    BlockElementType, OptionElement, OptionGroupElement,
+};
 use serde::{Deserialize, Serialize};
 
 pub mod block_elements;
@@ -60,22 +62,380 @@ impl BlockBuilder {
     pub fn add_divider(&mut self) {
         self.blocks.push(BlockType::Divider);
     }
+
+    pub fn plain_input(
+        mut self,
+        label: &str,
+        action_id: &str,
+        place_holder: Option<String>,
+        initial_value: Option<String>,
+        optional: bool,
+    ) -> Self {
+        self.add_plain_input(label, action_id, place_holder, initial_value, optional);
+        self
+    }
+
+    pub fn add_plain_input(
+        &mut self,
+        label: &str,
+        action_id: &str,
+        place_holder: Option<String>,
+        initial_value: Option<String>,
+        optional: bool,
+    ) {
+        self.blocks.push(BlockType::Input(
+            InputBlock::new_input(label, action_id, place_holder, initial_value).optional(optional),
+        ));
+    }
+
+    pub fn text_box(
+        mut self,
+        label: &str,
+        action_id: &str,
+        placeholder: Option<String>,
+        initial_value: Option<String>,
+        optional: bool,
+    ) -> Self {
+        self.add_text_box(label, action_id, placeholder, initial_value, optional);
+        self
+    }
+
+    pub fn add_text_box(
+        &mut self,
+        label: &str,
+        action_id: &str,
+        placeholder: Option<String>,
+        initial_value: Option<String>,
+        optional: bool,
+    ) {
+        self.blocks.push(BlockType::Input(
+            InputBlock::new_text_box(label, action_id, placeholder, initial_value)
+                .optional(optional),
+        ));
+    }
+
+    pub fn select(
+        mut self,
+        label: &str,
+        action_id: &str,
+        options: Vec<OptionElement>,
+        default: Option<OptionElement>,
+        optional: bool,
+    ) -> Self {
+        self.add_select(label, action_id, options, default, optional);
+        self
+    }
+
+    pub fn add_select(
+        &mut self,
+        label: &str,
+        action_id: &str,
+        options: Vec<OptionElement>,
+        default: Option<OptionElement>,
+        optional: bool,
+    ) {
+        self.blocks.push(BlockType::Input(
+            InputBlock::new_select(label, action_id, options, default).optional(optional),
+        ));
+    }
+
+    pub fn multi_select(
+        mut self,
+        label: &str,
+        action_id: &str,
+        options: Vec<OptionElement>,
+        default: Option<Vec<OptionElement>>,
+        optional: bool,
+    ) -> Self {
+        self.add_multi_select(label, action_id, options, default, optional);
+        self
+    }
+
+    pub fn add_multi_select(
+        &mut self,
+        label: &str,
+        action_id: &str,
+        options: Vec<OptionElement>,
+        default: Option<Vec<OptionElement>>,
+        optional: bool,
+    ) {
+        self.blocks.push(BlockType::Input(
+            InputBlock::new_multi_select(label, action_id, options, default).optional(optional),
+        ));
+    }
+
+    pub fn channel_select(
+        mut self,
+        label: &str,
+        action_id: &str,
+        initial_channel: Option<String>,
+        optional: bool,
+    ) -> Self {
+        self.add_channel_select(label, action_id, initial_channel, optional);
+        self
+    }
+
+    pub fn add_channel_select(
+        &mut self,
+        label: &str,
+        action_id: &str,
+        initial_channel: Option<String>,
+        optional: bool,
+    ) {
+        self.blocks.push(BlockType::Input(
+            InputBlock::new_channel_select(label, action_id, initial_channel).optional(optional),
+        ))
+    }
+
+    /// initial date should be in the format YYYY-MM-DD
+    pub fn date_picker(
+        mut self,
+        label: &str,
+        action_id: &str,
+        date: Option<String>,
+        optional: bool,
+    ) -> Self {
+        self.add_date_picker(label, action_id, date, optional);
+        self
+    }
+
+    pub fn add_date_picker(
+        &mut self,
+        label: &str,
+        action_id: &str,
+        date: Option<String>,
+        optional: bool,
+    ) {
+        self.blocks.push(BlockType::Input(
+            InputBlock::new_date_picker(label, action_id, date).optional(optional),
+        ));
+    }
+
+    /// initial time should be in the format HH:mm
+    pub fn time_picker(
+        mut self,
+        label: &str,
+        action_id: &str,
+        time: Option<String>,
+        optional: bool,
+    ) -> Self {
+        self.add_time_picker(label, action_id, time, optional);
+        self
+    }
+
+    pub fn add_time_picker(
+        &mut self,
+        label: &str,
+        action_id: &str,
+        time: Option<String>,
+        optional: bool,
+    ) {
+        self.blocks.push(BlockType::Input(
+            InputBlock::new_time_picker(label, action_id, time).optional(optional),
+        ));
+    }
+
+    pub fn multi_users_select(
+        mut self,
+        label: &str,
+        action_id: &str,
+        initial: Option<Vec<String>>,
+        optional: bool,
+    ) -> Self {
+        self.add_multi_users_select(label, action_id, initial, optional);
+        self
+    }
+
+    pub fn add_multi_users_select(
+        &mut self,
+        label: &str,
+        action_id: &str,
+        initial: Option<Vec<String>>,
+        optional: bool,
+    ) {
+        self.blocks.push(BlockType::Input(
+            InputBlock::new_multi_users_select(label, action_id, initial).optional(optional),
+        ));
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum BlockType {
-    /// TODO
-    Actions,
+    Actions(ActionBlock),
     Context(ContextBlock),
     Divider,
     File(FileBlock),
     Header(HeaderBlock),
     Image(ImageBlock),
-    Input,
+    Input(InputBlock),
     Section(SectionBlock),
+    /// TODO
     Video,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ActionBlock {
+    /// An array of interactive element objects - buttons, select menus, overflow menus, or date pickers. There is a maximum of 25 elements in each action block.
+    pub elements: Vec<BlockElementType>,
+    /// A string acting as a unique identifier for a block.
+    /// If not specified, a block_id will be generated.
+    /// You can use this block_id when you receive an interaction payload to identify the source of the action.
+    /// Maximum length for this field is 255 characters.
+    /// block_id should be unique for each message and each iteration of a message.
+    /// If a message is updated, use a new block_id
+    pub block_id: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct InputBlock {
+    /// A label that appears above an input element in the form of a text object that must have type of plain_text.
+    /// Maximum length for the text in this field is 2000 characters.
+    pub label: TextObject,
+    /// A plain-text input element, a checkbox element, a radio button element,
+    /// a select menu element, a multi-select menu element, or a datepicker.
+    pub element: BlockElementType,
+    /// An optional hint that appears below an input element in a lighter grey.
+    /// It must be a text object with a type of plain_text. Maximum length for the text in this field is 2000 characters
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hint: Option<TextObject>,
+    /// A boolean that indicates whether the input element may be empty when a user submits the modal. Defaults to false.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub optional: Option<bool>,
+}
+
+impl InputBlock {
+    pub fn new(label: &str, action_id: &str) -> Self {
+        InputBlock {
+            label: TextObject::new_text(label),
+            element: BlockElementType::new_plain_input(action_id, None, None),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_input(
+        label: &str,
+        action_id: &str,
+        placeholder: Option<String>,
+        initial_value: Option<String>,
+    ) -> Self {
+        InputBlock {
+            label: TextObject::new_text(label),
+            element: BlockElementType::new_plain_input(action_id, placeholder, initial_value),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_text_box(
+        label: &str,
+        action_id: &str,
+        placeholder: Option<String>,
+        initial_value: Option<String>,
+    ) -> Self {
+        InputBlock {
+            label: TextObject::new_text(label),
+            element: BlockElementType::new_text_box(action_id, placeholder, initial_value),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_select(
+        label: &str,
+        action_id: &str,
+        options: Vec<OptionElement>,
+        default: Option<OptionElement>,
+    ) -> Self {
+        InputBlock {
+            label: TextObject::new_text(label),
+            element: BlockElementType::new_select(action_id, options, default),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_select_with_groups(
+        label: &str,
+        action_id: &str,
+        option_groups: Vec<OptionGroupElement>,
+        default: Option<OptionElement>,
+    ) -> Self {
+        InputBlock {
+            label: TextObject::new_text(label),
+            element: BlockElementType::new_select_with_groups(action_id, option_groups, default),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_multi_select(
+        label: &str,
+        action_id: &str,
+        options: Vec<OptionElement>,
+        default: Option<Vec<OptionElement>>,
+    ) -> Self {
+        InputBlock {
+            label: TextObject::new_text(label),
+            element: BlockElementType::new_multi_select(action_id, options, default),
+            ..Default::default()
+        }
+    }
+    pub fn new_multi_select_with_groups(
+        label: &str,
+        action_id: &str,
+        options: Vec<OptionGroupElement>,
+        default: Option<Vec<OptionElement>>,
+    ) -> Self {
+        InputBlock {
+            label: TextObject::new_text(label),
+            element: BlockElementType::new_multi_select_with_groups(action_id, options, default),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_channel_select(
+        label: &str,
+        action_id: &str,
+        initial_channel: Option<String>,
+    ) -> Self {
+        InputBlock {
+            label: TextObject::new_text(label),
+            element: BlockElementType::new_channel_select(action_id, initial_channel),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_date_picker(label: &str, action_id: &str, date: Option<String>) -> Self {
+        InputBlock {
+            label: TextObject::new_text(label),
+            element: BlockElementType::new_date_selector(action_id, date),
+            ..Default::default()
+        }
+    }
+
+    /// initial time should be in the format HH:mm
+    pub fn new_time_picker(label: &str, action_id: &str, time: Option<String>) -> Self {
+        InputBlock {
+            label: TextObject::new_text(label),
+            element: BlockElementType::new_time_picker(action_id, time),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_multi_users_select(
+        label: &str,
+        action_id: &str,
+        initial: Option<Vec<String>>,
+    ) -> Self {
+        InputBlock {
+            label: TextObject::new_text(label),
+            element: BlockElementType::new_multi_user_select(action_id, initial),
+            ..Default::default()
+        }
+    }
+
+    pub fn optional(mut self, optional: bool) -> Self {
+        self.optional = Some(optional);
+        self
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
