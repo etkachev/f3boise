@@ -120,7 +120,7 @@ impl From<HashMap<String, BasicValue>> for PreBlastPost {
         };
 
         let start_time = {
-            if let Some(BasicValue::Single(time)) = value.get(pre_blast_action_ids::TITLE) {
+            if let Some(BasicValue::Single(time)) = value.get(pre_blast_action_ids::TIME_SELECT) {
                 NaiveTime::parse_from_str(time, "%H:%M").unwrap_or_default()
             } else {
                 NaiveTime::default()
@@ -224,14 +224,15 @@ pub fn convert_to_message(post: PreBlastPost) -> PostMessageRequest {
     let block_builder = BlockBuilder::new()
         .section_markdown(&format!("*Preblast: {}*", post.title))
         .section_markdown(&format!("*Date*: {}", post.date))
-        .section_markdown(&format!("*Time*: {}", post.start_time))
+        .section_markdown(&format!("*Time*: {}", post.start_time.format("%H:%M")))
         .section_markdown(&format!("*Where*: <#{}>", post.ao.channel_id()))
         .section_markdown(&format!("*Q(s)*: {}", post.qs_list()))
         .divider()
         .section_markdown(&format!("*Why*: {}", post.why))
         .section_markdown(&format!("*Equipment*: {}", post.equipment_list()))
         .section_markdown(&format!("*FNGs*: {}", post.fng_message.unwrap_or_default()))
-        .section_markdown(&post.mole_skin);
+        .section_markdown(&post.mole_skin)
+        .divider();
 
     PostMessageRequest {
         channel: channel_id,

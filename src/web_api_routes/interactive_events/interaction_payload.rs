@@ -110,12 +110,14 @@ use std::collections::HashMap;
 ///     \"action_ts\":\"1664404189.699355\"}
 ///   ]
 /// }
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum InteractionPayload {
-    BlockActions(BlockAction),
-    ViewSubmission(ViewSubmissionPayload),
+    /// type "block_actions" maps to BlockAction
+    BlockActions,
+    /// type "view_submission" maps to ViewSubmissionPayload
+    ViewSubmission,
 }
 
 /// Example:
@@ -710,6 +712,8 @@ pub struct ViewContainer {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::web_api_routes::slash_commands::pre_blast::pre_blast_post::PreBlastPost;
+    use chrono::NaiveTime;
 
     #[test]
     fn q_sheet_interaction() {
@@ -723,26 +727,29 @@ mod tests {
     fn pre_blast_submit() {
         let payload = "{\"type\":\"view_submission\",\"team\":{\"id\":\"T03T5J6801Z\",\"domain\":\"f3-boise\"},\"user\":{\"id\":\"U03T87KHRFE\",\"username\":\"edwardtkachev\",\"name\":\"edwardtkachev\",\"team_id\":\"T03T5J6801Z\"},\"api_app_id\":\"A03UAGJC9QD\",\"token\":\"iqHCM8gJry9vury2mmDiv0Os\",\"trigger_id\":\"4859734125698.3923618272067.d1a479e9ace60fdce0f01083a6f76d77\",\"view\":{\"id\":\"V04RNAX0T6D\",\"team_id\":\"T03T5J6801Z\",\"type\":\"modal\",\"blocks\":[{\"type\":\"input\",\"block_id\":\"wXC7n\",\"label\":{\"type\":\"plain_text\",\"text\":\"Title\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"title.input\",\"placeholder\":{\"type\":\"plain_text\",\"text\":\"Snarky Title\",\"emoji\":true},\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"input\",\"block_id\":\"fOUB\",\"label\":{\"type\":\"plain_text\",\"text\":\"AO\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"channels_select\",\"action_id\":\"ao.select\",\"initial_channel\":\"C03TZV5RRF1\"}},{\"type\":\"input\",\"block_id\":\"sJs7\",\"label\":{\"type\":\"plain_text\",\"text\":\"Workout Date\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"datepicker\",\"action_id\":\"date.select\",\"initial_date\":\"2023-02-25\"}},{\"type\":\"input\",\"block_id\":\"lfc\",\"label\":{\"type\":\"plain_text\",\"text\":\"Workout Time\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"timepicker\",\"action_id\":\"time.select\"}},{\"type\":\"input\",\"block_id\":\"lqB\",\"label\":{\"type\":\"plain_text\",\"text\":\"The Q(s)\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"multi_users_select\",\"action_id\":\"qs.select\",\"initial_users\":[\"U03T87KHRFE\"]}},{\"type\":\"divider\",\"block_id\":\"Jrw\"},{\"type\":\"input\",\"block_id\":\"+hS\",\"label\":{\"type\":\"plain_text\",\"text\":\"The Why\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"why.input\",\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"input\",\"block_id\":\"CdmN\",\"label\":{\"type\":\"plain_text\",\"text\":\"Equipment\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"multi_static_select\",\"action_id\":\"equipment.select\",\"initial_options\":[{\"text\":{\"type\":\"plain_text\",\"text\":\"Coupons \\ud83e\\uddf1\",\"emoji\":true},\"value\":\"coupons\"},{\"text\":{\"type\":\"plain_text\",\"text\":\"Sandbag \\ud83d\\udc5d\",\"emoji\":true},\"value\":\"sandbag\"},{\"text\":{\"type\":\"plain_text\",\"text\":\"Ruck \\ud83c\\udf92\",\"emoji\":true},\"value\":\"ruck\"}],\"options\":[{\"text\":{\"type\":\"plain_text\",\"text\":\"Coupons \\ud83e\\uddf1\",\"emoji\":true},\"value\":\"coupons\"},{\"text\":{\"type\":\"plain_text\",\"text\":\"Sandbag \\ud83d\\udc5d\",\"emoji\":true},\"value\":\"sandbag\"},{\"text\":{\"type\":\"plain_text\",\"text\":\"Ruck \\ud83c\\udf92\",\"emoji\":true},\"value\":\"ruck\"}]}},{\"type\":\"input\",\"block_id\":\"2Zt+\",\"label\":{\"type\":\"plain_text\",\"text\":\"Other Equipment\",\"emoji\":true},\"optional\":true,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"other_equipment.input\",\"placeholder\":{\"type\":\"plain_text\",\"text\":\"Anything else to bring?\",\"emoji\":true},\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"input\",\"block_id\":\"kro=\",\"label\":{\"type\":\"plain_text\",\"text\":\"FNGs\",\"emoji\":true},\"optional\":true,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"fngs.input\",\"initial_value\":\"Always\",\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"divider\",\"block_id\":\"wCLAv\"},{\"type\":\"input\",\"block_id\":\"8Nz\",\"label\":{\"type\":\"plain_text\",\"text\":\"The Moleskine\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"moleskin.textbox\",\"initial_value\":\"Notice\",\"multiline\":true,\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"input\",\"block_id\":\"d4Vq\",\"label\":{\"type\":\"plain_text\",\"text\":\"Choose where to post this\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"static_select\",\"action_id\":\"where_to_post.select\",\"initial_option\":{\"text\":{\"type\":\"plain_text\",\"text\":\"The AO Channel\",\"emoji\":true},\"value\":\"ao_channel\"},\"options\":[{\"text\":{\"type\":\"plain_text\",\"text\":\"The AO Channel\",\"emoji\":true},\"value\":\"ao_channel\"},{\"text\":{\"type\":\"plain_text\",\"text\":\"Current Channel\",\"emoji\":true},\"value\":\"current_channel\"},{\"text\":{\"type\":\"plain_text\",\"text\":\"Me\",\"emoji\":true},\"value\":\"self\"}]}},{\"type\":\"context\",\"block_id\":\"o=Mb\",\"elements\":[{\"type\":\"mrkdwn\",\"text\":\"Please wait after hitting submit!\",\"verbatim\":false}]}],\"private_metadata\":\"\",\"callback_id\":\"\",\"state\":{\"values\":{\"wXC7n\":{\"title.input\":{\"type\":\"plain_text_input\",\"value\":\"First One\"}},\"fOUB\":{\"ao.select\":{\"type\":\"channels_select\",\"selected_channel\":\"C03UBFXVBGD\"}},\"sJs7\":{\"date.select\":{\"type\":\"datepicker\",\"selected_date\":\"2023-02-25\"}},\"lfc\":{\"time.select\":{\"type\":\"timepicker\",\"selected_time\":\"05:15\"}},\"lqB\":{\"qs.select\":{\"type\":\"multi_users_select\",\"selected_users\":[\"U03T87KHRFE\"]}},\"+hS\":{\"why.input\":{\"type\":\"plain_text_input\",\"value\":\"Come out\"}},\"CdmN\":{\"equipment.select\":{\"type\":\"multi_static_select\",\"selected_options\":[{\"text\":{\"type\":\"plain_text\",\"text\":\"Coupons \\ud83e\\uddf1\",\"emoji\":true},\"value\":\"coupons\"},{\"text\":{\"type\":\"plain_text\",\"text\":\"Sandbag \\ud83d\\udc5d\",\"emoji\":true},\"value\":\"sandbag\"},{\"text\":{\"type\":\"plain_text\",\"text\":\"Ruck \\ud83c\\udf92\",\"emoji\":true},\"value\":\"ruck\"}]}},\"2Zt+\":{\"other_equipment.input\":{\"type\":\"plain_text_input\",\"value\":null}},\"kro=\":{\"fngs.input\":{\"type\":\"plain_text_input\",\"value\":\"Always\"}},\"8Nz\":{\"moleskin.textbox\":{\"type\":\"plain_text_input\",\"value\":\"Notice\"}},\"d4Vq\":{\"where_to_post.select\":{\"type\":\"static_select\",\"selected_option\":{\"text\":{\"type\":\"plain_text\",\"text\":\"Current Channel\",\"emoji\":true},\"value\":\"current_channel\"}}}}},\"hash\":\"1677341558.4sEYtlrJ\",\"title\":{\"type\":\"plain_text\",\"text\":\"Pre Blast\",\"emoji\":true},\"clear_on_close\":false,\"notify_on_close\":false,\"close\":null,\"submit\":{\"type\":\"plain_text\",\"text\":\"Submit\",\"emoji\":true},\"previous_view_id\":null,\"root_view_id\":\"V04RNAX0T6D\",\"app_id\":\"A03UAGJC9QD\",\"external_id\":\"\",\"app_installed_team_id\":\"T03T5J6801Z\",\"bot_id\":\"B03UG6KRSN8\"},\"response_urls\":[],\"is_enterprise_install\":false,\"enterprise\":null}";
         let parsed = serde_json::from_str::<InteractionPayload>(payload).unwrap();
-        if let InteractionPayload::ViewSubmission(submit) = parsed {
-            match submit.view {
-                ViewSubmissionPayloadView::Modal(modal) => {
-                    let values = modal.state.get_values();
-                    let where_post = values.get("where_to_post.select").unwrap();
-                    assert_eq!(
-                        where_post,
-                        &BasicValue::Single("current_channel".to_string())
-                    );
+        assert_eq!(parsed, InteractionPayload::ViewSubmission);
+        let parsed = serde_json::from_str::<ViewSubmissionPayload>(payload).unwrap();
+        match parsed.view {
+            ViewSubmissionPayloadView::Modal(modal) => {
+                let values = modal.state.get_values();
+                let where_post = values.get("where_to_post.select").unwrap();
+                assert_eq!(
+                    where_post,
+                    &BasicValue::Single("current_channel".to_string())
+                );
 
-                    let equipment = values.get("equipment.select").unwrap();
-                    assert_eq!(
-                        equipment,
-                        &BasicValue::Multi(vec![
-                            "coupons".to_string(),
-                            "sandbag".to_string(),
-                            "ruck".to_string()
-                        ])
-                    );
-                }
+                let equipment = values.get("equipment.select").unwrap();
+                assert_eq!(
+                    equipment,
+                    &BasicValue::Multi(vec![
+                        "coupons".to_string(),
+                        "sandbag".to_string(),
+                        "ruck".to_string()
+                    ])
+                );
+
+                let post = PreBlastPost::from(values);
+                assert_eq!(post.start_time, NaiveTime::from_hms(5, 15, 0));
             }
         }
         assert!(true);

@@ -38,6 +38,16 @@ fn parse_payload(payload: &str) -> Result<InteractionPayload, AppError> {
     Ok(result)
 }
 
+fn parse_block_actions(payload: &str) -> Result<BlockAction, AppError> {
+    let result = serde_json::from_str::<BlockAction>(payload)?;
+    Ok(result)
+}
+
+fn parse_view_submission(payload: &str) -> Result<ViewSubmissionPayload, AppError> {
+    let result = serde_json::from_str::<ViewSubmissionPayload>(payload)?;
+    Ok(result)
+}
+
 /// consume interactive events from slack
 pub async fn interactive_events(
     web_state: web::Data<MutableWebState>,
@@ -46,74 +56,86 @@ pub async fn interactive_events(
     body: web::Form<EventBody>,
 ) -> impl Responder {
     println!("{:?}", body);
-    if let Ok(body) = parse_payload(body.payload.as_str()) {
-        match body {
-            InteractionPayload::BlockActions(BlockAction {
-                actions,
-                user,
-                channel: action_channel,
-                message,
-                ..
-            }) if !actions.is_empty() => {
-                println!("With actions");
-                match &actions[0] {
-                    ActionType::Button(ButtonAction { action, .. }) => {
-                        println!("Button action");
-                        if let Err(err) = match_on_button_action(
-                            &db_pool,
-                            &app_state,
-                            &web_state,
-                            action,
-                            &user,
-                            &message,
-                            &action_channel,
-                        )
-                        .await
-                        {
-                            return HttpResponse::BadRequest().body(err.to_string());
+    if let Ok(payload) = parse_payload(body.payload.as_str()) {
+        match payload {
+            InteractionPayload::BlockActions => {
+                if let Ok(payload) = parse_block_actions(&body.payload) {
+                    match payload {
+                        BlockAction {
+                            actions,
+                            user,
+                            channel: action_channel,
+                            message,
+                            ..
+                        } if !actions.is_empty() => {
+                            println!("With actions");
+                            match &actions[0] {
+                                ActionType::Button(ButtonAction { action, .. }) => {
+                                    println!("Button action");
+                                    if let Err(err) = match_on_button_action(
+                                        &db_pool,
+                                        &app_state,
+                                        &web_state,
+                                        action,
+                                        &user,
+                                        &message,
+                                        &action_channel,
+                                    )
+                                    .await
+                                    {
+                                        return HttpResponse::BadRequest().body(err.to_string());
+                                    }
+                                }
+                                ActionType::Overflow(OverflowAction {
+                                    selected_option,
+                                    action,
+                                }) => {
+                                    println!("Overflow action");
+                                    if let Err(err) = match_on_overflow_action(
+                                        &db_pool,
+                                        &app_state,
+                                        &web_state,
+                                        &action_channel,
+                                        action,
+                                        selected_option,
+                                        &message,
+                                    )
+                                    .await
+                                    {
+                                        return HttpResponse::BadRequest().body(err.to_string());
+                                    }
+                                }
+                            }
                         }
+                        _ => {}
                     }
-                    ActionType::Overflow(OverflowAction {
-                        selected_option,
-                        action,
-                    }) => {
-                        println!("Overflow action");
-                        if let Err(err) = match_on_overflow_action(
-                            &db_pool,
-                            &app_state,
-                            &web_state,
-                            &action_channel,
-                            action,
-                            selected_option,
-                            &message,
-                        )
-                        .await
-                        {
-                            return HttpResponse::BadRequest().body(err.to_string());
-                        }
-                    }
+                } else {
+                    println!("Could not parse payload");
                 }
             }
-            InteractionPayload::ViewSubmission(ViewSubmissionPayload { user, view }) => {
-                match view {
-                    ViewSubmissionPayloadView::Modal(modal) => {
-                        let form_values = modal.state.get_values();
-                        let post = PreBlastPost::from(form_values);
-                        println!("from user {:?}", user.username);
-                        let message = convert_to_message(post);
-                        if let Err(err) = web_state.post_message(message).await {
-                            println!("error posting pre blast");
-                            println!("{:?}", err);
-                            return HttpResponse::BadRequest().body(err.to_string());
+            InteractionPayload::ViewSubmission => {
+                if let Ok(payload) = parse_view_submission(&body.payload) {
+                    let ViewSubmissionPayload { user, view } = payload;
+                    match view {
+                        ViewSubmissionPayloadView::Modal(modal) => {
+                            let form_values = modal.state.get_values();
+                            let post = PreBlastPost::from(form_values);
+                            println!("from user {:?}", user.username);
+                            let message = convert_to_message(post);
+                            if let Err(err) = web_state.post_message(message).await {
+                                println!("error posting pre blast");
+                                println!("{:?}", err);
+                                return HttpResponse::BadRequest().body(err.to_string());
+                            }
                         }
                     }
+                } else {
+                    println!("Could not parse payload");
                 }
             }
-            _ => {}
         }
-    } else {
-        println!("Could not parse payload");
     }
+
     HttpResponse::Ok().finish()
 }
 
