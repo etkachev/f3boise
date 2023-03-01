@@ -31,6 +31,7 @@ pub mod request {
 
 pub mod payload {
     use crate::slack_api::block_kit::{BlockBuilder, BlockType, TextObject};
+    use crate::web_api_routes::slash_commands::modal_utils::view_ids::ViewIds;
     use serde::Serialize;
 
     #[derive(Serialize, Debug)]
@@ -82,7 +83,12 @@ pub mod payload {
     }
 
     impl ViewModal {
-        pub fn new(title: &str, block_builder: BlockBuilder, submit_text: &str) -> Self {
+        pub fn new(
+            title: &str,
+            block_builder: BlockBuilder,
+            submit_text: &str,
+            view_id: ViewIds,
+        ) -> Self {
             ViewModal {
                 title: TextObject::new_text(title),
                 blocks: block_builder.blocks,
@@ -92,7 +98,7 @@ pub mod payload {
                 callback_id: None,
                 clean_on_close: None,
                 notify_on_close: None,
-                external_id: None,
+                external_id: Some(view_id.to_string()),
                 submit_disabled: None,
             }
         }

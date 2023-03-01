@@ -22,7 +22,9 @@ use sqlx::PgPool;
 
 pub mod ao_monthly_stats_graph;
 pub mod ao_stats;
+pub mod back_blast;
 pub mod invite_all;
+pub mod modal_utils;
 pub mod my_stats;
 pub mod pre_blast;
 pub mod q_line_up;
@@ -205,6 +207,19 @@ pub async fn slack_slash_commands_route(
             .await
             {
                 Ok(_) => HttpResponse::Ok().body("Opening Preblast modal"),
+                Err(err) => HttpResponse::Ok().body(err.to_string()),
+            }
+        }
+        "/bb" => {
+            match back_blast::generate_modal(
+                form.trigger_id.as_str(),
+                &web_state,
+                &form.channel_id,
+                &form.user_id,
+            )
+            .await
+            {
+                Ok(_) => HttpResponse::Ok().body("Opening Backblast modal"),
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
             }
         }

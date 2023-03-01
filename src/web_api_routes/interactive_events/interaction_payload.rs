@@ -1,5 +1,6 @@
 use crate::slack_api::block_kit::block_elements::OptionElement;
 use crate::slack_api::block_kit::{BlockType, TextObject};
+use crate::web_api_routes::slash_commands::modal_utils::view_ids::ViewIds;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -468,7 +469,16 @@ pub enum ViewSubmissionPayloadView {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ViewSubmissionPayloadViewModal {
     pub id: String,
+    pub external_id: Option<String>,
     pub state: InteractionStateValues,
+}
+
+impl ViewSubmissionPayloadViewModal {
+    pub fn modal_view_id(&self) -> Option<ViewIds> {
+        self.external_id
+            .as_ref()
+            .map(|external_id| ViewIds::from(external_id.as_str()))
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -570,6 +580,24 @@ impl InteractionStateValues {
 pub enum BasicValue {
     Single(String),
     Multi(Vec<String>),
+}
+
+impl BasicValue {
+    pub fn get_single(&self) -> Option<String> {
+        if let BasicValue::Single(value) = self {
+            Some(value.to_string())
+        } else {
+            None
+        }
+    }
+
+    pub fn get_multi_value(&self) -> Option<Vec<String>> {
+        if let BasicValue::Multi(value) = self {
+            Some(value.clone())
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]

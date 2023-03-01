@@ -6,7 +6,8 @@ use crate::slack_api::block_kit::block_elements::OptionElement;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::views::payload::{ViewModal, ViewPayload};
 use crate::slack_api::views::request::ViewsOpenRequest;
-use crate::web_api_routes::slash_commands::pre_blast::pre_blast_post::PreBlastWhere;
+use crate::web_api_routes::slash_commands::modal_utils::view_ids::ViewIds;
+use crate::web_api_routes::slash_commands::modal_utils::{default_post_option, where_to_post_list};
 use crate::web_api_state::MutableWebState;
 use chrono::{Datelike, Duration, NaiveDate};
 
@@ -116,7 +117,7 @@ fn create_pre_blast_modal(channel_id: &str, user_id: &str) -> ViewModal {
         )
         .context("Please wait after hitting submit!");
 
-    ViewModal::new("Pre Blast", block_builder, "Submit")
+    ViewModal::new("Pre Blast", block_builder, "Submit", ViewIds::PreBlast)
 }
 
 fn get_next_ao_date(ao: &AO) -> NaiveDate {
@@ -140,17 +141,5 @@ fn equipment_list() -> Vec<OptionElement> {
         OptionElement::from(AoEquipment::Sandbag),
         OptionElement::from(AoEquipment::Ruck),
         OptionElement::from(AoEquipment::RunningShoes),
-    ]
-}
-
-fn default_post_option() -> OptionElement {
-    OptionElement::from(PreBlastWhere::default())
-}
-
-fn where_to_post_list(channel_id: &str) -> Vec<OptionElement> {
-    vec![
-        default_post_option(),
-        OptionElement::from(PreBlastWhere::CurrentChannel(channel_id.to_string())),
-        OptionElement::from(PreBlastWhere::Myself),
     ]
 }
