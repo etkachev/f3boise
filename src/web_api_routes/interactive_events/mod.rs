@@ -111,8 +111,10 @@ pub async fn interactive_events(
                 }
             }
             InteractionPayload::ViewSubmission => {
+                println!("parsing view submission");
                 if let Ok(payload) = parse_view_submission(&body.payload) {
                     if let Err(err) = handle_view_submission(&payload, &web_state).await {
+                        println!("{:?}", err);
                         return HttpResponse::BadRequest().body(err.to_string());
                     }
                 } else {
