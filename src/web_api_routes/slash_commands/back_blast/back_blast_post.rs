@@ -147,13 +147,13 @@ pub fn convert_to_message(post: BackBlastPost) -> PostMessageRequest {
     };
 
     let first_section = format!(
-        "*Slackblast*:\
-{}\
-*DATE*: {}\
-*AO*: <#{}>\
-*Q(s)*: {}\
-*PAX*: {}\
-*FNGs*: {}\
+        "*Slackblast*:\n
+{}\n
+*DATE*: {}\n
+*AO*: <#{}>\n
+*Q(s)*: {}\n
+*PAX*: {}\n
+*FNGs*: {}\n
 *COUNT*: {}",
         post.title,
         post.date,
