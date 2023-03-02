@@ -53,7 +53,7 @@ pub mod response {
     #[derive(Deserialize, Debug)]
     pub struct PostMessageResponse {
         pub ok: bool,
-        pub channel: String,
+        pub channel: Option<String>,
         pub error: Option<String>,
     }
 }
