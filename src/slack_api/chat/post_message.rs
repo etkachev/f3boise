@@ -10,9 +10,13 @@ pub mod request {
         /// Channel, private group, or IM channel to send message to. Can be an encoded ID, or a name. See below for more details
         pub channel: String,
         pub blocks: Vec<BlockType>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         pub as_user: Option<bool>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         pub icon_emoji: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         pub icon_url: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         pub username: Option<String>,
     }
 
