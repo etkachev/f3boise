@@ -1,5 +1,6 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::equipment::AoEquipment;
+use crate::app_state::MutableAppState;
 use crate::slack_api::block_kit::block_elements::OptionElement;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
@@ -38,6 +39,15 @@ impl PreBlastPost {
             .map(|item| OptionElement::from(item).text.text)
             .collect::<Vec<String>>()
             .join(", ")
+    }
+
+    pub fn get_first_q(&self) -> Option<String> {
+        self.qs
+            .iter()
+            .map(|q| q.to_string())
+            .collect::<Vec<String>>()
+            .first()
+            .map(|q| q.to_string())
     }
 }
 
@@ -136,13 +146,21 @@ pub mod pre_blast_action_ids {
     pub const WHERE_POST: &str = "where_to_post.select";
 }
 
-pub fn convert_to_message(post: PreBlastPost) -> PostMessageRequest {
+pub fn convert_to_message(post: PreBlastPost, app_state: &MutableAppState) -> PostMessageRequest {
     let channel_id = match &post.post_where {
         BlastWhere::AoChannel => post.ao.channel_id().to_string(),
         BlastWhere::CurrentChannel(id) => id.to_string(),
         // TODO
         BlastWhere::Myself => "TODO".to_string(),
     };
+
+    let user = if let Some(id) = post.get_first_q() {
+        let app = app_state.app.lock().unwrap();
+        app.get_user(&id)
+    } else {
+        None
+    };
+
     let block_builder = BlockBuilder::new()
         .section_markdown(&format!("*Preblast: {}*", post.title))
         .section_markdown(&format!("*Date*: {}", post.date))
@@ -156,5 +174,9 @@ pub fn convert_to_message(post: PreBlastPost) -> PostMessageRequest {
         .section_markdown(&post.mole_skin)
         .divider();
 
-    PostMessageRequest::new(&channel_id, block_builder.blocks)
+    if let Some(f3_user) = user {
+        PostMessageRequest::new_as_user(&channel_id, block_builder.blocks, f3_user)
+    } else {
+        PostMessageRequest::new(&channel_id, block_builder.blocks)
+    }
 }

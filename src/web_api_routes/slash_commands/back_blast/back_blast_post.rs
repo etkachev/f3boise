@@ -25,6 +25,7 @@ pub struct BackBlastPost {
     pub ao: AO,
     pub qs: HashSet<String>,
     pub pax: HashSet<String>,
+    pub non_slack_pax: HashSet<String>,
     pub fngs: HashSet<String>,
     pub mole_skine: String,
     pub blast_where: BlastWhere,
@@ -37,7 +38,7 @@ impl BackBlastPost {
             .iter()
             .map(|q| format!("<@{}>", q))
             .collect::<Vec<String>>()
-            .join(",")
+            .join(", ")
     }
 
     pub fn pax_list(&self) -> String {
@@ -46,17 +47,18 @@ impl BackBlastPost {
             .iter()
             .map(|item| format!("<@{}>", item))
             .collect::<Vec<String>>();
-        let fngs = self.fng_list();
-        pax.extend(fngs);
-        pax.join(",")
+        pax.extend(self.non_slack_pax());
+        pax.extend(self.fng_list());
+        pax.join(", ")
     }
 
     pub fn fng_string_list(&self) -> String {
-        self.fng_list().join(",")
+        self.fng_list().join(", ")
     }
 
     pub fn pax_count(&self) -> usize {
         let mut pax = self.pax.clone();
+        pax.extend(self.non_slack_pax.clone());
         pax.extend(self.qs.clone());
         pax.extend(self.fngs.clone());
         pax.len()
@@ -64,6 +66,13 @@ impl BackBlastPost {
 
     fn fng_list(&self) -> Vec<String> {
         self.fngs
+            .iter()
+            .map(|item| item.trim().to_string())
+            .collect::<Vec<String>>()
+    }
+
+    fn non_slack_pax(&self) -> Vec<String> {
+        self.non_slack_pax
             .iter()
             .map(|item| item.trim().to_string())
             .collect::<Vec<String>>()
@@ -98,7 +107,7 @@ impl From<HashMap<String, BasicValue>> for BackBlastPost {
             .map(value_utils::get_hash_set_strings_from_multi)
             .unwrap_or_default();
 
-        let mut slack_pax = value
+        let slack_pax = value
             .get(back_blast_post_action_ids::PAX)
             .map(value_utils::get_hash_set_strings_from_multi)
             .unwrap_or_default();
@@ -107,8 +116,6 @@ impl From<HashMap<String, BasicValue>> for BackBlastPost {
             .get(back_blast_post_action_ids::UNTAGGABLE_PAX)
             .map(value_utils::get_hash_set_from_single_comma_split)
             .unwrap_or_default();
-
-        slack_pax.extend(non_slack_pax);
 
         let fngs = value
             .get(back_blast_post_action_ids::FNGS)
@@ -131,6 +138,7 @@ impl From<HashMap<String, BasicValue>> for BackBlastPost {
             ao,
             qs,
             pax: slack_pax,
+            non_slack_pax,
             fngs,
             mole_skine,
             blast_where,
@@ -169,4 +177,70 @@ pub fn convert_to_message(post: BackBlastPost) -> PostMessageRequest {
         .divider()
         .section_markdown(post.mole_skine.as_str());
     PostMessageRequest::new(&channel_id, block_builder.blocks)
+}
+
+pub fn get_first_message_section(post: &BackBlastPost) -> String {
+    format!(
+        "*Slackblast*:\n
+{}\n
+*DATE*: {}\n
+*AO*: <#{}>\n
+*Q(s)*: {}\n
+*PAX*: {}\n
+*FNGs*: {}\n
+*COUNT*: {}",
+        post.title,
+        post.date,
+        post.ao.channel_id(),
+        post.qs_list(),
+        post.pax_list(),
+        post.fng_string_list(),
+        post.pax_count()
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::app_state::parse_backblast::parse_back_blast;
+    use crate::slack_api::channels::list::response::ChannelData;
+    use crate::slack_api::channels::public_channels::PublicChannels;
+    use crate::users::f3_user::F3User;
+
+    fn empty_channels() -> HashMap<PublicChannels, ChannelData> {
+        HashMap::from([])
+    }
+
+    fn hash_set_user(id: &str, name: &str) -> (String, F3User) {
+        (
+            id.to_string(),
+            F3User {
+                id: Some(id.to_string()),
+                name: name.to_string(),
+                email: "email@test.com".to_string(),
+                img_url: None,
+            },
+        )
+    }
+
+    #[test]
+    fn parse_from_back_blast_command() {
+        let post = BackBlastPost {
+            title: "Title".to_string(),
+            date: NaiveDate::from_ymd(2023, 3, 2),
+            ao: AO::Bleach,
+            qs: HashSet::from(["Stinger".to_string()]),
+            pax: HashSet::from(["Freighter".to_string(), "Backslash".to_string()]),
+            non_slack_pax: HashSet::from([]),
+            fngs: HashSet::from(["Fng".to_string()]),
+            mole_skine: "The Thang".to_string(),
+            blast_where: BlastWhere::AoChannel,
+        };
+
+        let message = get_first_message_section(&post);
+        let users = HashMap::<String, F3User>::from([hash_set_user("U03SR452HL7", "Backslash")]);
+        let parsed = parse_back_blast(&message, &users, &empty_channels());
+        println!("{:?}", parsed);
+        assert_eq!(true, true);
+    }
 }

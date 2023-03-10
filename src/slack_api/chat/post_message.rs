@@ -10,12 +10,16 @@ pub mod request {
         /// Channel, private group, or IM channel to send message to. Can be an encoded ID, or a name. See below for more details
         pub channel: String,
         pub blocks: Vec<BlockType>,
+        /// (Legacy) Pass true to post the message as the authed user instead of as a bot. Defaults to false. Can only be used by classic Slack apps.
         #[serde(skip_serializing_if = "Option::is_none")]
         pub as_user: Option<bool>,
+        /// Emoji to use as the icon for this message. Overrides icon_url. Must be used in conjunction with as_user set to false, otherwise ignored. See authorship below
         #[serde(skip_serializing_if = "Option::is_none")]
         pub icon_emoji: Option<String>,
+        /// URL to an image to use as the icon for this message. Must be used in conjunction with as_user set to false, otherwise ignored. See authorship below
         #[serde(skip_serializing_if = "Option::is_none")]
         pub icon_url: Option<String>,
+        /// Set your bot's user name. Must be used in conjunction with as_user set to false, otherwise ignored. See authorship below
         #[serde(skip_serializing_if = "Option::is_none")]
         pub username: Option<String>,
     }
@@ -36,10 +40,10 @@ pub mod request {
             PostMessageRequest {
                 channel: channel.to_string(),
                 blocks,
-                as_user: Some(true),
+                as_user: None,
                 icon_url: user.img_url.clone(),
                 icon_emoji: None,
-                username: Some(user.name),
+                username: Some(format!("{} (via BoiseBot)", user.name)),
             }
         }
     }

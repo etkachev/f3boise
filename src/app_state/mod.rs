@@ -109,4 +109,8 @@ impl AppState {
                 acc
             })
     }
+
+    pub fn get_user(&self, id: &str) -> Option<F3User> {
+        self.users.get(id).cloned()
+    }
 }
