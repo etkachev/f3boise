@@ -1,4 +1,5 @@
 use crate::app_state::ao_data::AO;
+use crate::app_state::backblast_data::BackBlastData;
 use crate::app_state::MutableAppState;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
@@ -42,6 +43,7 @@ impl BackBlastPost {
             .join(", ")
     }
 
+    /// get full list of pax (slack, non-slack, and fngs) as comma separated string.
     pub fn pax_list(&self) -> String {
         let mut pax = self
             .pax
@@ -53,6 +55,7 @@ impl BackBlastPost {
         pax.join(", ")
     }
 
+    /// get the first q (to post message as)
     pub fn get_first_q(&self) -> Option<String> {
         self.qs
             .iter()
@@ -62,10 +65,12 @@ impl BackBlastPost {
             .map(|q| q.to_string())
     }
 
+    /// fng list string with comma separated.
     pub fn fng_string_list(&self) -> String {
         self.fng_list().join(", ")
     }
 
+    /// get total pax count
     pub fn pax_count(&self) -> usize {
         let mut pax = self.pax.clone();
         pax.extend(self.non_slack_pax.clone());
@@ -74,6 +79,7 @@ impl BackBlastPost {
         pax.len()
     }
 
+    /// get list of fngs with names trimmed.
     fn fng_list(&self) -> Vec<String> {
         self.fngs
             .iter()
@@ -81,6 +87,7 @@ impl BackBlastPost {
             .collect::<Vec<String>>()
     }
 
+    /// get non-slack pax with names trimmed.
     fn non_slack_pax(&self) -> Vec<String> {
         self.non_slack_pax
             .iter()
@@ -154,6 +161,43 @@ impl From<HashMap<String, BasicValue>> for BackBlastPost {
             blast_where,
         }
     }
+}
+
+/// convert to back blast data for saving
+pub fn convert_to_bb_data(request: &BackBlastPost, app_state: &MutableAppState) -> BackBlastData {
+    let users = {
+        let app = app_state.app.lock().unwrap();
+        app.get_slack_id_map()
+    };
+
+    let qs = request
+        .qs
+        .iter()
+        .fold(HashSet::<String>::new(), |mut acc, q| {
+            if let Some(name) = users.get(q.as_str()) {
+                acc.insert(name.to_string());
+            } else {
+                acc.insert(q.to_string());
+            }
+            acc
+        });
+
+    let mut pax = request
+        .pax
+        .iter()
+        .fold(HashSet::<String>::new(), |mut acc, item| {
+            if let Some(name) = users.get(item.as_str()) {
+                acc.insert(name.to_string());
+            } else {
+                acc.insert(item.to_string());
+            }
+            acc
+        });
+
+    pax.extend(request.non_slack_pax.clone());
+    pax.extend(request.fngs.clone());
+
+    BackBlastData::new(request.ao.clone(), qs, pax, request.date)
 }
 
 pub fn convert_to_message(post: BackBlastPost, app_state: &MutableAppState) -> PostMessageRequest {

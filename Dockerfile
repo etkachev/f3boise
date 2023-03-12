@@ -1,4 +1,5 @@
 # Builder stage
+# TODO switch to 1.68.0 when available
 FROM lukemathwalker/cargo-chef:latest-rust-1.67.1 AS chef
 
 # Let's switch our working directory to `app` (equivalent to `cd app`)
