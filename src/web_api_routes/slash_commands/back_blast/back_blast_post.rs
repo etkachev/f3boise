@@ -4,6 +4,7 @@ use crate::app_state::MutableAppState;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
 use crate::web_api_routes::interactive_events::interaction_payload::BasicValue;
+use crate::web_api_routes::slack_events::event_times::EventTimes;
 use crate::web_api_routes::slash_commands::modal_utils::{value_utils, BlastWhere};
 use chrono::NaiveDate;
 use std::collections::{HashMap, HashSet};
@@ -197,10 +198,18 @@ pub fn convert_to_bb_data(request: &BackBlastPost, app_state: &MutableAppState) 
     pax.extend(request.non_slack_pax.clone());
     pax.extend(request.fngs.clone());
 
-    BackBlastData::new(request.ao.clone(), qs, pax, request.date)
+    let mut data = BackBlastData::new(request.ao.clone(), qs, pax, request.date);
+
+    // setting for it to exist, but not valid.
+    data.set_event_times(EventTimes::new("temp".to_string(), "temp".to_string()));
+    data
 }
 
-pub fn convert_to_message(post: BackBlastPost, app_state: &MutableAppState) -> PostMessageRequest {
+pub fn convert_to_message(
+    post: BackBlastPost,
+    app_state: &MutableAppState,
+    is_valid: bool,
+) -> PostMessageRequest {
     let channel_id = match &post.blast_where {
         BlastWhere::AoChannel => post.ao.channel_id().to_string(),
         BlastWhere::CurrentChannel(id) => id.to_string(),
@@ -233,10 +242,16 @@ pub fn convert_to_message(post: BackBlastPost, app_state: &MutableAppState) -> P
         post.pax_count()
     );
 
+    let valid_context_text = if is_valid {
+        "Saved backblast"
+    } else {
+        "Did not save backblast"
+    };
     let block_builder = BlockBuilder::new()
         .section_markdown(&first_section)
         .divider()
-        .section_markdown(post.mole_skine.as_str());
+        .section_markdown(post.mole_skine.as_str())
+        .context(valid_context_text);
 
     if let Some(user) = user {
         PostMessageRequest::new_as_user(&channel_id, block_builder.blocks, user)

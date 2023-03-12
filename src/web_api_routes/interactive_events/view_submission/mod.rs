@@ -47,8 +47,11 @@ async fn handle_back_blast_submission(
     let form_values = modal.state.get_values();
     let post = back_blast_post::BackBlastPost::from(form_values);
     let db_data = back_blast_post::convert_to_bb_data(&post, app_state);
-    save_back_blast::save(db_pool, &[db_data]).await?;
-    let message = back_blast_post::convert_to_message(post, app_state);
+    let is_valid = db_data.is_valid_back_blast();
+    if is_valid {
+        save_back_blast::save(db_pool, &[db_data]).await?;
+    }
+    let message = back_blast_post::convert_to_message(post, app_state, is_valid);
     web_state.post_message(message).await
 }
 
