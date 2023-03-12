@@ -1,14 +1,10 @@
 /// enum of available views (modals) that we generate for the app)
+#[derive(Default)]
 pub enum ViewIds {
     PreBlast,
     BackBlast,
+    #[default]
     Unknown,
-}
-
-impl Default for ViewIds {
-    fn default() -> Self {
-        ViewIds::Unknown
-    }
 }
 
 impl ToString for ViewIds {

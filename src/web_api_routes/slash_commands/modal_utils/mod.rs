@@ -6,17 +6,12 @@ pub mod value_utils;
 pub mod view_ids;
 
 /// where to post a modal submission response. (for preblast or backblast)
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum BlastWhere {
+    #[default]
     AoChannel,
     CurrentChannel(String),
     Myself,
-}
-
-impl Default for BlastWhere {
-    fn default() -> Self {
-        BlastWhere::AoChannel
-    }
 }
 
 impl ToString for BlastWhere {

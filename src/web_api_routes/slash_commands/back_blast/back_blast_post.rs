@@ -1,4 +1,5 @@
 use crate::app_state::ao_data::AO;
+use crate::app_state::MutableAppState;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
 use crate::web_api_routes::interactive_events::interaction_payload::BasicValue;
@@ -50,6 +51,15 @@ impl BackBlastPost {
         pax.extend(self.non_slack_pax());
         pax.extend(self.fng_list());
         pax.join(", ")
+    }
+
+    pub fn get_first_q(&self) -> Option<String> {
+        self.qs
+            .iter()
+            .map(|q| q.to_string())
+            .collect::<Vec<String>>()
+            .first()
+            .map(|q| q.to_string())
     }
 
     pub fn fng_string_list(&self) -> String {
@@ -146,12 +156,19 @@ impl From<HashMap<String, BasicValue>> for BackBlastPost {
     }
 }
 
-pub fn convert_to_message(post: BackBlastPost) -> PostMessageRequest {
+pub fn convert_to_message(post: BackBlastPost, app_state: &MutableAppState) -> PostMessageRequest {
     let channel_id = match &post.blast_where {
         BlastWhere::AoChannel => post.ao.channel_id().to_string(),
         BlastWhere::CurrentChannel(id) => id.to_string(),
         // TODO
         BlastWhere::Myself => "TODO".to_string(),
+    };
+
+    let user = if let Some(id) = post.get_first_q() {
+        let app = app_state.app.lock().unwrap();
+        app.get_user(&id)
+    } else {
+        None
     };
 
     let first_section = format!(
@@ -176,7 +193,12 @@ pub fn convert_to_message(post: BackBlastPost) -> PostMessageRequest {
         .section_markdown(&first_section)
         .divider()
         .section_markdown(post.mole_skine.as_str());
-    PostMessageRequest::new(&channel_id, block_builder.blocks)
+
+    if let Some(user) = user {
+        PostMessageRequest::new_as_user(&channel_id, block_builder.blocks, user)
+    } else {
+        PostMessageRequest::new(&channel_id, block_builder.blocks)
+    }
 }
 
 pub fn get_first_message_section(post: &BackBlastPost) -> String {

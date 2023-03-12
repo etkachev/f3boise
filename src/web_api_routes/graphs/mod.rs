@@ -1,4 +1,5 @@
 use crate::shared::common_errors::AppError;
+use resvg::usvg_text_layout::TreeTextToPath;
 
 pub mod ao_monthly_leaderboard;
 pub mod ao_pax_leaderboard;
@@ -16,10 +17,14 @@ pub trait GraphWrapper {
     /// convert local svg file to png bytes. Can be used to upload to slack channels
     fn convert_svg(&self) -> Result<Vec<u8>, AppError> {
         let file = std::fs::read(self.file_path())?;
-        let mut options = resvg::usvg::Options::default();
-        options.fontdb.load_system_fonts();
-        options.fontdb.load_fonts_dir("./assets/fonts/");
-        let tree = resvg::usvg::Tree::from_data(&file, &options.to_ref())?;
+        let options = resvg::usvg::Options::default();
+
+        let mut fontdb = resvg::usvg_text_layout::fontdb::Database::new();
+        fontdb.load_system_fonts();
+        fontdb.load_fonts_dir("./assets/fonts/");
+        let mut tree = resvg::usvg::Tree::from_data(&file, &options)?;
+        tree.convert_text(&fontdb);
+
         let mut pixmap = resvg::tiny_skia::Pixmap::new(self.width(), self.height()).unwrap();
         resvg::render(
             &tree,

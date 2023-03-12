@@ -124,7 +124,6 @@ fn parse_users_list(text: &str, users: &HashMap<String, F3User>) -> HashSet<Stri
     let text = text.trim();
     let split_names = text
         .split(|c| c == ' ' || c == ',')
-        .into_iter()
         .filter(|c| !c.trim().is_empty())
         .filter(|c| {
             c.starts_with('@')

@@ -21,7 +21,9 @@ pub async fn handle_view_submission(
                     ViewIds::PreBlast => {
                         handle_pre_blast_submission(modal, web_state, app_state, user).await
                     }
-                    ViewIds::BackBlast => handle_back_blast_submission(modal, web_state).await,
+                    ViewIds::BackBlast => {
+                        handle_back_blast_submission(modal, web_state, app_state).await
+                    }
                     ViewIds::Unknown => Ok(()),
                 }
             } else {
@@ -34,10 +36,11 @@ pub async fn handle_view_submission(
 async fn handle_back_blast_submission(
     modal: &ViewSubmissionPayloadViewModal,
     web_state: &MutableWebState,
+    app_state: &MutableAppState,
 ) -> Result<(), AppError> {
     let form_values = modal.state.get_values();
     let post = back_blast_post::BackBlastPost::from(form_values);
-    let message = back_blast_post::convert_to_message(post);
+    let message = back_blast_post::convert_to_message(post, app_state);
     web_state.post_message(message).await
 }
 
