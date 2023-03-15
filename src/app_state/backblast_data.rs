@@ -38,6 +38,11 @@ impl BackBlastData {
         }
     }
 
+    pub fn with_type(mut self, bb_type: BackBlastType) -> Self {
+        self.bb_type = bb_type;
+        self
+    }
+
     pub fn set_pax(&mut self, pax: HashSet<String>) {
         self.pax = pax;
     }
@@ -88,8 +93,9 @@ impl BackBlastData {
     }
 }
 
-#[derive(Deserialize, Serialize, PartialEq, Debug, Eq)]
+#[derive(Deserialize, Serialize, PartialEq, Debug, Eq, Default, Clone)]
 pub enum BackBlastType {
+    #[default]
     BackBlast,
     DoubleDown,
     // TODO more types like DoubleDown, etc

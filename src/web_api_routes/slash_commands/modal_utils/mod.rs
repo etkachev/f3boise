@@ -1,3 +1,4 @@
+use crate::app_state::backblast_data::BackBlastType;
 use crate::shared::common_errors::AppError;
 use crate::slack_api::block_kit::block_elements::OptionElement;
 use std::str::FromStr;
@@ -63,4 +64,28 @@ pub fn where_to_post_list(channel_id: &str) -> Vec<OptionElement> {
         OptionElement::from(BlastWhere::CurrentChannel(channel_id.to_string())),
         OptionElement::from(BlastWhere::Myself),
     ]
+}
+
+/// default back_blast type for modal
+pub fn default_back_blast_type() -> OptionElement {
+    OptionElement::from(BackBlastType::BackBlast)
+}
+
+/// get list of back blast types for modal
+pub fn back_blast_types_list() -> Vec<OptionElement> {
+    vec![
+        default_back_blast_type(),
+        OptionElement::from(BackBlastType::DoubleDown),
+    ]
+}
+
+impl From<BackBlastType> for OptionElement {
+    fn from(value: BackBlastType) -> Self {
+        match value {
+            BackBlastType::BackBlast => OptionElement::new("BD", value.to_string().as_str()),
+            BackBlastType::DoubleDown => {
+                OptionElement::new("Double Down", value.to_string().as_str())
+            }
+        }
+    }
 }

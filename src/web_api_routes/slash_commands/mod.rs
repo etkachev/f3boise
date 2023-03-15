@@ -197,7 +197,7 @@ pub async fn slack_slash_commands_route(
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
             }
         }
-        "/dd" => {
+        "/dd" | "/preblast" => {
             match pre_blast::generate_modal(
                 form.trigger_id.as_str(),
                 &web_state,
@@ -210,7 +210,7 @@ pub async fn slack_slash_commands_route(
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
             }
         }
-        "/bb" => {
+        "/bb" | "/backblast" | "/slackblast" => {
             match back_blast::generate_modal(
                 form.trigger_id.as_str(),
                 &web_state,

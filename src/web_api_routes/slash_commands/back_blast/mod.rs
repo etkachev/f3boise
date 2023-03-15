@@ -4,7 +4,9 @@ use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::views::payload::{ViewModal, ViewPayload};
 use crate::slack_api::views::request::ViewsOpenRequest;
 use crate::web_api_routes::slash_commands::modal_utils::view_ids::ViewIds;
-use crate::web_api_routes::slash_commands::modal_utils::{default_post_option, where_to_post_list};
+use crate::web_api_routes::slash_commands::modal_utils::{
+    back_blast_types_list, default_back_blast_type, default_post_option, where_to_post_list,
+};
 use crate::web_api_state::MutableWebState;
 
 pub mod back_blast_post;
@@ -82,6 +84,13 @@ fn create_modal(channel_id: &str, user_id: &str) -> ViewModal {
             Some(default_moleskine),
             false,
         ).context("If trying to tag PAX in here, substitute _ for spaces and do not include titles in parenthesis (ie, @Moneyball not @Moneyball_(F3_STC)). Spelling is important, capitalization is not!")
+        .select(
+            "Backblast type",
+            back_blast_post::back_blast_post_action_ids::BB_TYPE,
+            back_blast_types_list(),
+            Some(default_back_blast_type()),
+            false,
+        )
         .select(
             "Choose where to post this",
             back_blast_post::back_blast_post_action_ids::WHERE_TO_POST,

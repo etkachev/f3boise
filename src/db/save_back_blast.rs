@@ -28,7 +28,6 @@ impl From<&BackBlastData> for BackBlastDbEntry {
             date: data.date,
             q: q.join(","),
             pax: pax.join(","),
-            // TODO defaults to backblast type.
             bb_type: data.bb_type.to_string(),
             channel_id: data.ao.channel_id().to_string(),
             active: !data.ao.is_otb(),

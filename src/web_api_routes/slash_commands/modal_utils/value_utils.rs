@@ -1,4 +1,5 @@
 use crate::app_state::ao_data::AO;
+use crate::app_state::backblast_data::BackBlastType;
 use crate::app_state::equipment::AoEquipment;
 use crate::web_api_routes::interactive_events::interaction_payload::BasicValue;
 use crate::web_api_routes::slash_commands::modal_utils::BlastWhere;
@@ -64,6 +65,10 @@ pub fn get_hash_set_from_single_comma_split(value: &BasicValue) -> HashSet<Strin
 
 pub fn get_blast_where_value(value: &BasicValue) -> BlastWhere {
     BlastWhere::from_str(value.get_single().unwrap_or_default().as_str()).unwrap_or_default()
+}
+
+pub fn get_back_blast_type(value: &BasicValue) -> BackBlastType {
+    BackBlastType::from(value.get_single().unwrap_or_default().as_str())
 }
 
 pub fn get_equipment_multi_value(value: &BasicValue) -> HashSet<AoEquipment> {

@@ -1,5 +1,5 @@
 use crate::app_state::ao_data::AO;
-use crate::app_state::backblast_data::BackBlastData;
+use crate::app_state::backblast_data::{BackBlastData, BackBlastType};
 use crate::app_state::MutableAppState;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
@@ -19,6 +19,7 @@ pub mod back_blast_post_action_ids {
     pub const FNGS: &str = "fngs.input";
     pub const MOLESKINE: &str = "moleskine.textarea";
     pub const WHERE_TO_POST: &str = "where-post.select";
+    pub const BB_TYPE: &str = "back_blast_type.select";
 }
 
 #[derive(Debug)]
@@ -32,6 +33,7 @@ pub struct BackBlastPost {
     pub fngs: HashSet<String>,
     pub mole_skine: String,
     pub blast_where: BlastWhere,
+    pub bb_type: BackBlastType,
 }
 
 impl BackBlastPost {
@@ -150,6 +152,11 @@ impl From<HashMap<String, BasicValue>> for BackBlastPost {
             .map(value_utils::get_blast_where_value)
             .unwrap_or_default();
 
+        let bb_type = value
+            .get(back_blast_post_action_ids::BB_TYPE)
+            .map(value_utils::get_back_blast_type)
+            .unwrap_or_default();
+
         BackBlastPost {
             title,
             date,
@@ -160,6 +167,7 @@ impl From<HashMap<String, BasicValue>> for BackBlastPost {
             fngs,
             mole_skine,
             blast_where,
+            bb_type,
         }
     }
 }
@@ -198,7 +206,9 @@ pub fn convert_to_bb_data(request: &BackBlastPost, app_state: &MutableAppState) 
     pax.extend(request.non_slack_pax.clone());
     pax.extend(request.fngs.clone());
 
-    let mut data = BackBlastData::new(request.ao.clone(), qs, pax, request.date);
+    let bb_type = request.bb_type.clone();
+
+    let mut data = BackBlastData::new(request.ao.clone(), qs, pax, request.date).with_type(bb_type);
 
     // setting for it to exist, but not valid.
     data.set_event_times(EventTimes::new("temp".to_string(), "temp".to_string()));
@@ -316,6 +326,7 @@ mod tests {
             fngs: HashSet::from(["Fng".to_string()]),
             mole_skine: "The Thang".to_string(),
             blast_where: BlastWhere::AoChannel,
+            bb_type: BackBlastType::BackBlast,
         };
 
         let message = get_first_message_section(&post);
