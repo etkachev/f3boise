@@ -76,6 +76,7 @@ pub fn back_blast_types_list() -> Vec<OptionElement> {
     vec![
         default_back_blast_type(),
         OptionElement::from(BackBlastType::DoubleDown),
+        OptionElement::from(BackBlastType::OffTheBooks),
     ]
 }
 
@@ -85,6 +86,9 @@ impl From<BackBlastType> for OptionElement {
             BackBlastType::BackBlast => OptionElement::new("BD", value.to_string().as_str()),
             BackBlastType::DoubleDown => {
                 OptionElement::new("Double Down", value.to_string().as_str())
+            }
+            BackBlastType::OffTheBooks => {
+                OptionElement::new("Off the Books", value.to_string().as_str())
             }
         }
     }

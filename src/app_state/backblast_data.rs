@@ -98,7 +98,7 @@ pub enum BackBlastType {
     #[default]
     BackBlast,
     DoubleDown,
-    // TODO more types like DoubleDown, etc
+    OffTheBooks,
 }
 
 impl ToString for BackBlastType {
@@ -106,6 +106,7 @@ impl ToString for BackBlastType {
         match self {
             BackBlastType::BackBlast => "backblast".to_string(),
             BackBlastType::DoubleDown => "doubledown".to_string(),
+            BackBlastType::OffTheBooks => "otb".to_string(),
         }
     }
 }
@@ -115,6 +116,7 @@ impl From<&str> for BackBlastType {
         match bb_type {
             "backblast" => BackBlastType::BackBlast,
             "doubledown" => BackBlastType::DoubleDown,
+            "otb" => BackBlastType::OffTheBooks,
             _ => BackBlastType::BackBlast,
         }
     }
@@ -194,5 +196,17 @@ impl Default for BackBlastData {
             bb_type: BackBlastType::BackBlast,
             event_times: None,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn otb_conversion() {
+        let otb = BackBlastType::OffTheBooks.to_string();
+        let back = BackBlastType::from(otb.as_str());
+        assert_eq!(back, BackBlastType::OffTheBooks);
     }
 }

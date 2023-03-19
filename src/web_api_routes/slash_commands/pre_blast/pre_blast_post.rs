@@ -94,7 +94,10 @@ impl From<HashMap<String, BasicValue>> for PreBlastPost {
                 v.get_single().unwrap_or_default().split(',').fold(
                     HashSet::<AoEquipment>::new(),
                     |mut acc, item| {
-                        acc.insert(AoEquipment::Other(item.to_string()));
+                        let item = item.trim();
+                        if !item.is_empty() {
+                            acc.insert(AoEquipment::Other(item.to_string()));
+                        }
                         acc
                     },
                 )
