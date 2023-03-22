@@ -10,7 +10,7 @@ use crate::slack_api::block_kit::BlockType;
 use crate::web_api_routes::interactive_events::interaction_payload::{
     Action, ActionChannel, InteractionMessageTypes,
 };
-use crate::web_api_routes::interactive_events::interaction_types::ActionComboData;
+use crate::web_api_routes::interactive_events::interaction_types::QSheetActionComboData;
 use crate::web_api_routes::interactive_events::message_utils::update_message_blocks_after_mut;
 use crate::web_api_routes::interactive_events::q_line_up::utils::{
     get_ao_string_from_blocks, get_existing_q_overflow_options,
@@ -23,7 +23,7 @@ pub mod utils;
 pub async fn clear_and_update_message(
     db_pool: &PgPool,
     web_state: &MutableWebState,
-    action_combo: &ActionComboData,
+    action_combo: &QSheetActionComboData,
     channel_id: &str,
     action_channel: &Option<ActionChannel>,
     message: &Option<InteractionMessageTypes>,
@@ -37,7 +37,7 @@ pub async fn clear_and_update_message(
 
 pub async fn process_q_line_up_event(
     db_pool: &PgPool,
-    action: &ActionComboData,
+    action: &QSheetActionComboData,
     users: Vec<String>,
     channel_id: String,
 ) -> Result<(), AppError> {
@@ -56,8 +56,9 @@ pub async fn update_existing_q_line_up_message(
     web_state: &MutableWebState,
     channel: &Option<ActionChannel>,
     message: &Option<InteractionMessageTypes>,
-    action: &Action,
-    action_combo: &ActionComboData,
+    action_combo: &QSheetActionComboData,
+    action_id: &str,
+    action_block_id: &str,
     slack_id: &str,
 ) -> Result<(), AppError> {
     if let Some(ActionChannel { id: channel_id, .. }) = channel {
@@ -68,7 +69,7 @@ pub async fn update_existing_q_line_up_message(
                     'blocks_list: for block in blocks {
                         if let BlockType::Section(section_block) = block {
                             match &section_block.block_id {
-                                Some(block_id) if block_id == &action.block_id => {
+                                Some(block_id) if block_id.as_str() == action_block_id => {
                                     let friendly_date = format_q_line_up_date(&action_combo.date);
                                     let ao_combo_str = action_combo.ao.to_string();
                                     let ao_string = get_ao_string_from_blocks(
@@ -82,10 +83,8 @@ pub async fn update_existing_q_line_up_message(
                                     );
                                     section_block.text.text = updated_text;
                                     let options = get_existing_q_overflow_options();
-                                    section_block.accessory = Some(BlockElementType::new_overflow(
-                                        action.action_id.as_str(),
-                                        options,
-                                    ));
+                                    section_block.accessory =
+                                        Some(BlockElementType::new_overflow(action_id, options));
                                     break 'blocks_list;
                                 }
                                 _ => {}
@@ -105,7 +104,7 @@ pub async fn update_existing_q_line_up_message(
 
 async fn process_clearing_existing_q_line_up(
     db_pool: &PgPool,
-    action: &ActionComboData,
+    action: &QSheetActionComboData,
     channel_id: &str,
 ) -> Result<(), AppError> {
     delete_q_line_up_entry(db_pool, channel_id, &action.date).await?;
@@ -116,7 +115,7 @@ async fn clear_existing_q_line_up_message(
     web_state: &MutableWebState,
     channel: &Option<ActionChannel>,
     message: &Option<InteractionMessageTypes>,
-    action_combo: &ActionComboData,
+    action_combo: &QSheetActionComboData,
     action: &Action,
 ) -> Result<(), AppError> {
     if let Some(ActionChannel { id: channel_id, .. }) = channel {

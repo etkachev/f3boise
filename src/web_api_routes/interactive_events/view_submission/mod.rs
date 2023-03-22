@@ -11,12 +11,14 @@ use sqlx::PgPool;
 
 /// handle a view submission from interactive event
 pub async fn handle_view_submission(
-    view_payload: &ViewSubmissionPayload,
+    payload: &str,
     web_state: &MutableWebState,
     app_state: &MutableAppState,
     db_pool: &PgPool,
 ) -> Result<(), AppError> {
-    let ViewSubmissionPayload { user, view } = view_payload;
+    let view_payload = serde_json::from_str::<ViewSubmissionPayload>(payload)?;
+
+    let ViewSubmissionPayload { user, view } = &view_payload;
     match view {
         ViewSubmissionPayloadView::Modal(modal) => {
             if let Some(view_id) = modal.modal_view_id() {

@@ -10,7 +10,7 @@ use crate::shared::string_utils::{
 use crate::shared::time::local_boise_time;
 use crate::slack_api::block_kit::{BlockBuilder, SectionBlock};
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
-use crate::web_api_routes::interactive_events::interaction_types::ActionComboData;
+use crate::web_api_routes::interactive_events::interaction_types::InteractionTypes;
 use crate::web_api_routes::interactive_events::q_line_up::utils::get_existing_q_overflow_options;
 use crate::web_api_routes::q_line_up::get_line_up_map;
 use crate::web_api_state::MutableWebState;
@@ -117,7 +117,7 @@ async fn get_q_line_up_for_range_for_ao(
     while date_to_check < end_date && !block_builder.reached_max() {
         if ao.week_days().contains(&date_to_check.weekday()) {
             let friendly_date = format_q_line_up_date(&date_to_check);
-            let action_combo = ActionComboData::new_q_line_up(&date_to_check, &ao);
+            let action_combo = InteractionTypes::new_q_line_up(&date_to_check, &ao);
             if let Some(existing) =
                 someone_signed_up_for_ao(&existing_line_up, &date_to_check, users)
             {
@@ -174,7 +174,7 @@ async fn get_q_line_up_for_range(
             let ao_string = ao.to_string();
             if ao.week_days().contains(&date_to_check.weekday()) {
                 let friendly_date = format_q_line_up_date(&date_to_check);
-                let action_combo = ActionComboData::new_q_line_up(&date_to_check, &ao);
+                let action_combo = InteractionTypes::new_q_line_up(&date_to_check, &ao);
                 if let Some(existing) =
                     someone_signed_up(&existing_line_up, &date_to_check, ao_string.as_str(), users)
                 {

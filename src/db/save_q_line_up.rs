@@ -1,6 +1,6 @@
 use crate::app_state::ao_data::AO;
 use crate::shared::common_errors::AppError;
-use crate::web_api_routes::interactive_events::interaction_types::ActionComboData;
+use crate::web_api_routes::interactive_events::interaction_types::QSheetActionComboData;
 use chrono::NaiveDate;
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
@@ -40,7 +40,7 @@ impl NewQLineUpDbEntry {
 
 /// maps action trigger to new q line up db entry
 pub fn map_from_action(
-    action: &ActionComboData,
+    action: &QSheetActionComboData,
     qs: Vec<String>,
     channel_id: String,
 ) -> Result<NewQLineUpDbEntry, AppError> {

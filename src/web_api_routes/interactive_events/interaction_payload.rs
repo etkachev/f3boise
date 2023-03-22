@@ -682,6 +682,22 @@ pub enum ActionType {
     Overflow(OverflowAction),
 }
 
+impl ActionType {
+    pub fn get_block_id(&self) -> String {
+        match self {
+            ActionType::Button(ButtonAction { action, .. }) => action.block_id.to_string(),
+            ActionType::Overflow(OverflowAction { action, .. }) => action.block_id.to_string(),
+        }
+    }
+
+    pub fn get_action_id(&self) -> String {
+        match self {
+            ActionType::Button(ButtonAction { action, .. }) => action.action_id.to_string(),
+            ActionType::Overflow(OverflowAction { action, .. }) => action.action_id.to_string(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct OverflowAction {
     pub selected_option: OptionElement,
