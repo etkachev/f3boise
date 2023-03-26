@@ -20,6 +20,7 @@ pub enum AO {
     Bellagio,
     Discovery,
     BlackDiamond,
+    BlackOps,
     DR,
     Unknown(String),
 }
@@ -93,6 +94,7 @@ impl AO {
             AO::Bellagio => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Discovery => HashSet::from([Weekday::Sat]),
             AO::BlackDiamond => HashSet::from([Weekday::Mon, Weekday::Wed]),
+            AO::BlackOps => HashSet::from([Weekday::Sun]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
@@ -136,7 +138,10 @@ impl AO {
                 ao if ao.week_days().contains(&week_day) => Some(six),
                 _ => None,
             },
-            Weekday::Sun => None,
+            Weekday::Sun => match self {
+                AO::BlackOps => Some(six),
+                _ => None,
+            },
         }
     }
 
@@ -154,6 +159,7 @@ impl AO {
             AO::WarHorse => AoType::Bootcamp,
             AO::Gem => AoType::Bootcamp,
             AO::IronMountain => AoType::Bootcamp,
+            AO::BlackOps => AoType::Bootcamp,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
         }
@@ -179,6 +185,7 @@ impl AO {
             AO::Bellagio => const_names::BELLAGIO_CHANNEL_ID,
             AO::Discovery => const_names::DISCOVERY_CHANNEL_ID,
             AO::BlackDiamond => const_names::BLACK_DIAMOND_CHANNEL_ID,
+            AO::BlackOps => const_names::BLACK_OPS_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -199,7 +206,7 @@ impl AO {
             AO::Bellagio => const_names::BELLAGIO_GOOGLE_MAPS,
             AO::Discovery => const_names::DISCOVERY_GOOGLE_MAPS,
             AO::BlackDiamond => const_names::BLACK_DIAMOND_GOOGLE_MAPS,
-            AO::DR => "Location Varies",
+            AO::DR | AO::BlackOps => "Location Varies",
             AO::Unknown(_) => "Unknown",
         }
     }
@@ -219,6 +226,7 @@ impl AO {
             const_names::BELLAGIO_CHANNEL_ID => AO::Bellagio,
             const_names::DISCOVERY_CHANNEL_ID => AO::Discovery,
             const_names::BLACK_DIAMOND_CHANNEL_ID => AO::BlackDiamond,
+            const_names::BLACK_OPS_CHANNEL_ID => AO::BlackOps,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
         }
@@ -242,6 +250,7 @@ impl Clone for AO {
             AO::Bellagio => AO::Bellagio,
             AO::Discovery => AO::Discovery,
             AO::BlackDiamond => AO::BlackDiamond,
+            AO::BlackOps => AO::BlackOps,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
     }
@@ -263,6 +272,7 @@ impl ToString for AO {
             AO::Bellagio => const_names::BELLAGIO,
             AO::Discovery => const_names::DISCOVERY,
             AO::BlackDiamond => const_names::BLACK_DIAMOND,
+            AO::BlackOps => const_names::BLACK_OPS,
             AO::DR => "",
             AO::Unknown(_) => "",
         };
@@ -298,6 +308,7 @@ impl From<String> for AO {
             const_names::BACKYARD => AO::Backyard,
             const_names::DISCOVERY => AO::Discovery,
             const_names::BLACK_DIAMOND => AO::BlackDiamond,
+            const_names::BLACK_OPS => AO::BlackOps,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
         }
@@ -332,6 +343,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::Bellagio => AO::Bellagio,
         PublicChannels::Discovery => AO::Discovery,
         PublicChannels::BlackDiamond => AO::BlackDiamond,
+        PublicChannels::BlackOps => AO::BlackOps,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
@@ -408,9 +420,11 @@ pub mod const_names {
     pub const BLACK_DIAMOND: &str = "black-diamond";
     pub const BLACK_DIAMOND_CHANNEL_ID: &str = "C04QQF5M8GL";
     pub const BLACK_DIAMOND_GOOGLE_MAPS: &str = "https://goo.gl/maps/a7EcVdttBEi1kiQx7";
+    pub const BLACK_OPS: &str = "black-ops";
+    pub const BLACK_OPS_CHANNEL_ID: &str = "C050HTBNU3B";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 13] = [
+    pub const AO_LIST: [AO; 14] = [
         AO::Bleach,
         AO::Gem,
         AO::OldGlory,
@@ -424,6 +438,7 @@ pub mod const_names {
         AO::Bellagio,
         AO::Discovery,
         AO::BlackDiamond,
+        AO::BlackOps,
     ];
 }
 

@@ -16,6 +16,7 @@ pub enum PublicChannels {
     Bellagio,
     Discovery,
     BlackDiamond,
+    BlackOps,
     DR,
     Welcome,
     Unknown(String),
@@ -37,6 +38,7 @@ impl From<&AO> for PublicChannels {
             AO::Bellagio => PublicChannels::Bellagio,
             AO::Discovery => PublicChannels::Discovery,
             AO::BlackDiamond => PublicChannels::BlackDiamond,
+            AO::BlackOps => PublicChannels::BlackOps,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }
