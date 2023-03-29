@@ -94,7 +94,7 @@ impl AO {
             AO::Bellagio => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Discovery => HashSet::from([Weekday::Sat]),
             AO::BlackDiamond => HashSet::from([Weekday::Mon, Weekday::Wed]),
-            AO::BlackOps => HashSet::from([Weekday::Sun]),
+            AO::BlackOps => HashSet::new(),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
@@ -138,10 +138,7 @@ impl AO {
                 ao if ao.week_days().contains(&week_day) => Some(six),
                 _ => None,
             },
-            Weekday::Sun => match self {
-                AO::BlackOps => Some(six),
-                _ => None,
-            },
+            Weekday::Sun => None,
         }
     }
 
