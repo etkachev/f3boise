@@ -105,8 +105,8 @@ fn create_pre_blast_modal(channel_id: &str, user_id: &str) -> ViewModal {
             "The Moleskine",
             pre_blast_post::pre_blast_action_ids::MOLE_SKINE,
             None,
-            Some("Notice".to_string()),
-            false,
+            None,
+            true,
         )
         .select(
             "Choose where to post this",
