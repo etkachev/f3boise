@@ -19,7 +19,7 @@ pub struct PreBlastPost {
     pub why: String,
     pub equipment: HashSet<AoEquipment>,
     pub fng_message: Option<String>,
-    pub mole_skin: String,
+    pub mole_skin: Option<String>,
     pub post_where: BlastWhere,
 }
 
@@ -112,8 +112,7 @@ impl From<HashMap<String, BasicValue>> for PreBlastPost {
 
         let mole_skin = value
             .get(pre_blast_action_ids::MOLE_SKINE)
-            .map(value_utils::get_single_string)
-            .unwrap_or_default();
+            .map(value_utils::get_single_string);
 
         let post_where = value
             .get(pre_blast_action_ids::WHERE_POST)
@@ -174,7 +173,10 @@ pub fn convert_to_message(post: PreBlastPost, app_state: &MutableAppState) -> Po
         .section_markdown(&format!("*Why*: {}", post.why))
         .section_markdown(&format!("*Equipment*: {}", post.equipment_list()))
         .section_markdown(&format!("*FNGs*: {}", post.fng_message.unwrap_or_default()))
-        .section_markdown(&post.mole_skin)
+        .section_markdown(&format!(
+            "*Moleskine*: {}",
+            post.mole_skin.unwrap_or_default()
+        ))
         .divider();
 
     if let Some(f3_user) = user {
