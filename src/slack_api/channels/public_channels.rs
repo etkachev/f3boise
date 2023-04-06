@@ -87,6 +87,8 @@ mod tests {
         test_channel_name("ao-ruckership-east", PublicChannels::RuckershipEast);
         test_channel_name("ao-discovery-park", PublicChannels::Discovery);
         test_channel_name("ao-black-diamond", PublicChannels::BlackDiamond);
+        test_channel_name("ao-black-ops", PublicChannels::BlackOps);
+        test_channel_name("black-ops", PublicChannels::BlackOps);
     }
 
     #[test]

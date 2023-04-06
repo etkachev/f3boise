@@ -470,4 +470,10 @@ mod tests {
         let ao = AO::from("ao-bellagio".to_string());
         assert_eq!(ao, AO::Bellagio);
     }
+
+    #[test]
+    fn black_ops() {
+        let ao = AO::from("black-ops".to_string());
+        assert_eq!(ao, AO::BlackOps);
+    }
 }
