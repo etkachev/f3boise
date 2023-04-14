@@ -86,7 +86,15 @@ impl BackBlastPost {
     fn fng_list(&self) -> Vec<String> {
         self.fngs
             .iter()
-            .map(|item| item.trim().to_string())
+            .filter_map(|item| {
+                let item = item.trim();
+                // filter out fngs names None.
+                if !matches!(item, "None") {
+                    Some(item.to_string())
+                } else {
+                    None
+                }
+            })
             .collect::<Vec<String>>()
     }
 
@@ -323,7 +331,7 @@ mod tests {
             qs: HashSet::from(["Stinger".to_string()]),
             pax: HashSet::from(["Freighter".to_string(), "Backslash".to_string()]),
             non_slack_pax: HashSet::from([]),
-            fngs: HashSet::from(["Fng".to_string()]),
+            fngs: HashSet::from(["Fng".to_string(), "None".to_string()]),
             mole_skine: "The Thang".to_string(),
             blast_where: BlastWhere::AoChannel,
             bb_type: BackBlastType::BackBlast,
@@ -333,6 +341,7 @@ mod tests {
         let users = HashMap::<String, F3User>::from([hash_set_user("U03SR452HL7", "Backslash")]);
         let parsed = parse_back_blast(&message, &users, &empty_channels());
         println!("{:?}", parsed);
-        assert_eq!(true, true);
+        assert!(parsed.includes_pax("Fng"));
+        assert!(!parsed.includes_pax("None"));
     }
 }
