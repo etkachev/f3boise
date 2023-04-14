@@ -756,6 +756,7 @@ pub struct ViewContainer {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::web_api_routes::slash_commands::black_diamond_rating::black_diamond_rating_post;
     use crate::web_api_routes::slash_commands::pre_blast::pre_blast_post::PreBlastPost;
     use chrono::NaiveTime;
 
@@ -767,6 +768,22 @@ mod tests {
         assert_eq!(interaction_payload, InteractionPayload::BlockActions);
         let block_action = serde_json::from_str::<BlockAction>(payload).unwrap();
         assert_eq!(block_action.user.username, "edwardtkachev".to_string());
+    }
+
+    #[test]
+    fn black_diamond_rating() {
+        let payload = "{\"type\":\"view_submission\",\"team\":{\"id\":\"T03T5J6801Z\",\"domain\":\"f3-boise\"},\"user\":{\"id\":\"U03T87KHRFE\",\"username\":\"edwardtkachev\",\"name\":\"edwardtkachev\",\"team_id\":\"T03T5J6801Z\"},\"api_app_id\":\"A03UAGJC9QD\",\"token\":\"iqHCM8gJry9vury2mmDiv0Os\",\"trigger_id\":\"5126995803505.3923618272067.da27da029e24e150af8ab048745ce24f\",\"view\":{\"id\":\"V053EQTKLUC\",\"team_id\":\"T03T5J6801Z\",\"type\":\"modal\",\"blocks\":[{\"type\":\"input\",\"block_id\":\"4k5H\",\"label\":{\"type\":\"plain_text\",\"text\":\"Number of Pax\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"pax-count.input\",\"placeholder\":{\"type\":\"plain_text\",\"text\":\"How many Pax?\",\"emoji\":true},\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"input\",\"block_id\":\"E\\/C\",\"label\":{\"type\":\"plain_text\",\"text\":\"Vests Removed\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"vests-removed.input\",\"placeholder\":{\"type\":\"plain_text\",\"text\":\"How many vests removed?\",\"emoji\":true},\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"input\",\"block_id\":\"5nmR\",\"label\":{\"type\":\"plain_text\",\"text\":\"Miles\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"miles.input\",\"placeholder\":{\"type\":\"plain_text\",\"text\":\"How many miles?\",\"emoji\":true},\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"input\",\"block_id\":\"ukR\",\"label\":{\"type\":\"plain_text\",\"text\":\"Avg Heart Rate\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"avg-heart-rate.input\",\"placeholder\":{\"type\":\"plain_text\",\"text\":\"Avg heart rate of pax\",\"emoji\":true},\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"input\",\"block_id\":\"hprYk\",\"label\":{\"type\":\"plain_text\",\"text\":\"Where to Post\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"channels_select\",\"action_id\":\"where_to_post.select\",\"initial_channel\":\"C03TZV5RRF1\"}}],\"private_metadata\":\"\",\"callback_id\":\"\",\"state\":{\"values\":{\"4k5H\":{\"pax-count.input\":{\"type\":\"plain_text_input\",\"value\":\"8\"}},\"E\\/C\":{\"vests-removed.input\":{\"type\":\"plain_text_input\",\"value\":\"8\"}},\"5nmR\":{\"miles.input\":{\"type\":\"plain_text_input\",\"value\":\"3.72\"}},\"ukR\":{\"avg-heart-rate.input\":{\"type\":\"plain_text_input\",\"value\":\"140.5\"}},\"hprYk\":{\"where_to_post.select\":{\"type\":\"channels_select\",\"selected_channel\":\"C03TZV5RRF1\"}}}},\"hash\":\"1681506037.vmNbE5Uf\",\"title\":{\"type\":\"plain_text\",\"text\":\"Black Diamond Rating\",\"emoji\":true},\"clear_on_close\":false,\"notify_on_close\":false,\"close\":null,\"submit\":{\"type\":\"plain_text\",\"text\":\"Submit\",\"emoji\":true},\"previous_view_id\":null,\"root_view_id\":\"V053EQTKLUC\",\"app_id\":\"A03UAGJC9QD\",\"external_id\":\"black_diamond_rating::70697\",\"app_installed_team_id\":\"T03T5J6801Z\",\"bot_id\":\"B03UG6KRSN8\"},\"response_urls\":[],\"is_enterprise_install\":false,\"enterprise\":null}";
+        let parsed = serde_json::from_str::<InteractionPayload>(payload).unwrap();
+        assert_eq!(parsed, InteractionPayload::ViewSubmission);
+        let parsed = serde_json::from_str::<ViewSubmissionPayload>(payload).unwrap();
+        match parsed.view {
+            ViewSubmissionPayloadView::Modal(modal) => {
+                let values = modal.state.get_values();
+                let post = black_diamond_rating_post::BlackDiamondRatingPost::from(values);
+                println!("{:?}", post);
+                assert_eq!(post.total_fmt(), 3.86.to_string());
+            }
+        }
     }
 
     #[test]

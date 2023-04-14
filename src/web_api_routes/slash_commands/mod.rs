@@ -23,6 +23,7 @@ use sqlx::PgPool;
 pub mod ao_monthly_stats_graph;
 pub mod ao_stats;
 pub mod back_blast;
+pub mod black_diamond_rating;
 pub mod invite_all;
 pub mod modal_utils;
 pub mod my_stats;
@@ -223,6 +224,16 @@ pub async fn slack_slash_commands_route(
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
             }
         }
+        "/black-diamond-grading" => match black_diamond_rating::generate_modal(
+            form.trigger_id.as_str(),
+            &web_state,
+            &form.channel_id,
+        )
+        .await
+        {
+            Ok(_) => HttpResponse::Ok().body("Opening Black Diamond rating modal"),
+            Err(err) => HttpResponse::Ok().body(err.to_string()),
+        },
         _ => {
             println!("command not accepted: {}", form.command);
             HttpResponse::Ok().body("Unknown command")

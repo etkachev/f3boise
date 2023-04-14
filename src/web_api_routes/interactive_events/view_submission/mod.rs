@@ -4,6 +4,7 @@ use crate::web_api_routes::interactive_events::interaction_payload::{
     ActionUser, ViewSubmissionPayload, ViewSubmissionPayloadView, ViewSubmissionPayloadViewModal,
 };
 use crate::web_api_routes::slash_commands::back_blast::back_blast_post;
+use crate::web_api_routes::slash_commands::black_diamond_rating::black_diamond_rating_post;
 use crate::web_api_routes::slash_commands::modal_utils::view_ids::ViewIds;
 use crate::web_api_routes::slash_commands::pre_blast::pre_blast_post;
 use crate::web_api_state::MutableWebState;
@@ -29,6 +30,10 @@ pub async fn handle_view_submission(
                     ViewIds::BackBlast => {
                         handle_back_blast_submission(modal, web_state, app_state, db_pool).await
                     }
+                    ViewIds::BlackDiamondRating => {
+                        handle_black_diamond_rating_submission(modal, web_state, app_state, user)
+                            .await
+                    }
                     ViewIds::Unknown => Ok(()),
                 }
             } else {
@@ -36,6 +41,18 @@ pub async fn handle_view_submission(
             }
         }
     }
+}
+
+async fn handle_black_diamond_rating_submission(
+    modal: &ViewSubmissionPayloadViewModal,
+    web_state: &MutableWebState,
+    app_state: &MutableAppState,
+    user: &ActionUser,
+) -> Result<(), AppError> {
+    let form_values = modal.state.get_values();
+    let post = black_diamond_rating_post::BlackDiamondRatingPost::from(form_values);
+    let message = black_diamond_rating_post::convert_to_message(post, app_state, user.id.as_str());
+    web_state.post_message(message).await
 }
 
 async fn handle_back_blast_submission(

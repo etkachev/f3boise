@@ -40,6 +40,10 @@ impl BlockElementType {
         BlockElementType::Button(ButtonElement::new_danger(text, action_id))
     }
 
+    pub fn new_img(image_url: &str, alt_text: &str) -> Self {
+        BlockElementType::Image(ImageBlock::new(image_url, alt_text))
+    }
+
     pub fn new_overflow(action_id: &str, options: Vec<OptionElement>) -> Self {
         BlockElementType::Overflow(OverflowElement::new(action_id, options))
     }
@@ -209,6 +213,15 @@ pub struct ImageBlock {
     pub image_url: String,
     /// A plain-text summary of the image. This should not contain any markup
     pub alt_text: String,
+}
+
+impl ImageBlock {
+    pub fn new(image_url: &str, alt_text: &str) -> Self {
+        ImageBlock {
+            image_url: image_url.to_string(),
+            alt_text: alt_text.to_string(),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]

@@ -42,6 +42,20 @@ impl BlockBuilder {
             .push(BlockType::Section(SectionBlock::new_markdown(text)));
     }
 
+    pub fn img_markdown(mut self, text: &str, img_url: &str, img_alt_text: &str) -> Self {
+        self.add_img_markdown(text, img_url, img_alt_text);
+        self
+    }
+
+    pub fn add_img_markdown(&mut self, text: &str, img_url: &str, img_alt_text: &str) {
+        self.blocks
+            .push(BlockType::Section(SectionBlock::new_markdown_with_img(
+                text,
+                img_url,
+                img_alt_text,
+            )));
+    }
+
     pub fn header(mut self, text: &str) -> Self {
         self.blocks
             .push(BlockType::Header(HeaderBlock::new_plain_text(text)));
@@ -498,6 +512,14 @@ impl SectionBlock {
         SectionBlock {
             text: TextObject::new_markdown(text),
             accessory: Some(BlockElementType::new_danger_btn(btn_text, action_id)),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_markdown_with_img(text: &str, image_url: &str, img_alt_text: &str) -> Self {
+        SectionBlock {
+            text: TextObject::new_markdown(text),
+            accessory: Some(BlockElementType::new_img(image_url, img_alt_text)),
             ..Default::default()
         }
     }

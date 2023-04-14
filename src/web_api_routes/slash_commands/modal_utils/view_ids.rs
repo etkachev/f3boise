@@ -3,6 +3,7 @@
 pub enum ViewIds {
     PreBlast,
     BackBlast,
+    BlackDiamondRating,
     #[default]
     Unknown,
 }
@@ -14,6 +15,7 @@ impl ToString for ViewIds {
         match self {
             ViewIds::BackBlast => format!("{}::{uid}", BACK_BLAST_ID),
             ViewIds::PreBlast => format!("{}::{uid}", PRE_BLAST_ID),
+            ViewIds::BlackDiamondRating => format!("{}::{uid}", BLACK_DIAMOND_RATING_ID),
             ViewIds::Unknown => "UNKNOWN".to_string(),
         }
     }
@@ -25,6 +27,7 @@ impl From<&str> for ViewIds {
         match value {
             BACK_BLAST_ID => ViewIds::BackBlast,
             PRE_BLAST_ID => ViewIds::PreBlast,
+            BLACK_DIAMOND_RATING_ID => ViewIds::BlackDiamondRating,
             _ => ViewIds::Unknown,
         }
     }
@@ -32,6 +35,7 @@ impl From<&str> for ViewIds {
 
 const BACK_BLAST_ID: &str = "back_blast";
 const PRE_BLAST_ID: &str = "pre_blast";
+const BLACK_DIAMOND_RATING_ID: &str = "black_diamond_rating";
 
 #[cfg(test)]
 mod tests {

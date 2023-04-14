@@ -19,6 +19,16 @@ pub fn get_single_string(value: &BasicValue) -> String {
     value.get_single().unwrap_or_default()
 }
 
+pub fn get_single_usize(value: &BasicValue) -> usize {
+    let string_value = value.get_single().unwrap_or_default();
+    string_value.parse::<usize>().unwrap_or_default()
+}
+
+pub fn get_single_float(value: &BasicValue) -> f32 {
+    let string_value = value.get_single().unwrap_or_default();
+    string_value.parse::<f32>().unwrap_or_default()
+}
+
 pub fn get_single_date(value: &BasicValue) -> NaiveDate {
     NaiveDate::from_str(value.get_single().unwrap_or_default().as_str()).unwrap_or_default()
 }
