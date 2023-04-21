@@ -90,8 +90,12 @@ pub async fn get_q_line_up_for_ao(
     start_date: &NaiveDate,
     users: &HashMap<String, String>,
 ) -> Result<BlockBuilder, AppError> {
+    let days_ahead: i64 = match ao {
+        AO::RuckershipEast | AO::RuckershipWest => 30,
+        _ => 20,
+    };
     let end_date = (*start_date)
-        .checked_add_signed(Duration::days(20))
+        .checked_add_signed(Duration::days(days_ahead))
         .unwrap_or_else(|| (*start_date).succ());
     let result = get_q_line_up_for_range_for_ao(db_pool, ao, start_date, end_date, users).await?;
     Ok(result)
