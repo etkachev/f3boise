@@ -380,6 +380,23 @@
     },
     "query": "\n    WITH list_view AS (\n        SELECT\n            al.name as ao,\n            string_to_array(lower(q), ',') as q,\n            string_to_array(lower(pax), ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = 'backblast' \n            AND bb.active = true \n            AND bb.channel_id = $1\n            AND bb.date >= $2\n            AND bb.date <= $3\n    )\n    \n    SELECT ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    ORDER BY date DESC;\n    "
   },
+  "78d36115cc6b23092dea99dff250a7f0d84404d9dcf6d39856f25589ea760054": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Date",
+          "Bool",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n    INSERT INTO q_line_up (id, qs, ao, date, closed, channel_id)\n    VALUES ($1, $2, $3, $4, $5, $6)\n    ON CONFLICT ON CONSTRAINT q_line_up_channel_id_date_key\n    DO UPDATE\n    SET qs = EXCLUDED.qs,\n        closed = EXCLUDED.closed;\n        "
+  },
   "86f69ee1f740e9baaae1a482f2c0f3d46f8ea39fa707266cfbf03a6f8fb4e30b": {
     "describe": {
       "columns": [],

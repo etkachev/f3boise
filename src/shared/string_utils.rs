@@ -65,10 +65,21 @@ pub fn map_q_line_up_existing(
     ao_string: Option<&str>,
     existing: Vec<String>,
 ) -> String {
+    let line_up = existing
+        .iter()
+        .map(|item| {
+            if item.as_str() == "closed" {
+                "_CLOSED_ :x:"
+            } else {
+                item.as_str()
+            }
+        })
+        .collect::<Vec<&str>>()
+        .join(",");
     if let Some(ao) = ao_string {
-        format!("`{}` - *{}* - {}", friendly_date, ao, existing.join(","))
+        format!("`{}` - *{}* - {}", friendly_date, ao, line_up)
     } else {
-        format!("`{}` - {}", friendly_date, existing.join(","))
+        format!("`{}` - {}", friendly_date, line_up)
     }
 }
 

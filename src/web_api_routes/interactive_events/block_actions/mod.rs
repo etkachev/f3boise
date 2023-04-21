@@ -10,7 +10,8 @@ use crate::web_api_routes::interactive_events::interaction_types::{
     InteractionTypes, QSheetActionComboData,
 };
 use crate::web_api_routes::interactive_events::q_line_up::{
-    clear_and_update_message, process_q_line_up_event, update_existing_q_line_up_message,
+    clear_and_update_message, close_and_update_message, process_q_line_up_event,
+    update_existing_q_line_up_message,
 };
 use crate::web_api_state::MutableWebState;
 use sqlx::PgPool;
@@ -121,6 +122,20 @@ async fn handle_q_lineup_interaction(
                             action_channel,
                             message,
                             action,
+                        )
+                        .await?;
+                    }
+                    // when closing existing q line up
+                    constants::Q_LINE_UP_CLOSED_TEXT => {
+                        let channel_id = get_channel_id_from_action(action_combo, app_state)?;
+                        close_and_update_message(
+                            db_pool,
+                            web_state,
+                            action_combo,
+                            channel_id.as_str(),
+                            action_channel,
+                            message,
+                            (&action_type.get_action_id(), &action_type.get_block_id()),
                         )
                         .await?;
                     }

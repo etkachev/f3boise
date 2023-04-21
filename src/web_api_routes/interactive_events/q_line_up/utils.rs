@@ -1,11 +1,12 @@
-use crate::shared::constants::Q_LINE_UP_CANCEL_TEXT;
+use crate::shared::constants::{Q_LINE_UP_CANCEL_TEXT, Q_LINE_UP_CLOSED_TEXT};
 use crate::slack_api::block_kit::block_elements::OptionElement;
 use crate::slack_api::block_kit::{BlockType, SectionBlock};
 use crate::web_api_routes::slash_commands::q_line_up::unwrap_message_data;
 
 pub fn get_existing_q_overflow_options() -> Vec<OptionElement> {
     let clear = OptionElement::new(Q_LINE_UP_CANCEL_TEXT, Q_LINE_UP_CANCEL_TEXT);
-    vec![clear]
+    let closed = OptionElement::new(Q_LINE_UP_CLOSED_TEXT, Q_LINE_UP_CLOSED_TEXT);
+    vec![clear, closed]
 }
 
 pub fn get_ao_string_from_blocks<'a>(

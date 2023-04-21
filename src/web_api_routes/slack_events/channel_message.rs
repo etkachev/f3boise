@@ -1,9 +1,5 @@
 use crate::app_state::backblast_data::{BACK_BLAST_TAG, SLACK_BLAST_TAG};
-use crate::app_state::parse_backblast::parse_back_blast;
 use crate::app_state::MutableAppState;
-use crate::db::save_back_blast;
-use crate::slack_api::channels::reactions_add::request::channel_request;
-use crate::web_api_routes::slack_events::event_times::EventTimes;
 use crate::web_api_state::MutableWebState;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
@@ -26,31 +22,31 @@ pub struct ChannelMessageEvent {
 
 pub async fn handle_channel_message(
     event: &ChannelMessageEvent,
-    web_app: &MutableWebState,
-    app_state: &MutableAppState,
-    db_pool: &PgPool,
+    _web_app: &MutableWebState,
+    _app_state: &MutableAppState,
+    _db_pool: &PgPool,
 ) {
     let (first_line, _) = event.text.split_once('\n').unwrap_or(("", ""));
     match first_line.to_lowercase() {
         // is back-blast
         line if line.starts_with(BACK_BLAST_TAG) || line.starts_with(SLACK_BLAST_TAG) => {
-            let mut data = {
-                let app = app_state.app.lock().unwrap();
-                parse_back_blast(event.text.as_str(), &app.users, &app.channels)
-            };
-            data.set_event_times(EventTimes::new(
-                event.ts.to_string(),
-                event.event_ts.to_string(),
-            ));
-
-            let verified = data.is_valid_back_blast();
-            let channel_request = channel_request(&data, verified, event.channel.as_str());
-            web_app.back_blast_verified(channel_request).await;
-            if verified {
-                if let Err(err) = save_back_blast::save(db_pool, &[data]).await {
-                    println!("Error saving bb to db: {:?}", err);
-                }
-            }
+            // let mut data = {
+            //     let app = app_state.app.lock().unwrap();
+            //     parse_back_blast(event.text.as_str(), &app.users, &app.channels)
+            // };
+            // data.set_event_times(EventTimes::new(
+            //     event.ts.to_string(),
+            //     event.event_ts.to_string(),
+            // ));
+            //
+            // let verified = data.is_valid_back_blast();
+            // let channel_request = channel_request(&data, verified, event.channel.as_str());
+            // web_app.back_blast_verified(channel_request).await;
+            // if verified {
+            //     if let Err(err) = save_back_blast::save(db_pool, &[data]).await {
+            //         println!("Error saving bb to db: {:?}", err);
+            //     }
+            // }
         }
         _ => (),
     }

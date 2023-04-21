@@ -95,6 +95,50 @@ async fn save_entry(
     Ok(())
 }
 
+pub async fn close_q_line_up_entry(
+    db_pool: &PgPool,
+    ao: &AO,
+    channel_id: &str,
+    date: &NaiveDate,
+) -> Result<(), AppError> {
+    let mut transaction = db_pool.begin().await.expect("Failed to begin transaction");
+    close_single_q_line_up(&mut transaction, ao, channel_id, date).await?;
+    transaction
+        .commit()
+        .await
+        .expect("Could not commit transaction");
+    Ok(())
+}
+
+async fn close_single_q_line_up(
+    transaction: &mut Transaction<'_, Postgres>,
+    ao: &AO,
+    channel_id: &str,
+    date: &NaiveDate,
+) -> Result<(), AppError> {
+    let id = Uuid::new_v4();
+    let ao = ao.to_string();
+    sqlx::query!(
+        r#"
+    INSERT INTO q_line_up (id, qs, ao, date, closed, channel_id)
+    VALUES ($1, $2, $3, $4, $5, $6)
+    ON CONFLICT ON CONSTRAINT q_line_up_channel_id_date_key
+    DO UPDATE
+    SET qs = EXCLUDED.qs,
+        closed = EXCLUDED.closed;
+        "#,
+        id,
+        "closed",
+        ao,
+        date,
+        true,
+        channel_id
+    )
+    .execute(transaction)
+    .await?;
+    Ok(())
+}
+
 pub async fn delete_q_line_up_entry(
     db_pool: &PgPool,
     channel_id: &str,
