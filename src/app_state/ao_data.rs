@@ -18,7 +18,7 @@ pub enum AO {
     Rise,
     WarHorse,
     Bellagio,
-    Discovery,
+    TheTower,
     BlackDiamond,
     BlackOps,
     DR,
@@ -92,7 +92,7 @@ impl AO {
             AO::Rise => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::WarHorse => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::Bellagio => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
-            AO::Discovery => HashSet::from([Weekday::Sat]),
+            AO::TheTower => HashSet::from([Weekday::Sat]),
             AO::BlackDiamond => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::BlackOps => HashSet::new(),
             AO::DR | AO::Unknown(_) => HashSet::new(),
@@ -150,7 +150,7 @@ impl AO {
             AO::Backyard => AoType::Bootcamp,
             AO::OldGlory => AoType::Bootcamp,
             AO::Rebel => AoType::Running,
-            AO::Discovery => AoType::Bootcamp,
+            AO::TheTower => AoType::Bootcamp,
             AO::RuckershipEast | AO::RuckershipWest => AoType::Rucking,
             AO::Rise => AoType::Bootcamp,
             AO::WarHorse => AoType::Bootcamp,
@@ -180,7 +180,7 @@ impl AO {
             AO::Rise => const_names::RISE_CHANNEL_ID,
             AO::WarHorse => const_names::WAR_HORSE_CHANNEL_ID,
             AO::Bellagio => const_names::BELLAGIO_CHANNEL_ID,
-            AO::Discovery => const_names::DISCOVERY_CHANNEL_ID,
+            AO::TheTower => const_names::THE_TOWER_CHANNEL_ID,
             AO::BlackDiamond => const_names::BLACK_DIAMOND_CHANNEL_ID,
             AO::BlackOps => const_names::BLACK_OPS_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
@@ -201,7 +201,7 @@ impl AO {
             AO::Rise => const_names::RISE_GOOGLE_MAPS,
             AO::WarHorse => const_names::WAR_HORSE_GOOGLE_MAPS,
             AO::Bellagio => const_names::BELLAGIO_GOOGLE_MAPS,
-            AO::Discovery => const_names::DISCOVERY_GOOGLE_MAPS,
+            AO::TheTower => const_names::THE_TOWER_GOOGLE_MAPS,
             AO::BlackDiamond => const_names::BLACK_DIAMOND_GOOGLE_MAPS,
             AO::DR | AO::BlackOps => "Location Varies",
             AO::Unknown(_) => "Unknown",
@@ -221,7 +221,7 @@ impl AO {
             const_names::RISE_CHANNEL_ID => AO::Rise,
             const_names::WAR_HORSE_CHANNEL_ID => AO::WarHorse,
             const_names::BELLAGIO_CHANNEL_ID => AO::Bellagio,
-            const_names::DISCOVERY_CHANNEL_ID => AO::Discovery,
+            const_names::THE_TOWER_CHANNEL_ID => AO::TheTower,
             const_names::BLACK_DIAMOND_CHANNEL_ID => AO::BlackDiamond,
             const_names::BLACK_OPS_CHANNEL_ID => AO::BlackOps,
             const_names::DR_CHANNEL_ID => AO::DR,
@@ -245,7 +245,7 @@ impl Clone for AO {
             AO::DR => AO::DR,
             AO::WarHorse => AO::WarHorse,
             AO::Bellagio => AO::Bellagio,
-            AO::Discovery => AO::Discovery,
+            AO::TheTower => AO::TheTower,
             AO::BlackDiamond => AO::BlackDiamond,
             AO::BlackOps => AO::BlackOps,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
@@ -267,7 +267,7 @@ impl ToString for AO {
             AO::Rise => const_names::RISE,
             AO::WarHorse => const_names::WAR_HORSE,
             AO::Bellagio => const_names::BELLAGIO,
-            AO::Discovery => const_names::DISCOVERY,
+            AO::TheTower => const_names::THE_TOWER,
             AO::BlackDiamond => const_names::BLACK_DIAMOND,
             AO::BlackOps => const_names::BLACK_OPS,
             AO::DR => "",
@@ -303,7 +303,7 @@ impl From<String> for AO {
             const_names::WAR_HORSE | "lakeview_park" => AO::WarHorse,
             const_names::BELLAGIO | "bellagio-resort" => AO::Bellagio,
             const_names::BACKYARD => AO::Backyard,
-            const_names::DISCOVERY => AO::Discovery,
+            const_names::THE_TOWER | "discovery-park" => AO::TheTower,
             const_names::BLACK_DIAMOND => AO::BlackDiamond,
             const_names::BLACK_OPS => AO::BlackOps,
             const_names::DR => AO::DR,
@@ -338,7 +338,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::Rise => AO::Rise,
         PublicChannels::WarHorse => AO::WarHorse,
         PublicChannels::Bellagio => AO::Bellagio,
-        PublicChannels::Discovery => AO::Discovery,
+        PublicChannels::TheTower => AO::TheTower,
         PublicChannels::BlackDiamond => AO::BlackDiamond,
         PublicChannels::BlackOps => AO::BlackOps,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
@@ -409,9 +409,9 @@ pub mod const_names {
     pub const BELLAGIO: &str = "bellagio";
     pub const BELLAGIO_CHANNEL_ID: &str = "C045SMRL43X";
     pub const BELLAGIO_GOOGLE_MAPS: &str = "https://goo.gl/maps/a7EcVdttBEi1kiQx7";
-    pub const DISCOVERY: &str = "discovery-park";
-    pub const DISCOVERY_CHANNEL_ID: &str = "C04B2DX8CCW";
-    pub const DISCOVERY_GOOGLE_MAPS: &str = "https://goo.gl/maps/zJkeWpgpS93MqhEU7";
+    pub const THE_TOWER: &str = "the-tower";
+    pub const THE_TOWER_CHANNEL_ID: &str = "C04B2DX8CCW";
+    pub const THE_TOWER_GOOGLE_MAPS: &str = "https://goo.gl/maps/zJkeWpgpS93MqhEU7";
     pub const DR: &str = "dr";
     pub const DR_CHANNEL_ID: &str = "C03U7U9T7HU";
     pub const BLACK_DIAMOND: &str = "black-diamond";
@@ -433,7 +433,7 @@ pub mod const_names {
         AO::Rise,
         AO::WarHorse,
         AO::Bellagio,
-        AO::Discovery,
+        AO::TheTower,
         AO::BlackDiamond,
         AO::BlackOps,
     ];
