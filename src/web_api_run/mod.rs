@@ -17,6 +17,7 @@ use crate::web_api_routes::interactive_events::interactive_events;
 use crate::web_api_routes::pax_data::stats::pax_stats_route;
 use crate::web_api_routes::pax_data::{get_bad_data, get_pax_back_blasts, get_pax_info, get_users};
 use crate::web_api_routes::q_line_up::q_line_up_route;
+use crate::web_api_routes::region_data::ao_meta_data::ao_list_meta_data_route;
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::slash_commands::slack_slash_commands_route;
 use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route, sync_q_line_up};
@@ -152,6 +153,9 @@ pub fn run(
                     .route("/{ao_name}", web::get().to(get_back_blast_stats_by_ao)),
             )
             .service(web::scope("/q_line_up").route("/list", web::get().to(q_line_up_route)))
+            .service(
+                web::scope("/region").route("/workouts", web::get().to(ao_list_meta_data_route)),
+            )
             .app_data(web_app_data.clone())
             .app_data(app_state_data.clone())
             .app_data(db_pool.clone())

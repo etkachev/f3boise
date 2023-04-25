@@ -1,6 +1,6 @@
 use crate::app_state::equipment::AoEquipment;
 use crate::slack_api::channels::public_channels::PublicChannels;
-use chrono::{Datelike, NaiveDate, NaiveTime, Weekday};
+use chrono::{Duration, NaiveTime, Weekday};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -99,8 +99,60 @@ impl AO {
         }
     }
 
-    pub fn default_time(&self, date: &NaiveDate) -> Option<NaiveTime> {
-        let week_day = date.weekday();
+    pub fn friendly_name(&self) -> &str {
+        match self {
+            AO::Bleach => "Bleach",
+            AO::Gem => "Gem",
+            AO::OldGlory => "Old Glory",
+            AO::Rebel => "Rebel",
+            AO::IronMountain => "Iron Mountain",
+            AO::RuckershipWest => "Ruckership West",
+            AO::RuckershipEast => "Ruckership East",
+            AO::Backyard => "Backyard",
+            AO::Rise => "Rise",
+            AO::WarHorse => "War Horse",
+            AO::Bellagio => "Bellagio",
+            AO::TheTower => "The Tower",
+            AO::BlackDiamond => "Black Diamond",
+            AO::BlackOps => "Black Ops",
+            AO::DR => "DR",
+            AO::Unknown(_) => "UNKNOWN",
+        }
+    }
+
+    pub fn workout_length(&self, week_day: &Weekday) -> Option<i64> {
+        match week_day {
+            Weekday::Mon => match self {
+                AO::BlackDiamond => Some(60),
+                _ => Some(45),
+            },
+            Weekday::Tue => Some(45),
+            Weekday::Wed => match self {
+                AO::BlackDiamond => Some(60),
+                _ => Some(45),
+            },
+            Weekday::Thu => Some(45),
+            Weekday::Fri => match self {
+                AO::Backyard => Some(45),
+                AO::RuckershipWest | AO::RuckershipEast => Some(60),
+                _ => Some(45),
+            },
+            Weekday::Sat => Some(60),
+            Weekday::Sun => None,
+        }
+    }
+
+    pub fn start_end_times(&self, week_day: &Weekday) -> Option<(NaiveTime, NaiveTime)> {
+        match (self.default_time(week_day), self.workout_length(week_day)) {
+            (Some(start), Some(minutes)) => {
+                let end_time = start + Duration::minutes(minutes);
+                Some((start, end_time))
+            }
+            _ => None,
+        }
+    }
+
+    pub fn default_time(&self, week_day: &Weekday) -> Option<NaiveTime> {
         let five = ao_times::five();
         let five_fifteen = ao_times::five_fifteen();
         let five_thirty = ao_times::five_thirty();
@@ -110,32 +162,32 @@ impl AO {
             Weekday::Mon => match self {
                 AO::OldGlory => Some(six),
                 AO::BlackDiamond => Some(five),
-                ao if ao.week_days().contains(&week_day) => Some(five_fifteen),
+                ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
             Weekday::Tue => match self {
                 AO::IronMountain => Some(five_thirty),
-                ao if ao.week_days().contains(&week_day) => Some(five_fifteen),
+                ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
             Weekday::Wed => match self {
                 AO::OldGlory => Some(six),
                 AO::BlackDiamond => Some(five),
-                ao if ao.week_days().contains(&week_day) => Some(five_fifteen),
+                ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
             Weekday::Thu => match self {
                 AO::IronMountain => Some(five_thirty),
-                ao if ao.week_days().contains(&week_day) => Some(five_fifteen),
+                ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
             Weekday::Fri => match self {
                 AO::RuckershipWest | AO::RuckershipEast => Some(five_thirty),
-                ao if ao.week_days().contains(&week_day) => Some(five_fifteen),
+                ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
             Weekday::Sat => match self {
-                ao if ao.week_days().contains(&week_day) => Some(six),
+                ao if ao.week_days().contains(week_day) => Some(six),
                 _ => None,
             },
             Weekday::Sun => None,
@@ -188,24 +240,53 @@ impl AO {
         }
     }
 
-    /// get google maps link for ao
-    pub fn google_maps_link(&self) -> &str {
+    pub fn address(&self) -> Option<&str> {
         match self {
-            AO::Bleach => const_names::BLEACH_GOOGLE_MAPS,
-            AO::Gem => const_names::GEM_GOOGLE_MAPS,
-            AO::OldGlory => const_names::OLD_GLORY_GOOGLE_MAPS,
-            AO::Rebel => const_names::REBEL_GOOGLE_MAPS,
-            AO::IronMountain => const_names::IRON_MOUNTAIN_GOOGLE_MAPS,
+            AO::Backyard => Some("2400 S Stoddard Rd, Meridian, ID 83642"),
+            AO::BlackDiamond => Some("Kleiner Park Loop, Meridian, ID 83642"),
+            AO::Bleach => Some("801 Aurora Dr, Boise, ID 83709"),
+            AO::OldGlory => Some("3064 W Malta Dr, Meridian, ID 83646"),
+            AO::Rise => Some("4403 S Surprise Way, Boise, ID 83716"),
+            AO::WarHorse => Some("1304 7th St N, Nampa, ID 83687"),
+            AO::Bellagio => Some("Kleiner Park Loop, Meridian, ID 83642"),
+            AO::Gem => Some("3423 N Meridian Rd, Meridian, ID 83642"),
+            AO::IronMountain => Some("75 Marjorie Ave, Middleton, ID 83644"),
+            AO::Rebel => Some("3801 E Hill Park Street, Meridian, ID 83642"),
+            AO::TheTower => Some("2121 E Lake Hazel Rd, Meridian, ID 83642"),
+            AO::RuckershipEast | AO::RuckershipWest | AO::BlackOps | AO::DR | AO::Unknown(_) => {
+                None
+            }
+        }
+    }
+
+    // optionally return google maps link
+    pub fn real_map_url(&self) -> Option<&str> {
+        match self {
+            AO::Bleach => Some(const_names::BLEACH_GOOGLE_MAPS),
+            AO::Gem => Some(const_names::GEM_GOOGLE_MAPS),
+            AO::OldGlory => Some(const_names::OLD_GLORY_GOOGLE_MAPS),
+            AO::Rebel => Some(const_names::REBEL_GOOGLE_MAPS),
+            AO::IronMountain => Some(const_names::IRON_MOUNTAIN_GOOGLE_MAPS),
+            AO::Backyard => Some(const_names::BACKYARD_GOOGLE_MAPS),
+            AO::Rise => Some(const_names::RISE_GOOGLE_MAPS),
+            AO::WarHorse => Some(const_names::WAR_HORSE_GOOGLE_MAPS),
+            AO::Bellagio => Some(const_names::BELLAGIO_GOOGLE_MAPS),
+            AO::TheTower => Some(const_names::THE_TOWER_GOOGLE_MAPS),
+            AO::BlackDiamond => Some(const_names::BLACK_DIAMOND_GOOGLE_MAPS),
+            AO::RuckershipWest | AO::RuckershipEast => None,
+            AO::DR | AO::BlackOps => None,
+            AO::Unknown(_) => None,
+        }
+    }
+
+    /// get google maps link for ao (returns generic text if not available)
+    pub fn google_maps_link(&self) -> &str {
+        self.real_map_url().unwrap_or(match self {
             AO::RuckershipWest | AO::RuckershipEast => "Location Varies",
-            AO::Backyard => const_names::BACKYARD_GOOGLE_MAPS,
-            AO::Rise => const_names::RISE_GOOGLE_MAPS,
-            AO::WarHorse => const_names::WAR_HORSE_GOOGLE_MAPS,
-            AO::Bellagio => const_names::BELLAGIO_GOOGLE_MAPS,
-            AO::TheTower => const_names::THE_TOWER_GOOGLE_MAPS,
-            AO::BlackDiamond => const_names::BLACK_DIAMOND_GOOGLE_MAPS,
             AO::DR | AO::BlackOps => "Location Varies",
             AO::Unknown(_) => "Unknown",
-        }
+            _ => "",
+        })
     }
 
     pub fn from_channel_id(channel_id: &str) -> Self {
@@ -408,7 +489,7 @@ pub mod const_names {
     pub const WAR_HORSE_GOOGLE_MAPS: &str = "https://goo.gl/maps/oariasYawYa5o7zs9";
     pub const BELLAGIO: &str = "bellagio";
     pub const BELLAGIO_CHANNEL_ID: &str = "C045SMRL43X";
-    pub const BELLAGIO_GOOGLE_MAPS: &str = "https://goo.gl/maps/a7EcVdttBEi1kiQx7";
+    pub const BELLAGIO_GOOGLE_MAPS: &str = "https://goo.gl/maps/5xFSnaT57Ws1JAZR6";
     pub const THE_TOWER: &str = "the-tower";
     pub const THE_TOWER_CHANNEL_ID: &str = "C04B2DX8CCW";
     pub const THE_TOWER_GOOGLE_MAPS: &str = "https://goo.gl/maps/zJkeWpgpS93MqhEU7";
@@ -416,7 +497,7 @@ pub mod const_names {
     pub const DR_CHANNEL_ID: &str = "C03U7U9T7HU";
     pub const BLACK_DIAMOND: &str = "black-diamond";
     pub const BLACK_DIAMOND_CHANNEL_ID: &str = "C04QQF5M8GL";
-    pub const BLACK_DIAMOND_GOOGLE_MAPS: &str = "https://goo.gl/maps/a7EcVdttBEi1kiQx7";
+    pub const BLACK_DIAMOND_GOOGLE_MAPS: &str = "https://goo.gl/maps/hsSKRSVHjifx4HdV6";
     pub const BLACK_OPS: &str = "black-ops";
     pub const BLACK_OPS_CHANNEL_ID: &str = "C050HTBNU3B";
 

@@ -29,7 +29,7 @@ fn create_pre_blast_modal(channel_id: &str, user_id: &str) -> ViewModal {
     let ao = AO::from_channel_id(channel_id);
     let next_date = get_next_ao_date(&ao);
     let default_time = ao
-        .default_time(&next_date)
+        .default_time(&next_date.weekday())
         .map(|time| time.format("%H:%M").to_string());
     let ao_equipment = ao
         .ao_type()
