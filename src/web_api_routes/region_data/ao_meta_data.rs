@@ -28,7 +28,7 @@ async fn ao_list_data(db: &PgPool) -> Result<[AoMetaData; 14], AppError> {
     let two_days_later = now + Duration::days(2);
     let tomorrow_qs = get_line_up_map(db, &now, &two_days_later).await?;
     let tomorrow = now + Duration::days(1);
-    let tomorrow_day = tomorrow.weekday().to_string();
+    let tomorrow_week_day = tomorrow.weekday().to_string();
     let results = AO_LIST.map(|ao| {
         let mut meta_data = AoMetaData::from(&ao);
         let filtered_bb = recent
@@ -47,7 +47,11 @@ async fn ao_list_data(db: &PgPool) -> Result<[AoMetaData; 14], AppError> {
             meta_data.avg_pax_count = avg_pax;
         }
 
-        if meta_data.workout_dates.get(tomorrow_day.as_str()).is_some() {
+        if meta_data
+            .workout_dates
+            .get(tomorrow_week_day.as_str())
+            .is_some()
+        {
             let q = tomorrow_qs
                 .get(ao.to_string().as_str())
                 .iter()
@@ -72,8 +76,8 @@ async fn ao_list_data(db: &PgPool) -> Result<[AoMetaData; 14], AppError> {
 
 async fn get_recent_back_blasts(db: &PgPool) -> Result<Vec<BackBlastData>, AppError> {
     let now = local_boise_time().date_naive();
-    let two_weeks = now - Duration::days(14);
-    let results = get_all_within_date_range(db, &two_weeks, &now).await?;
+    let three_months = now - Duration::days(90);
+    let results = get_all_within_date_range(db, &three_months, &now).await?;
     let data = results
         .iter()
         .map(BackBlastData::from)

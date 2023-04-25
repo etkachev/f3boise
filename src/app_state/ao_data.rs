@@ -32,6 +32,7 @@ pub type AoDays = HashSet<Weekday>;
 pub enum AoType {
     Bootcamp,
     Heavy,
+    HighIntensity,
     Running,
     Rucking,
 }
@@ -40,6 +41,7 @@ impl ToString for AoType {
     fn to_string(&self) -> String {
         match self {
             AoType::Bootcamp => String::from("Bootcamp"),
+            AoType::HighIntensity => String::from("High Intensity"),
             AoType::Heavy => String::from("Ruck/Sandbag"),
             AoType::Running => String::from("Running"),
             AoType::Rucking => String::from("Ruck/Hike"),
@@ -51,6 +53,7 @@ impl AoType {
     pub fn equipment(&self) -> HashSet<AoEquipment> {
         match self {
             AoType::Bootcamp => HashSet::from([AoEquipment::Coupons]),
+            AoType::HighIntensity => HashSet::from([AoEquipment::Ruck, AoEquipment::Sandbag]),
             AoType::Heavy => HashSet::from([AoEquipment::Ruck, AoEquipment::Sandbag]),
             AoType::Running => HashSet::from([AoEquipment::RunningShoes]),
             AoType::Rucking => HashSet::from([AoEquipment::Ruck]),
