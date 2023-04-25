@@ -200,7 +200,7 @@ impl AO {
     pub fn ao_type(&self) -> AoType {
         match self {
             AO::Bleach => AoType::Heavy,
-            AO::BlackDiamond => AoType::Heavy,
+            AO::BlackDiamond => AoType::HighIntensity,
             AO::Bellagio => AoType::Bootcamp,
             AO::Backyard => AoType::Bootcamp,
             AO::OldGlory => AoType::Bootcamp,

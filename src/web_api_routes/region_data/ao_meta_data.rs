@@ -43,7 +43,9 @@ async fn ao_list_data(db: &PgPool) -> Result<[AoMetaData; 14], AppError> {
             .collect::<Vec<usize>>();
         let len = filtered_bb.len();
         if len != 0 {
-            let avg_pax = filtered_bb.iter().sum::<usize>() / len;
+            let sum = filtered_bb.iter().sum::<usize>();
+            let avg_pax = (sum as f32) / len as f32;
+            let avg_pax = avg_pax.ceil() as usize;
             meta_data.avg_pax_count = avg_pax;
         }
 
