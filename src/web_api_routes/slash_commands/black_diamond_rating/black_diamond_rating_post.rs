@@ -122,16 +122,16 @@ pub fn convert_to_message(
     };
 
     let desc = format!(
-        "1. # vests removed / Pax\
-2. # miles / {}\
+        "1. # vests removed / Pax\n\
+2. # miles / {}\n\
 3. Avg heart rate of Pax / {}",
         calculation_consts::MILES_DIVIDED,
         calculation_consts::HEART_RATE_DIVIDED
     );
 
     let break_down = format!(
-        "1. {}/{} vests off = {}\
-2. {} miles/{} = {}\
+        "1. {}/{} vests off = {}\n\
+2. {} miles/{} = {}\n\
 3. {} hr/{} = {}",
         post.vests_removed,
         post.pax_count,
