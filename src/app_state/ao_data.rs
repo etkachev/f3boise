@@ -95,7 +95,7 @@ impl AO {
             AO::Rise => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::WarHorse => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::Bellagio => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
-            AO::TheTower => HashSet::from([Weekday::Sat]),
+            AO::TheTower => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::BlackDiamond => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::BlackOps => HashSet::new(),
             AO::DR | AO::Unknown(_) => HashSet::new(),
