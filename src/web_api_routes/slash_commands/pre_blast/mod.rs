@@ -84,7 +84,7 @@ fn create_pre_blast_modal(channel_id: &str, user_id: &str) -> ViewModal {
             pre_blast_post::pre_blast_action_ids::EQUIPMENT,
             equipment_list(),
             Some(ao_equipment),
-            false,
+            true,
         )
         .plain_input(
             "Other Equipment",

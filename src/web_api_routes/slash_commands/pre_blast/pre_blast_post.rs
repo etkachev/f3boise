@@ -34,6 +34,10 @@ impl PreBlastPost {
     }
 
     pub fn equipment_list(&self) -> String {
+        if self.equipment.is_empty() {
+            return String::from("None");
+        }
+
         self.equipment
             .iter()
             .map(|item| OptionElement::from(item).text.text)
