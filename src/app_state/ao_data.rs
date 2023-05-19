@@ -115,7 +115,7 @@ impl AO {
             AO::Rise => "Rise",
             AO::WarHorse => "War Horse",
             AO::Bellagio => "Bellagio",
-            AO::TheTower => "The Tower",
+            AO::TheTower => "Tower",
             AO::BlackDiamond => "Black Diamond",
             AO::BlackOps => "Black Ops",
             AO::DR => "DR",
@@ -387,7 +387,7 @@ impl From<String> for AO {
             const_names::WAR_HORSE | "lakeview_park" => AO::WarHorse,
             const_names::BELLAGIO | "bellagio-resort" => AO::Bellagio,
             const_names::BACKYARD => AO::Backyard,
-            const_names::THE_TOWER | "discovery-park" => AO::TheTower,
+            const_names::THE_TOWER | "the-tower" | "discovery-park" => AO::TheTower,
             const_names::BLACK_DIAMOND => AO::BlackDiamond,
             const_names::BLACK_OPS => AO::BlackOps,
             const_names::DR => AO::DR,
@@ -493,7 +493,7 @@ pub mod const_names {
     pub const BELLAGIO: &str = "bellagio";
     pub const BELLAGIO_CHANNEL_ID: &str = "C045SMRL43X";
     pub const BELLAGIO_GOOGLE_MAPS: &str = "https://goo.gl/maps/5xFSnaT57Ws1JAZR6";
-    pub const THE_TOWER: &str = "the-tower";
+    pub const THE_TOWER: &str = "tower";
     pub const THE_TOWER_CHANNEL_ID: &str = "C04B2DX8CCW";
     pub const THE_TOWER_GOOGLE_MAPS: &str = "https://goo.gl/maps/zJkeWpgpS93MqhEU7";
     pub const DR: &str = "dr";
