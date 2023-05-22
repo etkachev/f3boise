@@ -13,8 +13,9 @@ pub enum PublicChannels {
     RuckershipWest,
     RuckershipEast,
     WarHorse,
+    IronHorse,
     Bellagio,
-    TheTower,
+    Tower,
     BlackDiamond,
     BlackOps,
     DR,
@@ -35,8 +36,9 @@ impl From<&AO> for PublicChannels {
             AO::RuckershipWest => PublicChannels::RuckershipWest,
             AO::RuckershipEast => PublicChannels::RuckershipEast,
             AO::WarHorse => PublicChannels::WarHorse,
+            AO::IronHorse => PublicChannels::IronHorse,
             AO::Bellagio => PublicChannels::Bellagio,
-            AO::TheTower => PublicChannels::TheTower,
+            AO::Tower => PublicChannels::Tower,
             AO::BlackDiamond => PublicChannels::BlackDiamond,
             AO::BlackOps => PublicChannels::BlackOps,
             AO::DR => PublicChannels::DR,
@@ -85,9 +87,10 @@ mod tests {
         test_channel_name("ao-rebel", PublicChannels::Rebel);
         test_channel_name("ao-ruckership-west", PublicChannels::RuckershipWest);
         test_channel_name("ao-ruckership-east", PublicChannels::RuckershipEast);
-        test_channel_name("ao-tower", PublicChannels::TheTower);
+        test_channel_name("ao-tower", PublicChannels::Tower);
         test_channel_name("ao-black-diamond", PublicChannels::BlackDiamond);
         test_channel_name("ao-black-ops", PublicChannels::BlackOps);
+        test_channel_name("ao-iron-horse", PublicChannels::IronHorse);
         test_channel_name("black-ops", PublicChannels::BlackOps);
     }
 
