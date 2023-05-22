@@ -115,7 +115,7 @@ impl AO {
             AO::RuckershipEast => "Ruckership East",
             AO::Backyard => "Backyard",
             AO::Rise => "Rise",
-            AO::WarHorse => "War Horse",
+            AO::WarHorse => "Warhorse",
             AO::IronHorse => "Iron Horse",
             AO::Bellagio => "Bellagio",
             AO::Tower => "Tower",
