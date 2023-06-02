@@ -22,6 +22,7 @@ pub enum AO {
     Tower,
     BlackDiamond,
     BlackOps,
+    CamelsBack,
     DR,
     Unknown(String),
 }
@@ -100,6 +101,7 @@ impl AO {
             AO::Tower => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::BlackDiamond => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::BlackOps => HashSet::new(),
+            AO::CamelsBack => HashSet::from([Weekday::Fri]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
@@ -121,6 +123,7 @@ impl AO {
             AO::Tower => "Tower",
             AO::BlackDiamond => "Black Diamond",
             AO::BlackOps => "Black Ops",
+            AO::CamelsBack => "Camel's Back",
             AO::DR => "DR",
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -216,6 +219,7 @@ impl AO {
             AO::Gem => AoType::Bootcamp,
             AO::IronMountain => AoType::Bootcamp,
             AO::BlackOps => AoType::Bootcamp,
+            AO::CamelsBack => AoType::Bootcamp,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
         }
@@ -243,6 +247,7 @@ impl AO {
             AO::IronHorse => const_names::IRON_HORSE_CHANNEL_ID,
             AO::BlackDiamond => const_names::BLACK_DIAMOND_CHANNEL_ID,
             AO::BlackOps => const_names::BLACK_OPS_CHANNEL_ID,
+            AO::CamelsBack => const_names::CAMELS_BACK_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -263,6 +268,7 @@ impl AO {
             AO::IronHorse => None,
             AO::Rebel => Some("3801 E Hill Park Street, Meridian, ID 83642"),
             AO::Tower => Some("2121 E Lake Hazel Rd, Meridian, ID 83642"),
+            AO::CamelsBack => Some("1200 Heron St, Boise, ID 83702"),
             AO::RuckershipEast | AO::RuckershipWest | AO::BlackOps | AO::DR | AO::Unknown(_) => {
                 None
             }
@@ -283,6 +289,7 @@ impl AO {
             AO::Bellagio => Some(const_names::BELLAGIO_GOOGLE_MAPS),
             AO::Tower => Some(const_names::THE_TOWER_GOOGLE_MAPS),
             AO::BlackDiamond => Some(const_names::BLACK_DIAMOND_GOOGLE_MAPS),
+            AO::CamelsBack => Some(const_names::CAMELS_BACK_GOOGLE_MAPS),
             // varies between locations
             AO::IronHorse => None,
             AO::RuckershipWest | AO::RuckershipEast => None,
@@ -319,6 +326,7 @@ impl AO {
             const_names::THE_TOWER_CHANNEL_ID => AO::Tower,
             const_names::BLACK_DIAMOND_CHANNEL_ID => AO::BlackDiamond,
             const_names::BLACK_OPS_CHANNEL_ID => AO::BlackOps,
+            const_names::CAMELS_BACK_CHANNEL_ID => AO::CamelsBack,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
         }
@@ -344,6 +352,7 @@ impl Clone for AO {
             AO::Tower => AO::Tower,
             AO::BlackDiamond => AO::BlackDiamond,
             AO::BlackOps => AO::BlackOps,
+            AO::CamelsBack => AO::CamelsBack,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
     }
@@ -367,6 +376,7 @@ impl ToString for AO {
             AO::Tower => const_names::THE_TOWER,
             AO::BlackDiamond => const_names::BLACK_DIAMOND,
             AO::BlackOps => const_names::BLACK_OPS,
+            AO::CamelsBack => const_names::CAMELS_BACK,
             AO::DR => "",
             AO::Unknown(_) => "",
         };
@@ -404,6 +414,7 @@ impl From<String> for AO {
             const_names::BLACK_DIAMOND => AO::BlackDiamond,
             const_names::IRON_HORSE => AO::IronHorse,
             const_names::BLACK_OPS => AO::BlackOps,
+            const_names::CAMELS_BACK => AO::CamelsBack,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
         }
@@ -440,6 +451,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::Tower => AO::Tower,
         PublicChannels::BlackDiamond => AO::BlackDiamond,
         PublicChannels::BlackOps => AO::BlackOps,
+        PublicChannels::CamelsBack => AO::CamelsBack,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
@@ -520,14 +532,18 @@ pub mod const_names {
     pub const BLACK_OPS_CHANNEL_ID: &str = "C050HTBNU3B";
     pub const IRON_HORSE: &str = "iron-horse";
     pub const IRON_HORSE_CHANNEL_ID: &str = "C058WNHF24A";
+    pub const CAMELS_BACK: &str = "camels-back-park";
+    pub const CAMELS_BACK_CHANNEL_ID: &str = "C05AJDFUBM4";
+    pub const CAMELS_BACK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/28RexfPU7yd7z2Zg8";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 15] = [
+    pub const AO_LIST: [AO; 16] = [
         AO::Backyard,
         AO::Bellagio,
         AO::BlackDiamond,
         AO::BlackOps,
         AO::Bleach,
+        AO::CamelsBack,
         AO::Gem,
         AO::IronHorse,
         AO::IronMountain,
