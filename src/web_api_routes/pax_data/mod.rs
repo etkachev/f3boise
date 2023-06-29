@@ -1,7 +1,7 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::BackBlastData;
 use crate::app_state::MutableAppState;
-use crate::db::queries::all_back_blasts::{get_all, get_list_with_pax};
+use crate::db::queries::all_back_blasts::{get_all, get_dd_list_with_pax, get_list_with_pax};
 use crate::db::queries::users::get_db_users;
 use crate::users::f3_user::F3User;
 use actix_web::{web, HttpResponse, Responder};
@@ -97,6 +97,33 @@ pub async fn get_pax_back_blasts(
     let user_name = user_name.unwrap();
 
     match get_list_with_pax(&db_pool, &user_name).await {
+        Ok(users) => {
+            let data: Vec<BackBlastData> = users.into_iter().map(BackBlastData::from).collect();
+            HttpResponse::Ok().json(data)
+        }
+        Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+    }
+}
+
+pub async fn get_pax_double_downs(
+    db_pool: web::Data<PgPool>,
+    app_state: web::Data<MutableAppState>,
+    req: web::Query<PaxInfoQuery>,
+) -> impl Responder {
+    let user_name = {
+        let app = app_state.app.lock().expect("Could not lock app");
+        app.users
+            .get(req.id.as_str())
+            .map(|user| user.name.to_string())
+    };
+
+    if user_name.is_none() {
+        return HttpResponse::NotFound().body("User not found");
+    }
+
+    let user_name = user_name.unwrap();
+
+    match get_dd_list_with_pax(&db_pool, &user_name).await {
         Ok(users) => {
             let data: Vec<BackBlastData> = users.into_iter().map(BackBlastData::from).collect();
             HttpResponse::Ok().json(data)

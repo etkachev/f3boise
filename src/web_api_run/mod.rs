@@ -11,11 +11,14 @@ use crate::web_api_routes::back_blast_data::csv_download_all::{
 use crate::web_api_routes::back_blast_data::pax_leaderboard_graph::pax_leaderboard_route;
 use crate::web_api_routes::back_blast_data::yearly_stats::get_yearly_stats_route;
 use crate::web_api_routes::back_blast_data::{
-    get_all_back_blasts_route, get_missing_back_blasts, get_top_pax_data_route,
+    get_all_back_blasts_route, get_all_double_downs_route, get_missing_back_blasts,
+    get_top_pax_data_route,
 };
 use crate::web_api_routes::interactive_events::interactive_events;
 use crate::web_api_routes::pax_data::stats::pax_stats_route;
-use crate::web_api_routes::pax_data::{get_bad_data, get_pax_back_blasts, get_pax_info, get_users};
+use crate::web_api_routes::pax_data::{
+    get_bad_data, get_pax_back_blasts, get_pax_double_downs, get_pax_info, get_users,
+};
 use crate::web_api_routes::q_line_up::q_line_up_route;
 use crate::web_api_routes::region_data::ao_meta_data::ao_list_meta_data_route;
 use crate::web_api_routes::slack_events::slack_events;
@@ -128,6 +131,7 @@ pub fn run(
                 web::scope("/pax")
                     .route("/info", web::get().to(get_pax_info))
                     .route("/back_blasts", web::get().to(get_pax_back_blasts))
+                    .route("/double_downs", web::get().to(get_pax_double_downs))
                     .route("/all", web::get().to(get_users))
                     .route("/bad-data", web::get().to(get_bad_data))
                     .route("/stats/{name}", web::get().to(pax_stats_route)),
@@ -151,6 +155,10 @@ pub fn run(
                         web::get().to(download_back_blasts_csv_route),
                     )
                     .route("/{ao_name}", web::get().to(get_back_blast_stats_by_ao)),
+            )
+            .service(
+                web::scope("/double_downs")
+                    .route("/all", web::get().to(get_all_double_downs_route)),
             )
             .service(web::scope("/q_line_up").route("/list", web::get().to(q_line_up_route)))
             .service(

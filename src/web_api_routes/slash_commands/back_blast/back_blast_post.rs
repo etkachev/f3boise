@@ -82,6 +82,13 @@ impl BackBlastPost {
         pax.len()
     }
 
+    pub fn saved_context_str(&self, is_valid: bool) -> String {
+        let bb_type = self.bb_type.to_string();
+        let valid_context_text = if is_valid { "Saved" } else { "Did not save" };
+
+        format!("{} {}", valid_context_text, bb_type)
+    }
+
     /// get list of fngs with names trimmed.
     fn fng_list(&self) -> Vec<String> {
         self.fngs
@@ -260,16 +267,12 @@ pub fn convert_to_message(
         post.pax_count()
     );
 
-    let valid_context_text = if is_valid {
-        "Saved backblast"
-    } else {
-        "Did not save backblast"
-    };
+    let valid_context_text = post.saved_context_str(is_valid);
     let block_builder = BlockBuilder::new()
         .section_markdown(&first_section)
         .divider()
         .section_markdown(post.mole_skine.as_str())
-        .context(valid_context_text);
+        .context(valid_context_text.as_str());
 
     if let Some(user) = user {
         PostMessageRequest::new_as_user(&channel_id, block_builder.blocks, user)
@@ -343,5 +346,24 @@ mod tests {
         println!("{:?}", parsed);
         assert!(parsed.includes_pax("Fng"));
         assert!(!parsed.includes_pax("None"));
+    }
+
+    #[test]
+    fn double_down_context_str() {
+        let post = BackBlastPost {
+            title: "Title".to_string(),
+            date: NaiveDate::from_ymd(2023, 3, 2),
+            ao: AO::Bleach,
+            qs: HashSet::from(["Stinger".to_string()]),
+            pax: HashSet::from(["Freighter".to_string(), "Backslash".to_string()]),
+            non_slack_pax: HashSet::from([]),
+            fngs: HashSet::from(["Fng".to_string(), "None".to_string()]),
+            mole_skine: "The Thang".to_string(),
+            blast_where: BlastWhere::AoChannel,
+            bb_type: BackBlastType::DoubleDown,
+        };
+
+        let context_str = post.saved_context_str(true);
+        assert_eq!(context_str.as_str(), "Saved doubledown");
     }
 }

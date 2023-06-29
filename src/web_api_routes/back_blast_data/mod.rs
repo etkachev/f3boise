@@ -1,6 +1,6 @@
 use crate::app_state::ao_data::const_names::AO_LIST;
 use crate::app_state::backblast_data::BackBlastData;
-use crate::db::queries::all_back_blasts::get_all;
+use crate::db::queries::all_back_blasts::{get_all, get_all_dd};
 use crate::db::queries::missing_back_blasts::get_back_blasts_since;
 use crate::web_api_routes::back_blast_data::top_pax_per_ao::get_top_pax_per_ao;
 use actix_web::{web, HttpResponse, Responder};
@@ -19,6 +19,17 @@ pub mod yearly_stats;
 /// route to get all back blast data
 pub async fn get_all_back_blasts_route(db_pool: web::Data<PgPool>) -> impl Responder {
     match get_all(&db_pool).await {
+        Ok(list) => {
+            let mapped: Vec<BackBlastData> = list.into_iter().map(BackBlastData::from).collect();
+            HttpResponse::Ok().json(mapped)
+        }
+        Err(err) => HttpResponse::NotFound().body(err.to_string()),
+    }
+}
+
+/// route to get all back blast data
+pub async fn get_all_double_downs_route(db_pool: web::Data<PgPool>) -> impl Responder {
+    match get_all_dd(&db_pool).await {
         Ok(list) => {
             let mapped: Vec<BackBlastData> = list.into_iter().map(BackBlastData::from).collect();
             HttpResponse::Ok().json(mapped)
