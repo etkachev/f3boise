@@ -112,7 +112,7 @@ fn create_pre_blast_modal(channel_id: &str, user_id: &str) -> ViewModal {
             "Choose where to post this",
             pre_blast_post::pre_blast_action_ids::WHERE_POST,
             where_to_post_list(channel_id),
-            Some(default_post_option()),
+            Some(default_post_option(Some(channel_id))),
             false,
         )
         .context("Please wait after hitting submit!");

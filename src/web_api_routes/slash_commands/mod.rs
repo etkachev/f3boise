@@ -1,4 +1,5 @@
 use crate::app_state::ao_data::AO;
+use crate::app_state::backblast_data::BackBlastType;
 use crate::app_state::MutableAppState;
 use crate::shared::time::local_boise_time;
 use crate::web_api_routes::graphs::ao_monthly_leaderboard::get_ao_monthly_stats_graph;
@@ -198,7 +199,7 @@ pub async fn slack_slash_commands_route(
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
             }
         }
-        "/dd" | "/preblast" => {
+        "/preblast" => {
             match pre_blast::generate_modal(
                 form.trigger_id.as_str(),
                 &web_state,
@@ -211,12 +212,19 @@ pub async fn slack_slash_commands_route(
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
             }
         }
-        "/bb" | "/backblast" | "/slackblast" => {
+        "/bb" | "/backblast" | "/slackblast" | "/dd" | "/double-down" | "/down-range"
+        | "/off-the-books" => {
+            let back_blast_type = match form.command.as_str() {
+                "/dd" | "/double-down" => BackBlastType::DoubleDown,
+                "/down-range" | "/off-the-books" => BackBlastType::OffTheBooks,
+                _ => BackBlastType::BackBlast,
+            };
             match back_blast::generate_modal(
                 form.trigger_id.as_str(),
                 &web_state,
                 &form.channel_id,
                 &form.user_id,
+                back_blast_type,
             )
             .await
             {

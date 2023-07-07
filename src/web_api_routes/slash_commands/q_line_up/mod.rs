@@ -91,7 +91,7 @@ pub async fn get_q_line_up_for_ao(
     users: &HashMap<String, String>,
 ) -> Result<BlockBuilder, AppError> {
     let days_ahead: i64 = match ao {
-        AO::RuckershipEast | AO::RuckershipWest => 30,
+        AO::RuckershipEast | AO::RuckershipWest | AO::CamelsBack => 30,
         _ => 20,
     };
     let end_date = (*start_date)

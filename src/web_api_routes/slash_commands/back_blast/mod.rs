@@ -1,3 +1,4 @@
+use crate::app_state::backblast_data::BackBlastType;
 use crate::shared::common_errors::AppError;
 use crate::shared::time::local_boise_time;
 use crate::slack_api::block_kit::BlockBuilder;
@@ -16,14 +17,15 @@ pub async fn generate_modal(
     web_app: &MutableWebState,
     channel_id: &str,
     user_id: &str,
+    back_blast_type: BackBlastType,
 ) -> Result<(), AppError> {
-    let modal = create_modal(channel_id, user_id);
+    let modal = create_modal(channel_id, user_id, back_blast_type);
     let view = ViewsOpenRequest::new(trigger_id, ViewPayload::Modal(modal));
     web_app.open_view(view).await?;
     Ok(())
 }
 
-fn create_modal(channel_id: &str, user_id: &str) -> ViewModal {
+fn create_modal(channel_id: &str, user_id: &str, back_blast_type: BackBlastType) -> ViewModal {
     let default_date = local_boise_time().date_naive();
     let default_moleskine = r#"*WARMUP:*
 *THE THANG:*
@@ -88,14 +90,14 @@ fn create_modal(channel_id: &str, user_id: &str) -> ViewModal {
             "Backblast type",
             back_blast_post::back_blast_post_action_ids::BB_TYPE,
             back_blast_types_list(),
-            Some(default_back_blast_type()),
+            Some(default_back_blast_type(Some(back_blast_type))),
             false,
         )
         .select(
             "Choose where to post this",
             back_blast_post::back_blast_post_action_ids::WHERE_TO_POST,
             where_to_post_list(channel_id),
-            Some(default_post_option()),
+            Some(default_post_option(Some(channel_id))),
             false,
         ).context("Do not hit Submit more than once! Even if you get a timeout error, the backblast has likely already been posted. If using email, this can take time and this form may not automatically close.");
     ViewModal::new("Back Blast", block_builder, "Submit", ViewIds::BackBlast)
