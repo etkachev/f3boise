@@ -89,7 +89,7 @@ impl AO {
             AO::Gem => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::OldGlory => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::Rebel => HashSet::from([Weekday::Tue, Weekday::Thu]),
-            AO::IronMountain => HashSet::from([Weekday::Tue]),
+            AO::IronMountain => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::RuckershipWest => HashSet::from([Weekday::Fri]),
             AO::RuckershipEast => HashSet::from([Weekday::Fri]),
             AO::Backyard => HashSet::from([Weekday::Wed, Weekday::Fri]),
