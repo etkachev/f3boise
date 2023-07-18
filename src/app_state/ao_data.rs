@@ -17,7 +17,6 @@ pub enum AO {
     Backyard,
     Rise,
     WarHorse,
-    IronHorse,
     Bellagio,
     Tower,
     BlackDiamond,
@@ -91,7 +90,6 @@ impl AO {
             AO::OldGlory => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::Rebel => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::IronMountain => HashSet::from([Weekday::Tue]),
-            AO::IronHorse => HashSet::from([Weekday::Sat]),
             AO::RuckershipWest => HashSet::from([Weekday::Fri]),
             AO::RuckershipEast => HashSet::from([Weekday::Fri]),
             AO::Backyard => HashSet::from([Weekday::Wed, Weekday::Fri]),
@@ -118,7 +116,6 @@ impl AO {
             AO::Backyard => "Backyard",
             AO::Rise => "Rise",
             AO::WarHorse => "Warhorse",
-            AO::IronHorse => "Iron Horse",
             AO::Bellagio => "Bellagio",
             AO::Tower => "Tower",
             AO::BlackDiamond => "Black Diamond",
@@ -191,7 +188,7 @@ impl AO {
                 _ => None,
             },
             Weekday::Fri => match self {
-                AO::RuckershipWest | AO::RuckershipEast => Some(five_thirty),
+                AO::RuckershipWest | AO::RuckershipEast => Some(five),
                 ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
@@ -215,7 +212,6 @@ impl AO {
             AO::RuckershipEast | AO::RuckershipWest => AoType::Rucking,
             AO::Rise => AoType::Bootcamp,
             AO::WarHorse => AoType::Bootcamp,
-            AO::IronHorse => AoType::Bootcamp,
             AO::Gem => AoType::Bootcamp,
             AO::IronMountain => AoType::Bootcamp,
             AO::BlackOps => AoType::Bootcamp,
@@ -244,7 +240,6 @@ impl AO {
             AO::WarHorse => const_names::WAR_HORSE_CHANNEL_ID,
             AO::Bellagio => const_names::BELLAGIO_CHANNEL_ID,
             AO::Tower => const_names::THE_TOWER_CHANNEL_ID,
-            AO::IronHorse => const_names::IRON_HORSE_CHANNEL_ID,
             AO::BlackDiamond => const_names::BLACK_DIAMOND_CHANNEL_ID,
             AO::BlackOps => const_names::BLACK_OPS_CHANNEL_ID,
             AO::CamelsBack => const_names::CAMELS_BACK_CHANNEL_ID,
@@ -264,8 +259,6 @@ impl AO {
             AO::Bellagio => Some("Kleiner Park Loop, Meridian, ID 83642"),
             AO::Gem => Some("3423 N Meridian Rd, Meridian, ID 83642"),
             AO::IronMountain => Some("75 Marjorie Ave, Middleton, ID 83644"),
-            // varies by location
-            AO::IronHorse => None,
             AO::Rebel => Some("3801 E Hill Park Street, Meridian, ID 83642"),
             AO::Tower => Some("2121 E Lake Hazel Rd, Meridian, ID 83642"),
             AO::CamelsBack => Some("1200 Heron St, Boise, ID 83702"),
@@ -290,8 +283,6 @@ impl AO {
             AO::Tower => Some(const_names::THE_TOWER_GOOGLE_MAPS),
             AO::BlackDiamond => Some(const_names::BLACK_DIAMOND_GOOGLE_MAPS),
             AO::CamelsBack => Some(const_names::CAMELS_BACK_GOOGLE_MAPS),
-            // varies between locations
-            AO::IronHorse => None,
             AO::RuckershipWest | AO::RuckershipEast => None,
             AO::DR | AO::BlackOps => None,
             AO::Unknown(_) => None,
@@ -303,7 +294,6 @@ impl AO {
         self.real_map_url().unwrap_or(match self {
             AO::RuckershipWest | AO::RuckershipEast => "Location Varies",
             AO::DR | AO::BlackOps => "Location Varies",
-            AO::IronHorse => "Varies between locations",
             AO::Unknown(_) => "Unknown",
             _ => "",
         })
@@ -322,7 +312,6 @@ impl AO {
             const_names::RISE_CHANNEL_ID => AO::Rise,
             const_names::WAR_HORSE_CHANNEL_ID => AO::WarHorse,
             const_names::BELLAGIO_CHANNEL_ID => AO::Bellagio,
-            const_names::IRON_HORSE_CHANNEL_ID => AO::IronHorse,
             const_names::THE_TOWER_CHANNEL_ID => AO::Tower,
             const_names::BLACK_DIAMOND_CHANNEL_ID => AO::BlackDiamond,
             const_names::BLACK_OPS_CHANNEL_ID => AO::BlackOps,
@@ -347,7 +336,6 @@ impl Clone for AO {
             AO::Rise => AO::Rise,
             AO::DR => AO::DR,
             AO::WarHorse => AO::WarHorse,
-            AO::IronHorse => AO::IronHorse,
             AO::Bellagio => AO::Bellagio,
             AO::Tower => AO::Tower,
             AO::BlackDiamond => AO::BlackDiamond,
@@ -371,7 +359,6 @@ impl ToString for AO {
             AO::Backyard => const_names::BACKYARD,
             AO::Rise => const_names::RISE,
             AO::WarHorse => const_names::WAR_HORSE,
-            AO::IronHorse => const_names::IRON_HORSE,
             AO::Bellagio => const_names::BELLAGIO,
             AO::Tower => const_names::THE_TOWER,
             AO::BlackDiamond => const_names::BLACK_DIAMOND,
@@ -412,7 +399,6 @@ impl From<String> for AO {
             const_names::BACKYARD => AO::Backyard,
             const_names::THE_TOWER | "the-tower" | "discovery-park" => AO::Tower,
             const_names::BLACK_DIAMOND => AO::BlackDiamond,
-            const_names::IRON_HORSE => AO::IronHorse,
             const_names::BLACK_OPS => AO::BlackOps,
             const_names::CAMELS_BACK => AO::CamelsBack,
             const_names::DR => AO::DR,
@@ -446,7 +432,6 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::OldGlory => AO::OldGlory,
         PublicChannels::Rise => AO::Rise,
         PublicChannels::WarHorse => AO::WarHorse,
-        PublicChannels::IronHorse => AO::IronHorse,
         PublicChannels::Bellagio => AO::Bellagio,
         PublicChannels::Tower => AO::Tower,
         PublicChannels::BlackDiamond => AO::BlackDiamond,
@@ -530,14 +515,12 @@ pub mod const_names {
     pub const BLACK_DIAMOND_GOOGLE_MAPS: &str = "https://goo.gl/maps/hsSKRSVHjifx4HdV6";
     pub const BLACK_OPS: &str = "black-ops";
     pub const BLACK_OPS_CHANNEL_ID: &str = "C050HTBNU3B";
-    pub const IRON_HORSE: &str = "iron-horse";
-    pub const IRON_HORSE_CHANNEL_ID: &str = "C058WNHF24A";
     pub const CAMELS_BACK: &str = "camels-back-park";
     pub const CAMELS_BACK_CHANNEL_ID: &str = "C05AJDFUBM4";
     pub const CAMELS_BACK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/28RexfPU7yd7z2Zg8";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 16] = [
+    pub const AO_LIST: [AO; 15] = [
         AO::Backyard,
         AO::Bellagio,
         AO::BlackDiamond,
@@ -545,7 +528,6 @@ pub mod const_names {
         AO::Bleach,
         AO::CamelsBack,
         AO::Gem,
-        AO::IronHorse,
         AO::IronMountain,
         AO::OldGlory,
         AO::Rebel,
@@ -593,5 +575,12 @@ mod tests {
     fn black_ops() {
         let ao = AO::from("black-ops".to_string());
         assert_eq!(ao, AO::BlackOps);
+    }
+
+    #[test]
+    fn ruckership_start_time() {
+        let ao = AO::RuckershipWest;
+        let start_time = ao.default_time(&Weekday::Fri).unwrap();
+        assert_eq!(start_time, NaiveTime::from_hms(5, 0, 0));
     }
 }
