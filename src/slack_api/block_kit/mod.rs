@@ -314,6 +314,7 @@ pub struct ActionBlock {
     /// Maximum length for this field is 255 characters.
     /// block_id should be unique for each message and each iteration of a message.
     /// If a message is updated, use a new block_id
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub block_id: Option<String>,
 }
 
@@ -613,6 +614,7 @@ pub struct ImageBlock {
     /// A plain-text summary of the image. This should not contain any markup. Maximum length for this field is 2000 characters
     pub alt_text: String,
     /// An optional title for the image in the form of a text object that can only be of type: plain_text. Maximum length for the text in this field is 2000 characters.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<TextObject>,
 }
 
