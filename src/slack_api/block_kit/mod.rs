@@ -63,9 +63,13 @@ impl BlockBuilder {
     }
 
     pub fn context(mut self, text: &str) -> Self {
+        self.add_context(text);
+        self
+    }
+
+    pub fn add_context(&mut self, text: &str) {
         self.blocks
             .push(BlockType::Context(ContextBlock::new_markdown(text)));
-        self
     }
 
     pub fn divider(mut self) -> Self {
@@ -75,6 +79,17 @@ impl BlockBuilder {
 
     pub fn add_divider(&mut self) {
         self.blocks.push(BlockType::Divider);
+    }
+
+    pub fn btn(mut self, label: &str, action_id: &str, value: &str) -> Self {
+        self.add_btn(label, action_id, value);
+        self
+    }
+
+    pub fn add_btn(&mut self, label: &str, action_id: &str, value: &str) {
+        self.blocks.push(BlockType::Actions(ActionBlock::new_btn(
+            label, action_id, value,
+        )));
     }
 
     pub fn plain_input(
@@ -300,6 +315,16 @@ pub struct ActionBlock {
     /// block_id should be unique for each message and each iteration of a message.
     /// If a message is updated, use a new block_id
     pub block_id: Option<String>,
+}
+
+impl ActionBlock {
+    pub fn new_btn(text: &str, action_id: &str, value: &str) -> Self {
+        let block_element = BlockElementType::new_btn_value(text, action_id, value);
+        ActionBlock {
+            elements: vec![block_element],
+            block_id: None,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]

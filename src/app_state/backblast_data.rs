@@ -1,6 +1,6 @@
 use super::ao_data::AO;
 use crate::db::db_back_blast::DbBackBlast;
-use crate::db::queries::all_back_blasts::BackBlastJsonData;
+use crate::db::queries::all_back_blasts::{BackBlastFullJsonData, BackBlastJsonData};
 use crate::db::save_back_blast::BackBlastDbEntry;
 use crate::shared::string_utils::{string_split_hash, string_vec_to_hash};
 use crate::web_api_routes::slack_events::event_times::EventTimes;
@@ -14,6 +14,8 @@ pub const SLACK_BLAST_TAG: &str = "*slackblast*:";
 /// General data of a backblast
 #[derive(Debug, PartialEq, Serialize, Deserialize, Eq)]
 pub struct BackBlastData {
+    /// possible id of backblast if saved in db
+    pub id: Option<String>,
     /// AO this backblast is part of
     pub ao: AO,
     /// list of Q's that led
@@ -25,6 +27,10 @@ pub struct BackBlastData {
     /// type of back blast
     pub bb_type: BackBlastType,
     pub event_times: Option<EventTimes>,
+    pub title: Option<String>,
+    pub moleskine: Option<String>,
+    /// explicit list of fngs
+    pub fngs: HashSet<String>,
 }
 
 impl BackBlastData {
@@ -154,13 +160,18 @@ impl From<&BackBlastDbEntry> for BackBlastData {
     fn from(db_entry: &BackBlastDbEntry) -> Self {
         let qs = string_split_hash(&db_entry.q, ',');
         let pax = string_split_hash(&db_entry.pax, ',');
+        let fngs = string_split_hash(&db_entry.fngs.clone().unwrap_or_default(), ',');
         BackBlastData {
+            id: Some(db_entry.id.to_string()),
             ao: AO::from(db_entry.ao.to_string()),
             qs,
             pax,
             date: db_entry.date,
             bb_type: BackBlastType::from(db_entry.bb_type.as_str()),
             event_times: None,
+            fngs,
+            title: db_entry.title.clone(),
+            moleskine: db_entry.moleskine.clone(),
         }
     }
 }
@@ -171,17 +182,46 @@ impl From<BackBlastJsonData> for BackBlastData {
     }
 }
 
-impl From<&BackBlastJsonData> for BackBlastData {
-    fn from(data: &BackBlastJsonData) -> Self {
+impl From<BackBlastFullJsonData> for BackBlastData {
+    fn from(value: BackBlastFullJsonData) -> Self {
+        BackBlastData::from(&value)
+    }
+}
+impl From<&BackBlastFullJsonData> for BackBlastData {
+    fn from(data: &BackBlastFullJsonData) -> Self {
         let qs = string_vec_to_hash(&data.q);
         let pax = string_vec_to_hash(&data.pax);
+        let fngs = string_vec_to_hash(&data.fngs.clone().unwrap_or_default());
         BackBlastData {
+            id: Some(data.id.to_string()),
             ao: AO::from_channel_id(data.channel_id.as_str()),
             qs,
             pax,
             date: data.date,
             bb_type: BackBlastType::from(data.bb_type.as_str()),
             event_times: None,
+            title: data.title.clone(),
+            moleskine: data.moleskine.clone(),
+            fngs,
+        }
+    }
+}
+
+impl From<&BackBlastJsonData> for BackBlastData {
+    fn from(data: &BackBlastJsonData) -> Self {
+        let qs = string_vec_to_hash(&data.q);
+        let pax = string_vec_to_hash(&data.pax);
+        BackBlastData {
+            id: Some(data.id.to_string()),
+            ao: AO::from_channel_id(data.channel_id.as_str()),
+            qs,
+            pax,
+            date: data.date,
+            bb_type: BackBlastType::from(data.bb_type.as_str()),
+            event_times: None,
+            title: None,
+            moleskine: None,
+            fngs: HashSet::new(),
         }
     }
 }
@@ -189,12 +229,16 @@ impl From<&BackBlastJsonData> for BackBlastData {
 impl Default for BackBlastData {
     fn default() -> Self {
         BackBlastData {
+            id: None,
             ao: AO::Unknown("EMPTY".to_string()),
             qs: HashSet::new(),
             pax: HashSet::new(),
             date: NaiveDate::MIN,
             bb_type: BackBlastType::BackBlast,
             event_times: None,
+            title: None,
+            moleskine: None,
+            fngs: HashSet::new(),
         }
     }
 }

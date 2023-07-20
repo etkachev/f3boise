@@ -13,6 +13,7 @@ pub enum AppError {
     ChronoParse(chrono::ParseError),
     Usvg(resvg::usvg::Error),
     Reqwest(reqwest::Error),
+    Uuid(uuid::Error),
     General(String),
 }
 
@@ -27,6 +28,12 @@ impl error::Error for AppError {}
 impl From<io::Error> for AppError {
     fn from(err: io::Error) -> Self {
         AppError::Io(err)
+    }
+}
+
+impl From<&str> for AppError {
+    fn from(err: &str) -> Self {
+        AppError::General(err.to_string())
     }
 }
 
@@ -69,5 +76,11 @@ impl From<resvg::usvg::Error> for AppError {
 impl From<reqwest::Error> for AppError {
     fn from(err: reqwest::Error) -> Self {
         AppError::Reqwest(err)
+    }
+}
+
+impl From<uuid::Error> for AppError {
+    fn from(err: uuid::Error) -> Self {
+        AppError::Uuid(err)
     }
 }

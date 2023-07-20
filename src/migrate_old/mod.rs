@@ -53,7 +53,7 @@ pub async fn save_old_back_blasts(db_pool: &PgPool) -> Result<(), AppError> {
     for (ao, file_path) in AOLIST.iter() {
         let ao_name = ao.to_string();
         let bb = read_back_blasts(ao, &back_blast_path(file_path))?;
-        save_back_blast::save(db_pool, &bb).await?;
+        save_back_blast::save_multiple(db_pool, &bb).await?;
         println!("Saved: {}", ao_name);
     }
 

@@ -62,6 +62,8 @@ pub mod response {
     pub struct PostMessageResponse {
         pub ok: bool,
         pub channel: Option<String>,
+        /// timestamp on when it was posted.
+        pub ts: Option<String>,
         pub error: Option<String>,
     }
 }

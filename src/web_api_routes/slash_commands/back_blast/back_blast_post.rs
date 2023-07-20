@@ -3,7 +3,9 @@ use crate::app_state::backblast_data::{BackBlastData, BackBlastType};
 use crate::app_state::MutableAppState;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
+use crate::slack_api::chat::update_message::request::UpdateMessageRequest;
 use crate::web_api_routes::interactive_events::interaction_payload::BasicValue;
+use crate::web_api_routes::interactive_events::interaction_types::InteractionTypes;
 use crate::web_api_routes::slack_events::event_times::EventTimes;
 use crate::web_api_routes::slash_commands::modal_utils::{value_utils, BlastWhere};
 use chrono::NaiveDate;
@@ -227,19 +229,39 @@ pub fn convert_to_bb_data(request: &BackBlastPost, app_state: &MutableAppState) 
 
     // setting for it to exist, but not valid.
     data.set_event_times(EventTimes::new("temp".to_string(), "temp".to_string()));
+    data.title = Some(request.title.to_string());
+    data.moleskine = Some(request.mole_skine.to_string());
+    data.fngs = request.fngs.clone();
     data
 }
 
+/// convert to update message request
+pub fn convert_to_update_message(
+    post: BackBlastPost,
+    saved: bool,
+    id: Option<String>,
+    ts: &str,
+) -> UpdateMessageRequest {
+    let channel_id = match &post.blast_where {
+        BlastWhere::AoChannel => post.ao.channel_id().to_string(),
+        BlastWhere::CurrentChannel(id) => id.to_string(),
+    };
+
+    let block_builder = get_block_builder(post, id, saved);
+
+    UpdateMessageRequest::new(&channel_id, ts, block_builder.blocks)
+}
+
+/// convert to post message request. pass in id of saved backblast in db
 pub fn convert_to_message(
     post: BackBlastPost,
     app_state: &MutableAppState,
     is_valid: bool,
+    id: Option<String>,
 ) -> PostMessageRequest {
     let channel_id = match &post.blast_where {
         BlastWhere::AoChannel => post.ao.channel_id().to_string(),
         BlastWhere::CurrentChannel(id) => id.to_string(),
-        // TODO
-        BlastWhere::Myself => "TODO".to_string(),
     };
 
     let user = if let Some(id) = post.get_first_q() {
@@ -249,6 +271,16 @@ pub fn convert_to_message(
         None
     };
 
+    let block_builder = get_block_builder(post, id, is_valid);
+
+    if let Some(user) = user {
+        PostMessageRequest::new_as_user(&channel_id, block_builder.blocks, user)
+    } else {
+        PostMessageRequest::new(&channel_id, block_builder.blocks)
+    }
+}
+
+fn get_block_builder(post: BackBlastPost, id: Option<String>, is_valid: bool) -> BlockBuilder {
     let first_section = format!(
         "*Slackblast*:\n
 {}\n
@@ -267,18 +299,22 @@ pub fn convert_to_message(
         post.pax_count()
     );
 
-    let valid_context_text = post.saved_context_str(is_valid);
-    let block_builder = BlockBuilder::new()
+    let mut block_builder = BlockBuilder::new()
         .section_markdown(&first_section)
         .divider()
-        .section_markdown(post.mole_skine.as_str())
-        .context(valid_context_text.as_str());
+        .section_markdown(post.mole_skine.as_str());
 
-    if let Some(user) = user {
-        PostMessageRequest::new_as_user(&channel_id, block_builder.blocks, user)
-    } else {
-        PostMessageRequest::new(&channel_id, block_builder.blocks)
+    if let Some(id) = id {
+        let interaction_btn = InteractionTypes::new_edit_back_blast(id.as_str());
+        block_builder.add_btn(
+            "Edit Backblast",
+            interaction_btn.to_string().as_str(),
+            "edit-backblast",
+        );
     }
+    let valid_context_text = post.saved_context_str(is_valid);
+    block_builder.add_context(valid_context_text.as_str());
+    block_builder
 }
 
 pub fn get_first_message_section(post: &BackBlastPost) -> String {

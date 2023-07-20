@@ -2,6 +2,11 @@ use crate::app_state::MutableAppState;
 use crate::shared::common_errors::AppError;
 use crate::shared::constants;
 use crate::slack_api::channels::public_channels::PublicChannels;
+use crate::slack_api::views::payload::ViewPayload;
+use crate::slack_api::views::request::ViewsOpenRequest;
+use crate::web_api_routes::interactive_events::edit_backblast::{
+    create_edit_modal, get_back_blast, get_user_data,
+};
 use crate::web_api_routes::interactive_events::interaction_payload::{
     ActionChannel, ActionType, ActionUser, BlockAction, ButtonAction, InteractionMessageTypes,
     OverflowAction,
@@ -31,6 +36,7 @@ pub async fn handle_block_actions(
             user,
             channel: action_channel,
             message,
+            trigger_id,
             ..
         } if !actions.is_empty() => {
             println!("With {} actions", actions.len());
@@ -50,7 +56,16 @@ pub async fn handle_block_actions(
                     )
                     .await?
                 }
-                InteractionTypes::EditBackBlast => {}
+                InteractionTypes::EditBackBlast(id) => {
+                    handle_edit_back_blast(
+                        db_pool,
+                        web_state,
+                        id,
+                        &action_channel,
+                        trigger_id.as_str(),
+                    )
+                    .await?
+                }
                 InteractionTypes::Unknown => {
                     println!("Unknown interaction");
                 }
@@ -58,6 +73,27 @@ pub async fn handle_block_actions(
         }
         _ => {}
     }
+    Ok(())
+}
+
+async fn handle_edit_back_blast(
+    db_pool: &PgPool,
+    web_state: &MutableWebState,
+    id: &str,
+    action_channel: &Option<ActionChannel>,
+    trigger_id: &str,
+) -> Result<(), AppError> {
+    let bb = get_back_blast(db_pool, id).await?;
+    let channel = action_channel.as_ref().map(|c| c.id.to_string());
+    if channel.is_none() {
+        return Err(AppError::from("Missing channel id"));
+    }
+
+    let channel = channel.unwrap();
+    let users = get_user_data(db_pool, &bb).await?;
+    let modal = create_edit_modal(channel.as_str(), &bb, users, id);
+    let view = ViewsOpenRequest::new(trigger_id, ViewPayload::Modal(modal));
+    web_state.open_view(view).await?;
     Ok(())
 }
 

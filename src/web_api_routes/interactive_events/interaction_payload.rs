@@ -470,6 +470,8 @@ pub enum ViewSubmissionPayloadView {
 pub struct ViewSubmissionPayloadViewModal {
     pub id: String,
     pub external_id: Option<String>,
+    /// An optional string that will be sent to your app in view_submission and block_actions events. Max length of 3000 characters
+    pub private_metadata: Option<String>,
     pub state: InteractionStateValues,
 }
 

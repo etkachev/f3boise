@@ -5,6 +5,7 @@ use crate::shared::common_errors::AppError;
 use crate::web_api_routes::auth::get_key;
 use crate::web_api_routes::back_blast_data::ao_back_blast_stats::get_back_blast_stats_by_ao;
 use crate::web_api_routes::back_blast_data::ao_monthly_leaderboard::ao_monthly_leaderboard_route;
+use crate::web_api_routes::back_blast_data::back_blast_single::get_single_back_blast_data;
 use crate::web_api_routes::back_blast_data::csv_download_all::{
     back_blasts_csv_html, download_back_blasts_csv_route,
 };
@@ -154,7 +155,8 @@ pub fn run(
                         "/download-csv",
                         web::get().to(download_back_blasts_csv_route),
                     )
-                    .route("/{ao_name}", web::get().to(get_back_blast_stats_by_ao)),
+                    .route("/{ao_name}", web::get().to(get_back_blast_stats_by_ao))
+                    .route("/single/{id}", web::get().to(get_single_back_blast_data)),
             )
             .service(
                 web::scope("/double_downs")

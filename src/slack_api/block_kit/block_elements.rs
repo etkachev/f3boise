@@ -36,6 +36,10 @@ impl BlockElementType {
         BlockElementType::Button(ButtonElement::new(text, action_id))
     }
 
+    pub fn new_btn_value(text: &str, action_id: &str, value: &str) -> Self {
+        BlockElementType::Button(ButtonElement::new(text, action_id).with_value(value))
+    }
+
     pub fn new_danger_btn(text: &str, action_id: &str) -> Self {
         BlockElementType::Button(ButtonElement::new_danger(text, action_id))
     }
@@ -619,6 +623,9 @@ pub struct ButtonElement {
     /// either 'primary' or 'danger'. uses default if none passed in.
     #[serde(skip_serializing_if = "Option::is_none")]
     style: Option<String>,
+    /// The value to send along with the interaction payload. Maximum length for this field is 2000 characters.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    value: Option<String>,
 }
 
 pub enum ButtonStyle {
@@ -645,6 +652,7 @@ impl ButtonElement {
             text: TextObject::new_text(text),
             action_id: action_id.to_string(),
             style: None,
+            value: None,
         }
     }
 
@@ -654,6 +662,7 @@ impl ButtonElement {
             text: TextObject::new_text(text),
             action_id: action_id.to_string(),
             style: Some(ButtonStyle::Danger.to_string()),
+            value: None,
         }
     }
 
@@ -663,6 +672,13 @@ impl ButtonElement {
             text: TextObject::new_text(text),
             action_id: action_id.to_string(),
             style: Some(ButtonStyle::Primary.to_string()),
+            value: None,
         }
+    }
+
+    /// insert with custom value
+    pub fn with_value(mut self, value: &str) -> Self {
+        self.value = Some(value.to_string());
+        self
     }
 }

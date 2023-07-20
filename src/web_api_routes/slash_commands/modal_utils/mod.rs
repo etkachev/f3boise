@@ -12,7 +12,6 @@ pub enum BlastWhere {
     #[default]
     AoChannel,
     CurrentChannel(String),
-    Myself,
 }
 
 impl ToString for BlastWhere {
@@ -20,7 +19,6 @@ impl ToString for BlastWhere {
         match self {
             BlastWhere::AoChannel => String::from("Ao Channel"),
             BlastWhere::CurrentChannel(_) => String::from("Current Channel"),
-            BlastWhere::Myself => String::from("Me"),
         }
     }
 }
@@ -33,7 +31,6 @@ impl FromStr for BlastWhere {
         match split_text {
             ("ao_channel", _) => Ok(BlastWhere::AoChannel),
             ("current_channel", id) => Ok(BlastWhere::CurrentChannel(id.to_string())),
-            ("self", _) => Ok(BlastWhere::Myself),
             _ => Err(AppError::General("Could not parse".to_string())),
         }
     }
@@ -49,7 +46,6 @@ impl From<BlastWhere> for OptionElement {
                 &BlastWhere::CurrentChannel(channel_id.to_string()).to_string(),
                 &format!("current_channel::{channel_id}"),
             ),
-            BlastWhere::Myself => OptionElement::new(&BlastWhere::Myself.to_string(), "self"),
         }
     }
 }
@@ -65,7 +61,6 @@ pub fn where_to_post_list(channel_id: &str) -> Vec<OptionElement> {
     vec![
         OptionElement::from(BlastWhere::default()),
         OptionElement::from(BlastWhere::CurrentChannel(channel_id.to_string())),
-        OptionElement::from(BlastWhere::Myself),
     ]
 }
 

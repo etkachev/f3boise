@@ -5,7 +5,7 @@ use std::str::FromStr;
 #[derive(Debug, PartialEq)]
 pub enum InteractionTypes {
     QLineUp(QSheetActionComboData),
-    EditBackBlast,
+    EditBackBlast(String),
     Unknown,
 }
 
@@ -14,8 +14,9 @@ impl InteractionTypes {
         InteractionTypes::QLineUp(QSheetActionComboData::new_q_line_up(date, ao))
     }
 
-    pub fn new_edit_back_blast() -> Self {
-        InteractionTypes::EditBackBlast
+    /// pass in the id of saved backblast for editing later
+    pub fn new_edit_back_blast(id: &str) -> Self {
+        InteractionTypes::EditBackBlast(id.to_string())
     }
 }
 
@@ -24,7 +25,7 @@ impl From<&str> for InteractionTypes {
         let (first_type, rest) = action_id.split_once("::").unwrap_or((action_id, ""));
         match first_type {
             Q_LINE_UP => InteractionTypes::QLineUp(QSheetActionComboData::from(rest)),
-            EDIT_BACK_BLAST => InteractionTypes::EditBackBlast,
+            EDIT_BACK_BLAST => InteractionTypes::EditBackBlast(rest.to_string()),
             _ => InteractionTypes::Unknown,
         }
     }
@@ -34,7 +35,7 @@ impl ToString for InteractionTypes {
     fn to_string(&self) -> String {
         match self {
             InteractionTypes::QLineUp(data) => format!("{Q_LINE_UP}::{}", data.to_string()),
-            InteractionTypes::EditBackBlast => EDIT_BACK_BLAST.to_string(),
+            InteractionTypes::EditBackBlast(id) => format!("{EDIT_BACK_BLAST}::{}", id),
             InteractionTypes::Unknown => "unknown".to_string(),
         }
     }

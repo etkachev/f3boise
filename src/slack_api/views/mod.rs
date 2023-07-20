@@ -103,6 +103,11 @@ pub mod payload {
             }
         }
 
+        pub fn with_private_meta(mut self, private_metadata: &str) -> Self {
+            self.private_metadata = Some(private_metadata.to_string());
+            self
+        }
+
         pub fn is_valid_payload(&self) -> bool {
             self.is_valid_title()
                 && self.is_valid_blocks()

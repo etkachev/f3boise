@@ -169,8 +169,11 @@ impl MutableWebState {
         }
     }
 
-    /// post message to someone or channel
-    pub async fn post_message(&self, request: PostMessageRequest) -> Result<(), AppError> {
+    /// post message to someone or channel. return ts from message posted
+    pub async fn post_message(
+        &self,
+        request: PostMessageRequest,
+    ) -> Result<Option<String>, AppError> {
         let url = request.get_plain_url_request(&self.base_api_url);
         println!("Calling: {:?}", url.as_str());
         let body = serde_json::to_vec(&request)?;
@@ -179,7 +182,7 @@ impl MutableWebState {
         if let Some(err) = response.error {
             Err(AppError::General(err))
         } else {
-            Ok(())
+            Ok(response.ts)
         }
     }
 
@@ -212,8 +215,11 @@ impl MutableWebState {
         }
     }
 
-    /// update message that exists in slack
-    pub async fn update_message(&self, request: UpdateMessageRequest) -> Result<(), AppError> {
+    /// update message that exists in slack. returns ts
+    pub async fn update_message(
+        &self,
+        request: UpdateMessageRequest,
+    ) -> Result<Option<String>, AppError> {
         let url = request.get_plain_url_request(&self.base_api_url);
         println!("Calling: {:?}", url.as_str());
         let body = serde_json::to_vec(&request)?;
@@ -222,7 +228,7 @@ impl MutableWebState {
         if let Some(err) = response.error {
             Err(AppError::General(err))
         } else {
-            Ok(())
+            Ok(response.ts)
         }
     }
 

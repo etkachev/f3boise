@@ -34,6 +34,10 @@ pub async fn handle_view_submission(
                         handle_black_diamond_rating_submission(modal, web_state, app_state, user)
                             .await
                     }
+                    ViewIds::BackBlastEdit => {
+                        handle_edit_back_blast_submission(modal, web_state, app_state, db_pool)
+                            .await
+                    }
                     ViewIds::Unknown => Ok(()),
                 }
             } else {
@@ -52,7 +56,46 @@ async fn handle_black_diamond_rating_submission(
     let form_values = modal.state.get_values();
     let post = black_diamond_rating_post::BlackDiamondRatingPost::from(form_values);
     let message = black_diamond_rating_post::convert_to_message(post, app_state, user.id.as_str());
-    web_state.post_message(message).await
+    web_state.post_message(message).await?;
+    Ok(())
+}
+
+async fn handle_edit_back_blast_submission(
+    modal: &ViewSubmissionPayloadViewModal,
+    web_state: &MutableWebState,
+    app_state: &MutableAppState,
+    db_pool: &PgPool,
+) -> Result<(), AppError> {
+    use crate::db::queries::all_back_blasts;
+    use crate::db::save_back_blast;
+
+    let form_values = modal.state.get_values();
+    let post = back_blast_post::BackBlastPost::from(form_values);
+    let db_data = back_blast_post::convert_to_bb_data(&post, app_state);
+    let is_valid = db_data.is_valid_back_blast();
+    if is_valid {
+        if let Some(id) = &modal.private_metadata {
+            // save to backend
+            save_back_blast::update_back_blast(db_pool, id, &db_data).await?;
+            // fetch latest update
+            let updated_bb = all_back_blasts::get_back_blast_by_id(db_pool, id).await?;
+            if let Some(ts) = updated_bb.map(|bb| bb.ts).unwrap_or_default() {
+                let message = back_blast_post::convert_to_update_message(
+                    post,
+                    true,
+                    modal.private_metadata.clone(),
+                    ts.as_str(),
+                );
+                // send message update to slack
+                let ts = web_state.update_message(message).await?;
+                if let Some(ts) = ts {
+                    // update ts on backblast
+                    save_back_blast::update_back_blast_ts(db_pool, id, ts).await?;
+                }
+            }
+        }
+    }
+    Ok(())
 }
 
 async fn handle_back_blast_submission(
@@ -67,11 +110,20 @@ async fn handle_back_blast_submission(
     let post = back_blast_post::BackBlastPost::from(form_values);
     let db_data = back_blast_post::convert_to_bb_data(&post, app_state);
     let is_valid = db_data.is_valid_back_blast();
+    let mut id: Option<String> = None;
     if is_valid {
-        save_back_blast::save(db_pool, &[db_data]).await?;
+        // save single back blast
+        let saved_id = save_back_blast::save_single(db_pool, &db_data).await?;
+        id = Some(saved_id);
     }
-    let message = back_blast_post::convert_to_message(post, app_state, is_valid);
-    web_state.post_message(message).await
+    let message = back_blast_post::convert_to_message(post, app_state, is_valid, id.clone());
+    // post message to slack
+    let ts = web_state.post_message(message).await?;
+    if let (Some(id), Some(ts)) = (id, ts) {
+        // update backblast ts in db
+        save_back_blast::update_back_blast_ts(db_pool, id.as_str(), ts).await?;
+    }
+    Ok(())
 }
 
 async fn handle_pre_blast_submission(
@@ -84,5 +136,6 @@ async fn handle_pre_blast_submission(
     let post = pre_blast_post::PreBlastPost::from(form_values);
     println!("from user {:?}", user.username);
     let message = pre_blast_post::convert_to_message(post, app_state);
-    web_state.post_message(message).await
+    web_state.post_message(message).await?;
+    Ok(())
 }

@@ -156,8 +156,6 @@ pub fn convert_to_message(post: PreBlastPost, app_state: &MutableAppState) -> Po
     let channel_id = match &post.post_where {
         BlastWhere::AoChannel => post.ao.channel_id().to_string(),
         BlastWhere::CurrentChannel(id) => id.to_string(),
-        // TODO
-        BlastWhere::Myself => "TODO".to_string(),
     };
 
     let user = if let Some(id) = post.get_first_q() {
