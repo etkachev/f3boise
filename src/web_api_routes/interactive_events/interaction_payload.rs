@@ -663,7 +663,7 @@ pub struct InteractionMessage {
     /// if from blocks, then this would say "This content can't be displayed
     pub text: String,
     /// slack user id
-    pub user: String,
+    pub user: Option<String>,
     /// timestamp the message happened
     pub ts: String,
     /// blocks of the message
@@ -758,6 +758,7 @@ pub struct ViewContainer {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::web_api_routes::interactive_events::interaction_types::InteractionTypes;
     use crate::web_api_routes::slash_commands::black_diamond_rating::black_diamond_rating_post;
     use crate::web_api_routes::slash_commands::pre_blast::pre_blast_post::PreBlastPost;
     use chrono::NaiveTime;
@@ -830,5 +831,20 @@ mod tests {
                 assert_eq!(equipment, &BasicValue::Multi(vec![]));
             }
         }
+    }
+
+    #[test]
+    fn edit_back_blast() {
+        let payload = "{\"type\":\"block_actions\",\"user\":{\"id\":\"U03T87KHRFE\",\"username\":\"edwardtkachev\",\"name\":\"edwardtkachev\",\"team_id\":\"T03T5J6801Z\"},\"api_app_id\":\"A03UAGJC9QD\",\"token\":\"iqHCM8gJry9vury2mmDiv0Os\",\"container\":{\"type\":\"message\",\"message_ts\":\"1689882778.307339\",\"channel_id\":\"C03TZV5RRF1\",\"is_ephemeral\":false},\"trigger_id\":\"5616359762052.3923618272067.d52e2d86d98a2c36b62c9d8912326397\",\"team\":{\"id\":\"T03T5J6801Z\",\"domain\":\"f3-boise\"},\"enterprise\":null,\"is_enterprise_install\":false,\"channel\":{\"id\":\"C03TZV5RRF1\",\"name\":\"bot-playground\"},\"message\":{\"type\":\"message\",\"subtype\":\"bot_message\",\"text\":\"*Slackblast*:\\n\\ntest\\n\\n*DATE*: 2023-07-20\\n\\n*AO*: <#C03UR7GM7Q9>\\n\\n*Q(s)*: <@U03T87KHRFE>\\n\\n*PAX*: <@U03SR452HL7>, TestPax\\n\\n*FNGs*: \\n\\n*COUNT*: 3 *WARMUP:* test\\n\\n*THE THANG:*\\nHi\\n\\n*MARY:*\\n*ANNOUNCEMENTS:*\\n*COT:* Edit Backblast button Saved backblast\",\"ts\":\"1689882778.307339\",\"username\":\"Stinger (via BoiseBot)\",\"icons\":{\"image_48\":\"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2023-03-10\\/4933887289794_48.png\"},\"bot_id\":\"B03UG6KRSN8\",\"app_id\":\"A03UAGJC9QD\",\"blocks\":[{\"type\":\"section\",\"block_id\":\"Giu2f\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Slackblast*:\\n\\ntest\\n\\n*DATE*: 2023-07-20\\n\\n*AO*: <#C03UR7GM7Q9>\\n\\n*Q(s)*: <@U03T87KHRFE>\\n\\n*PAX*: <@U03SR452HL7>, TestPax\\n\\n*FNGs*: \\n\\n*COUNT*: 3\",\"verbatim\":false}},{\"type\":\"divider\",\"block_id\":\"oXj\"},{\"type\":\"section\",\"block_id\":\"ztG\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*WARMUP:* test\\n\\n*THE THANG:*\\nHi\\n\\n*MARY:*\\n*ANNOUNCEMENTS:*\\n*COT:*\",\"verbatim\":false}},{\"type\":\"actions\",\"block_id\":\"8Kt\",\"elements\":[{\"type\":\"button\",\"action_id\":\"edit_back_blast::fde3616a-413e-40ba-a8d1-ac1999baae8d\",\"text\":{\"type\":\"plain_text\",\"text\":\"Edit Backblast\",\"emoji\":true},\"value\":\"edit-backblast\"}]},{\"type\":\"context\",\"block_id\":\"i6b\",\"elements\":[{\"type\":\"mrkdwn\",\"text\":\"Saved backblast\",\"verbatim\":false}]}]},\"state\":{\"values\":{}},\"response_url\":\"https:\\/\\/hooks.slack.com\\/actions\\/T03T5J6801Z\\/5599381131943\\/UcVNhazZlzor1mGkerodoInU\",\"actions\":[{\"action_id\":\"edit_back_blast::fde3616a-413e-40ba-a8d1-ac1999baae8d\",\"block_id\":\"8Kt\",\"text\":{\"type\":\"plain_text\",\"text\":\"Edit Backblast\",\"emoji\":true},\"value\":\"edit-backblast\",\"type\":\"button\",\"action_ts\":\"1689882782.229794\"}]}";
+        let interaction_payload = serde_json::from_str::<InteractionPayload>(payload).unwrap();
+        assert_eq!(interaction_payload, InteractionPayload::BlockActions);
+        let block_action = serde_json::from_str::<BlockAction>(payload).unwrap();
+        println!("{:?}", block_action);
+        let first_action = block_action.actions.get(0).unwrap();
+        let action = InteractionTypes::from(first_action.get_action_id().as_str());
+        assert_eq!(
+            action,
+            InteractionTypes::EditBackBlast("fde3616a-413e-40ba-a8d1-ac1999baae8d".to_string())
+        );
     }
 }
