@@ -1,3 +1,4 @@
+use crate::app_state::backblast_data::BackBlastData;
 use crate::app_state::MutableAppState;
 use crate::shared::common_errors::AppError;
 use crate::shared::constants;
@@ -5,7 +6,7 @@ use crate::slack_api::channels::public_channels::PublicChannels;
 use crate::slack_api::views::payload::ViewPayload;
 use crate::slack_api::views::request::ViewsOpenRequest;
 use crate::web_api_routes::interactive_events::edit_backblast::{
-    create_edit_modal, get_back_blast, get_user_data,
+    create_edit_modal, get_back_blast, get_user_data, BackBlastUsersEdit,
 };
 use crate::web_api_routes::interactive_events::interaction_payload::{
     ActionChannel, ActionType, ActionUser, BlockAction, ButtonAction, InteractionMessageTypes,
@@ -63,6 +64,7 @@ pub async fn handle_block_actions(
                         id,
                         &action_channel,
                         trigger_id.as_str(),
+                        &user,
                     )
                     .await?
                 }
@@ -82,6 +84,7 @@ async fn handle_edit_back_blast(
     id: &str,
     action_channel: &Option<ActionChannel>,
     trigger_id: &str,
+    user: &ActionUser,
 ) -> Result<(), AppError> {
     let bb = get_back_blast(db_pool, id).await?;
     let channel = action_channel.as_ref().map(|c| c.id.to_string());
@@ -91,10 +94,24 @@ async fn handle_edit_back_blast(
 
     let channel = channel.unwrap();
     let users = get_user_data(db_pool, &bb).await?;
+    // only Q's can edit backblast
+    if !user_allowed_to_edit(user, &bb, &users) {
+        return Ok(());
+    }
     let modal = create_edit_modal(channel.as_str(), &bb, users, id);
     let view = ViewsOpenRequest::new(trigger_id, ViewPayload::Modal(modal));
     web_state.open_view(view).await?;
     Ok(())
+}
+
+/// only qs can edit back blast
+fn user_allowed_to_edit(
+    user: &ActionUser,
+    bb: &BackBlastData,
+    user_edit: &BackBlastUsersEdit,
+) -> bool {
+    let slack_ids = user_edit.convert_to_slack_ids(&bb.qs);
+    slack_ids.iter().any(|id| &user.id == id)
 }
 
 async fn handle_q_lineup_interaction(
@@ -202,5 +219,51 @@ fn get_channel_id_from_action(
         Err(AppError::General("Could not find ao".to_string()))
     } else {
         Ok(channel_id)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::app_state::ao_data::AO;
+    use crate::users::f3_user::F3User;
+    use chrono::NaiveDate;
+    use std::collections::HashSet;
+
+    fn mock_user(id: &str, name: &str) -> F3User {
+        F3User {
+            id: Some(id.to_string()),
+            name: name.to_string(),
+            email: "".to_string(),
+            img_url: None,
+        }
+    }
+
+    #[test]
+    fn only_allow_qs() {
+        let action_user = ActionUser {
+            id: "123".to_string(),
+            name: "Stinger".to_string(),
+            username: "stinger".to_string(),
+        };
+        let bb = BackBlastData::new(
+            AO::Tower,
+            HashSet::from(["backslash".to_string()]),
+            HashSet::from(["stinger".to_string()]),
+            NaiveDate::from_ymd(2023, 1, 1),
+        );
+        let edit_data = BackBlastUsersEdit::new(
+            vec![mock_user("123", "stinger"), mock_user("22", "backslash")],
+            vec![],
+        );
+        let allowed = user_allowed_to_edit(&action_user, &bb, &edit_data);
+        assert_eq!(allowed, false);
+        let action_user = ActionUser {
+            id: "22".to_string(),
+            name: "backslash".to_string(),
+            username: "backslash".to_string(),
+        };
+        let allowed = user_allowed_to_edit(&action_user, &bb, &edit_data);
+        assert_eq!(allowed, true);
     }
 }

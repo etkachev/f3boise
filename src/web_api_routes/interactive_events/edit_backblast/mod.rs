@@ -41,6 +41,12 @@ pub struct BackBlastUsersEdit {
 }
 
 impl BackBlastUsersEdit {
+    pub fn new(slack_users: Vec<F3User>, non_slack_users: Vec<F3User>) -> Self {
+        BackBlastUsersEdit {
+            slack_users,
+            non_slack_users,
+        }
+    }
     pub fn convert_to_slack_ids(&self, users: &HashSet<String>) -> Vec<String> {
         users.iter().fold(Vec::<String>::new(), |mut acc, item| {
             if let Some(id) = self.get_slack_id(item) {
