@@ -13,6 +13,7 @@ pub mod ao_back_blast_stats;
 pub mod ao_monthly_leaderboard;
 pub mod back_blast_single;
 pub mod csv_download_all;
+pub mod double_downs;
 pub mod pax_leaderboard_graph;
 pub mod top_pax_per_ao;
 pub mod yearly_stats;
@@ -28,7 +29,7 @@ pub async fn get_all_back_blasts_route(db_pool: web::Data<PgPool>) -> impl Respo
     }
 }
 
-/// route to get all back blast data
+/// route to get all double down data
 pub async fn get_all_double_downs_route(db_pool: web::Data<PgPool>) -> impl Responder {
     match get_all_dd(&db_pool).await {
         Ok(list) => {
@@ -36,6 +37,14 @@ pub async fn get_all_double_downs_route(db_pool: web::Data<PgPool>) -> impl Resp
             HttpResponse::Ok().json(mapped)
         }
         Err(err) => HttpResponse::NotFound().body(err.to_string()),
+    }
+}
+
+/// route to get double down stats
+pub async fn get_double_down_stats_route(db_pool: web::Data<PgPool>) -> impl Responder {
+    match double_downs::get_stats(&db_pool).await {
+        Ok(stats) => HttpResponse::Ok().json(stats),
+        Err(err) => HttpResponse::BadRequest().body(err.to_string()),
     }
 }
 

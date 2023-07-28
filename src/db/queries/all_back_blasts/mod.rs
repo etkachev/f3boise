@@ -20,6 +20,40 @@ pub async fn get_all_dd(db_pool: &PgPool) -> Result<Vec<BackBlastJsonData>, AppE
     get_all_by_type(db_pool, BackBlastType::DoubleDown).await
 }
 
+/// get all backblast db data (double downs included) for purposes of csv download backup.
+pub async fn get_full_db_back_blasts(
+    db_pool: &PgPool,
+) -> Result<Vec<BackBlastFullJsonData>, AppError> {
+    let rows: Vec<BackBlastFullJsonData> = sqlx::query_as!(
+        BackBlastFullJsonData,
+        r#"
+        WITH list_view AS (
+        SELECT
+            bb.id as id,
+            al.name as ao,
+            string_to_array(lower(q), ',') as q,
+            string_to_array(lower(pax), ',') as pax,
+            date,
+            bb_type,
+            bb.channel_id,
+            bb.title,
+            bb.moleskine,
+            string_to_array(lower(fngs), ',') as fngs,
+            bb.ts
+        FROM back_blasts bb
+        INNER JOIN ao_list al on bb.channel_id = al.channel_id
+    )
+    
+    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type, title, moleskine, fngs, ts
+    FROM list_view
+    ORDER BY date DESC;
+        "#,
+    )
+    .fetch_all(db_pool)
+    .await?;
+    Ok(rows)
+}
+
 /// get back blast by id
 pub async fn get_back_blast_by_id(
     db_pool: &PgPool,

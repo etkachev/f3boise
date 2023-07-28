@@ -1,4 +1,6 @@
-use crate::db::queries::all_back_blasts::{get_list_with_pax, BackBlastJsonData};
+use crate::db::queries::all_back_blasts::{
+    get_dd_list_with_pax, get_list_with_pax, BackBlastJsonData,
+};
 use crate::db::queries::users::get_user_by_name;
 use crate::shared::common_errors::AppError;
 use crate::users::f3_user::F3User;
@@ -23,6 +25,8 @@ pub struct PaxStatsResponse {
     pub pax_profile: Option<F3User>,
     /// full list of BD's for this pax
     pub bd_list: Vec<BackBlastJsonData>,
+    /// full list of DD's for this pax
+    pub dd_list: Vec<BackBlastJsonData>,
 }
 
 impl PaxStatsResponse {
@@ -31,6 +35,7 @@ impl PaxStatsResponse {
         user: Option<F3User>,
         pax_info: PaxInfoResponse,
         bd_list: Vec<BackBlastJsonData>,
+        dd_list: Vec<BackBlastJsonData>,
     ) -> Self {
         PaxStatsResponse {
             q_count: pax_info.q_count,
@@ -38,6 +43,7 @@ impl PaxStatsResponse {
             first_post: pax_info.start_date,
             pax_profile: user,
             bd_list,
+            dd_list,
         }
     }
 }
@@ -56,8 +62,9 @@ pub async fn pax_stats_route(
 /// get the stats for certain pax
 async fn get_pax_stats(db_pool: &PgPool, name: &str) -> Result<PaxStatsResponse, AppError> {
     let list = get_list_with_pax(db_pool, name).await?;
-    let response = get_pax_info_from_bb_data(&list, name);
+    let dd = get_dd_list_with_pax(db_pool, name).await?;
+    let response = get_pax_info_from_bb_data(&list, &dd, name);
     let user = get_user_by_name(db_pool, name).await?;
-    let stats = PaxStatsResponse::new(user, response, list);
+    let stats = PaxStatsResponse::new(user, response, list, dd);
     Ok(stats)
 }

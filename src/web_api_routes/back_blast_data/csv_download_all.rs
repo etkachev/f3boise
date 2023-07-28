@@ -1,5 +1,5 @@
 use crate::db::queries::all_back_blasts;
-use crate::db::queries::all_back_blasts::BackBlastJsonData;
+use crate::db::queries::all_back_blasts::BackBlastFullJsonData;
 use actix_web::{web, HttpResponse, Responder};
 use chrono::NaiveDate;
 use serde::Serialize;
@@ -12,22 +12,29 @@ pub struct BackBlastRow {
     pub q: String,
     /// flat comma separated list
     pub pax: String,
+    /// flat comma separated list
+    pub fngs: String,
     pub date: NaiveDate,
+    pub title: String,
+    pub moleskine: String,
 }
 
-impl From<BackBlastJsonData> for BackBlastRow {
-    fn from(row: BackBlastJsonData) -> Self {
+impl From<BackBlastFullJsonData> for BackBlastRow {
+    fn from(row: BackBlastFullJsonData) -> Self {
         BackBlastRow {
             ao: row.ao,
             q: row.q.join(","),
             pax: row.pax.join(","),
             date: row.date,
+            fngs: row.fngs.map(|items| items.join(",")).unwrap_or_default(),
+            title: row.title.unwrap_or_default(),
+            moleskine: row.moleskine.unwrap_or_default(),
         }
     }
 }
 
 pub async fn download_back_blasts_csv_route(db_pool: web::Data<PgPool>) -> impl Responder {
-    match all_back_blasts::get_all(&db_pool).await {
+    match all_back_blasts::get_full_db_back_blasts(&db_pool).await {
         Ok(bb_data) => {
             let mut wrt = csv::WriterBuilder::new().from_writer(vec![]);
             for bb in bb_data.into_iter() {

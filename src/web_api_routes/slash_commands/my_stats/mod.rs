@@ -1,6 +1,8 @@
 use crate::app_state::backblast_data::BackBlastData;
 use crate::app_state::MutableAppState;
-use crate::db::queries::all_back_blasts::{get_list_with_pax, BackBlastJsonData};
+use crate::db::queries::all_back_blasts::{
+    get_dd_list_with_pax, get_list_with_pax, BackBlastJsonData,
+};
 use crate::shared::common_errors::AppError;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::web_api_routes::pax_data::PaxInfoResponse;
@@ -13,14 +15,19 @@ pub async fn get_user_stats_by_name(
     user_name: &str,
 ) -> Result<PaxInfoResponse, AppError> {
     let list = get_list_with_pax(db_pool, user_name).await?;
-    let response = get_pax_info_from_bb_data(&list, user_name);
+    let dd = get_dd_list_with_pax(db_pool, user_name).await?;
+    let response = get_pax_info_from_bb_data(&list, &dd, user_name);
     Ok(response)
 }
 
-pub fn get_pax_info_from_bb_data(list: &[BackBlastJsonData], user_name: &str) -> PaxInfoResponse {
-    list.iter()
-        .map(BackBlastData::from)
-        .fold(PaxInfoResponse::new(user_name), |mut acc, item| {
+pub fn get_pax_info_from_bb_data(
+    list: &[BackBlastJsonData],
+    dd: &[BackBlastJsonData],
+    user_name: &str,
+) -> PaxInfoResponse {
+    let mut result = list.iter().map(BackBlastData::from).fold(
+        PaxInfoResponse::new(user_name),
+        |mut acc, item| {
             acc.favorite_ao.for_ao(&item.ao);
             acc.post_count += 1;
             if item.qs.contains(&user_name.to_lowercase()) {
@@ -31,7 +38,12 @@ pub fn get_pax_info_from_bb_data(list: &[BackBlastJsonData], user_name: &str) ->
                 acc.start_date = item.date;
             }
             acc
-        })
+        },
+    );
+
+    result.with_dd(dd);
+
+    result
 }
 
 /// handle getting response for my stats.
@@ -59,7 +71,15 @@ pub async fn handle_my_stats(
         .section_markdown(format!("*Total Posts*: {}", response.post_count).as_str())
         .section_markdown(format!("*Q Posts*: {}", response.q_count).as_str())
         .section_markdown(format!("*Favorite AO*: {}", response.favorite_ao.favorite()).as_str())
-        .section_markdown(format!("*First F3 Boise post*: {:?}", response.start_date).as_str());
+        .section_markdown(format!("*First F3 Boise post*: {:?}", response.start_date).as_str())
+        .section_markdown(
+            format!(
+                "*{} DD Posts*: {}",
+                response.current_dd_program.to_string(),
+                response.dd_count
+            )
+            .as_str(),
+        );
 
     Ok(block_builder)
 }

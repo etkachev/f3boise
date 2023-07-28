@@ -1,8 +1,12 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::BackBlastData;
+use crate::app_state::double_downs::DoubleDownProgram;
 use crate::app_state::MutableAppState;
-use crate::db::queries::all_back_blasts::{get_all, get_dd_list_with_pax, get_list_with_pax};
+use crate::db::queries::all_back_blasts::{
+    get_all, get_dd_list_with_pax, get_list_with_pax, BackBlastJsonData,
+};
 use crate::db::queries::users::get_db_users;
+use crate::shared::time::local_boise_time;
 use crate::users::f3_user::F3User;
 use actix_web::{web, HttpResponse, Responder};
 use chrono::NaiveDate;
@@ -24,6 +28,9 @@ pub struct PaxInfoResponse {
     pub q_count: usize,
     pub start_date: NaiveDate,
     pub favorite_ao: FavoriteAoData,
+    pub dd_count: usize,
+    #[serde(skip_serializing)]
+    pub current_dd_program: DoubleDownProgram,
 }
 
 /// represents a hashmap of ao and how many posts you did in that ao
@@ -64,16 +71,28 @@ impl PaxInfoResponse {
             ..Default::default()
         }
     }
+
+    pub fn with_dd(&mut self, dd: &[BackBlastJsonData]) {
+        let dd_count = dd
+            .iter()
+            .filter(|item| self.current_dd_program.date_range().contains(&item.date))
+            .count();
+        self.dd_count = dd_count;
+    }
 }
 
 impl Default for PaxInfoResponse {
     fn default() -> Self {
+        let now = local_boise_time().date_naive();
+        let dd_program = DoubleDownProgram::from(&now);
         PaxInfoResponse {
             name: String::new(),
             post_count: 0,
             q_count: 0,
             start_date: NaiveDate::MAX,
             favorite_ao: FavoriteAoData::new(),
+            dd_count: 0,
+            current_dd_program: dd_program,
         }
     }
 }
