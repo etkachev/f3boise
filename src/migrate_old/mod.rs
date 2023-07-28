@@ -3,6 +3,7 @@ use crate::app_state::backblast_data::BackBlastData;
 use crate::db::save_q_line_up::NewQLineUpDbEntry;
 use crate::db::{save_back_blast, save_q_line_up};
 use crate::shared::common_errors::AppError;
+use crate::shared::string_utils::string_split_hash;
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
@@ -32,6 +33,14 @@ struct OldQSheetRow {
     pub lakeview_park: Option<String>,
 }
 
+#[derive(Serialize, Deserialize)]
+struct ProdCSVEntry {
+    pub ao: String,
+    pub q: String,
+    pub pax: String,
+    pub date: String,
+}
+
 const BACK_YARD_BB_PATH: &str = "migration_files/old/Backyard";
 const BLEACH_BB_PATH: &str = "migration_files/old/Bleach";
 const GEM_BB_PATH: &str = "migration_files/old/Gem";
@@ -58,6 +67,28 @@ pub async fn save_old_back_blasts(db_pool: &PgPool) -> Result<(), AppError> {
     }
 
     Ok(())
+}
+
+/// v2 sync method to sync prod db to local
+pub async fn sync_prod_db(db_pool: &PgPool) -> Result<(), AppError> {
+    let bb = read_back_blast_csv()?;
+    save_back_blast::save_multiple(db_pool, &bb).await?;
+    println!("Saved all");
+    Ok(())
+}
+
+fn read_back_blast_csv() -> Result<Vec<BackBlastData>, AppError> {
+    let mut rdr = csv::ReaderBuilder::new().from_path("migration_files/prod_db/f3-boise.csv")?;
+    let mut results: Vec<BackBlastData> = vec![];
+    for record in rdr.deserialize() {
+        let record: ProdCSVEntry = record?;
+        let date = NaiveDate::parse_from_str(record.date.as_str(), "%Y-%m-%d").unwrap();
+        let ao = AO::from(record.ao.to_string());
+        let qs = string_split_hash(record.q.as_str(), ',');
+        let pax = string_split_hash(record.pax.as_str(), ',');
+        results.push(BackBlastData::new(ao, qs, pax, date));
+    }
+    Ok(results)
 }
 
 pub async fn save_old_q_line_up(db_pool: &PgPool) -> Result<(), AppError> {

@@ -189,13 +189,11 @@ impl From<HashMap<String, BasicValue>> for BackBlastPost {
     }
 }
 
-/// convert to back blast data for saving
-pub fn convert_to_bb_data(request: &BackBlastPost, app_state: &MutableAppState) -> BackBlastData {
-    let users = {
-        let app = app_state.app.lock().unwrap();
-        app.get_slack_id_map()
-    };
-
+/// convert to back blast data for saving. pass in hashmap of slack id to pax name
+pub fn convert_to_bb_data(
+    request: &BackBlastPost,
+    users: HashMap<String, String>,
+) -> BackBlastData {
     let qs = request
         .qs
         .iter()

@@ -1,9 +1,5 @@
-use f3_api_rs::app_state::ao_data::AO;
-use f3_api_rs::app_state::backblast_data::BackBlastData;
 use f3_api_rs::configuration::get_configuration;
-use f3_api_rs::db::queries::all_back_blasts::get_all;
-use f3_api_rs::migrate_old::{clean_sheet_name, save_old_back_blasts, AOLIST};
-use f3_api_rs::shared::common_errors::AppError;
+use f3_api_rs::migrate_old::sync_prod_db;
 use f3_api_rs::web_api_run::get_connection_pool;
 use serde::{Deserialize, Serialize};
 
@@ -15,104 +11,11 @@ struct PaxCount {
     pub post_count: u16,
 }
 
-fn pax_counts_path(folder: &str) -> String {
-    format!("{}/PAX counts.csv", folder)
-}
-
 #[tokio::main]
 async fn main() {
     let config = get_configuration().expect("Failed to read config");
     let connection_pool = get_connection_pool(&config.database);
-    if let Err(err) = save_old_back_blasts(&connection_pool).await {
-        println!("Error saving bb: {:?}", err);
+    if let Err(err) = sync_prod_db(&connection_pool).await {
+        println!("Error syncing prod db to local: {:?}", err);
     }
-
-    match get_all(&connection_pool).await {
-        Ok(results) => {
-            let mut mapped: Vec<BackBlastData> =
-                results.into_iter().map(BackBlastData::from).collect();
-            mapped.sort_by(|a, b| a.date.cmp(&b.date));
-
-            for (ao, ao_path) in AOLIST.iter() {
-                if let Err(err) = verify_ao_stats(ao, &mapped, ao_path) {
-                    println!("Error verifying: {:?}", err);
-                }
-            }
-        }
-        Err(err) => println!("Err: {}", err),
-    }
-}
-
-fn verify_ao_stats(ao: &AO, data: &[BackBlastData], ao_file_path: &str) -> Result<(), AppError> {
-    let ao = ao.clone();
-    let pax_counts_file = pax_counts_path(ao_file_path);
-    let mut rdr = csv::ReaderBuilder::new().from_path(pax_counts_file)?;
-    let mut pax_counts = Vec::<PaxCount>::new();
-    for item in rdr.deserialize() {
-        let item: PaxCount = item?;
-        let pax_count_name = clean_sheet_name(item.name.as_str());
-        let pax_count_name = pax_count_name.to_lowercase();
-        let pax_data = data
-            .iter()
-            .filter(|data| {
-                data.ao == ao
-                    && data
-                        .get_pax()
-                        .iter()
-                        .map(|name| name.to_lowercase())
-                        .any(|name| name == pax_count_name)
-            })
-            .count();
-        if pax_data != item.post_count as usize {
-            println!("Mismatch for {} in {}", item.name, ao.to_string());
-            println!("Calculated: {} | Recorded: {}", pax_data, item.post_count);
-        }
-        pax_counts.push(item);
-    }
-
-    let pax_counts_names: Vec<String> = pax_counts
-        .iter()
-        .filter_map(|pc| {
-            if pc.post_count > 0 {
-                let name = clean_sheet_name(pc.name.as_str());
-                Some(name.to_lowercase())
-            } else {
-                None
-            }
-        })
-        .collect();
-    let pax_db_names: Vec<String> =
-        data.iter()
-            .filter(|item| item.ao == ao)
-            .fold(Vec::new(), |mut acc, item| {
-                for name in item.get_pax() {
-                    if !acc.contains(&name) {
-                        acc.push(name.to_lowercase());
-                    }
-                }
-                acc
-            });
-
-    // check pax counts data
-    for name in pax_counts_names.iter() {
-        if !pax_db_names.contains(name) {
-            println!(
-                "{}: Found in PAX counts but not backblasts: {}",
-                ao.to_string(),
-                name
-            );
-        }
-    }
-
-    // check db data
-    for name in pax_db_names.iter() {
-        if !pax_counts_names.contains(name) {
-            println!(
-                "{}: Found in bb names but not PAX counts: {}",
-                ao.to_string(),
-                name
-            );
-        }
-    }
-    Ok(())
 }

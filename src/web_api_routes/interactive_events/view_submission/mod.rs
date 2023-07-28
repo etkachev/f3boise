@@ -1,5 +1,6 @@
 use crate::app_state::MutableAppState;
 use crate::shared::common_errors::AppError;
+use crate::users::get_slack_id_map;
 use crate::web_api_routes::interactive_events::interaction_payload::{
     ActionUser, ViewSubmissionPayload, ViewSubmissionPayloadView, ViewSubmissionPayloadViewModal,
 };
@@ -35,8 +36,7 @@ pub async fn handle_view_submission(
                             .await
                     }
                     ViewIds::BackBlastEdit => {
-                        handle_edit_back_blast_submission(modal, web_state, app_state, db_pool)
-                            .await
+                        handle_edit_back_blast_submission(modal, web_state, db_pool).await
                     }
                     ViewIds::Unknown => Ok(()),
                 }
@@ -63,7 +63,6 @@ async fn handle_black_diamond_rating_submission(
 async fn handle_edit_back_blast_submission(
     modal: &ViewSubmissionPayloadViewModal,
     web_state: &MutableWebState,
-    app_state: &MutableAppState,
     db_pool: &PgPool,
 ) -> Result<(), AppError> {
     use crate::db::queries::all_back_blasts;
@@ -71,7 +70,8 @@ async fn handle_edit_back_blast_submission(
 
     let form_values = modal.state.get_values();
     let post = back_blast_post::BackBlastPost::from(form_values);
-    let db_data = back_blast_post::convert_to_bb_data(&post, app_state);
+    let users = get_slack_id_map(db_pool).await?;
+    let db_data = back_blast_post::convert_to_bb_data(&post, users);
     let is_valid = db_data.is_valid_back_blast();
     if is_valid {
         if let Some(id) = &modal.private_metadata {
@@ -108,7 +108,8 @@ async fn handle_back_blast_submission(
 
     let form_values = modal.state.get_values();
     let post = back_blast_post::BackBlastPost::from(form_values);
-    let db_data = back_blast_post::convert_to_bb_data(&post, app_state);
+    let users = get_slack_id_map(db_pool).await?;
+    let db_data = back_blast_post::convert_to_bb_data(&post, users);
     let is_valid = db_data.is_valid_back_blast();
     let mut id: Option<String> = None;
     if is_valid {
