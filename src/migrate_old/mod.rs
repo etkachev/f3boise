@@ -39,6 +39,9 @@ struct ProdCSVEntry {
     pub q: String,
     pub pax: String,
     pub date: String,
+    pub fngs: Option<String>,
+    pub title: Option<String>,
+    pub moleskine: Option<String>,
 }
 
 const BACK_YARD_BB_PATH: &str = "migration_files/old/Backyard";
@@ -86,7 +89,11 @@ fn read_back_blast_csv() -> Result<Vec<BackBlastData>, AppError> {
         let ao = AO::from(record.ao.to_string());
         let qs = string_split_hash(record.q.as_str(), ',');
         let pax = string_split_hash(record.pax.as_str(), ',');
-        results.push(BackBlastData::new(ao, qs, pax, date));
+        let mut mapped = BackBlastData::new(ao, qs, pax, date);
+        mapped.title = record.title.clone();
+        mapped.moleskine = record.moleskine.clone();
+        mapped.fngs = string_split_hash(record.fngs.unwrap_or_default().as_str(), ',');
+        results.push(mapped);
     }
     Ok(results)
 }
