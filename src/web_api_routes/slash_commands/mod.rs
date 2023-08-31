@@ -4,7 +4,9 @@ use crate::app_state::MutableAppState;
 use crate::shared::time::local_boise_time;
 use crate::web_api_routes::graphs::ao_monthly_leaderboard::get_ao_monthly_stats_graph;
 use crate::web_api_routes::graphs::ao_pax_leaderboard::post_ao_pax_leaderboard_graph;
-use crate::web_api_routes::graphs::overall_pax_leaderboard::post_overall_pax_leaderboard_graph;
+use crate::web_api_routes::graphs::overall_pax_leaderboard::{
+    post_overall_pax_dd_leaderboard_graph, post_overall_pax_leaderboard_graph,
+};
 use crate::web_api_routes::slash_commands::ao_monthly_stats_graph::AOMonthlyStatsGraphCommand;
 use crate::web_api_routes::slash_commands::ao_stats::get_ao_stats_block;
 use crate::web_api_routes::slash_commands::invite_all::handle_invite_all;
@@ -196,6 +198,19 @@ pub async fn slack_slash_commands_route(
             .await
             {
                 Ok(_) => HttpResponse::Ok().body("Posting Top pax overall"),
+                Err(err) => HttpResponse::Ok().body(err.to_string()),
+            }
+        }
+        "/top-dd-pax-30-days-overall" => {
+            match post_overall_pax_dd_leaderboard_graph(
+                &db_pool,
+                &web_state,
+                form.channel_id.to_string(),
+                form.text.as_str(),
+            )
+            .await
+            {
+                Ok(_) => HttpResponse::Ok().body("Posting Top DD pax overall"),
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
             }
         }

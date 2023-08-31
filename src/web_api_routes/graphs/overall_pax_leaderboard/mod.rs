@@ -1,5 +1,7 @@
 use crate::app_state::backblast_data::BackBlastData;
-use crate::db::queries::all_back_blasts::{get_all_within_date_range, BackBlastJsonData};
+use crate::db::queries::all_back_blasts::{
+    get_all_dd_within_date_range, get_all_within_date_range, BackBlastJsonData,
+};
 use crate::shared::common_errors::AppError;
 use crate::shared::time::local_boise_time;
 use crate::slack_api::files::request::FileUploadRequest;
@@ -32,6 +34,34 @@ pub async fn post_overall_pax_leaderboard_graph(
         vec![channel_id],
         png,
         "top-10-pax-overall.png",
+        text.as_str(),
+    );
+    web_state.upload_file(file_request).await?;
+    Ok(())
+}
+
+pub async fn post_overall_pax_dd_leaderboard_graph(
+    db_pool: &PgPool,
+    web_state: &MutableWebState,
+    channel_id: String,
+    date_range_text: &str,
+) -> Result<(), AppError> {
+    let (start, end) = resolve_date_range(date_range_text);
+    let dd_back_blasts = get_all_dd_within_date_range(db_pool, &start, &end).await?;
+    let graph = OverallPaxGraph::new(dd_back_blasts, (start, end));
+    let png = graph_generator(graph)?;
+    let start_formatted = friendly_date(start);
+    let end_formatted = friendly_date(end);
+    let text = format!(
+        "Here are top 10 DD PAX overall. From {} to {}",
+        start_formatted, end_formatted
+    );
+
+    // std::fs::write("dd.png", png)?;
+    let file_request = FileUploadRequest::new(
+        vec![channel_id],
+        png,
+        "top-10-dd-pax-overall.png",
         text.as_str(),
     );
     web_state.upload_file(file_request).await?;

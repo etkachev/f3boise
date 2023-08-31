@@ -17,6 +17,7 @@ pub struct BackBlastRow {
     pub date: NaiveDate,
     pub title: String,
     pub moleskine: String,
+    pub bb_type: String,
 }
 
 impl From<BackBlastFullJsonData> for BackBlastRow {
@@ -29,6 +30,7 @@ impl From<BackBlastFullJsonData> for BackBlastRow {
             fngs: row.fngs.map(|items| items.join(",")).unwrap_or_default(),
             title: row.title.unwrap_or_default(),
             moleskine: row.moleskine.unwrap_or_default(),
+            bb_type: row.bb_type,
         }
     }
 }

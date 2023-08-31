@@ -1,5 +1,5 @@
 use crate::app_state::ao_data::AO;
-use crate::app_state::backblast_data::BackBlastData;
+use crate::app_state::backblast_data::{BackBlastData, BackBlastType};
 use crate::db::save_q_line_up::NewQLineUpDbEntry;
 use crate::db::{save_back_blast, save_q_line_up};
 use crate::shared::common_errors::AppError;
@@ -42,6 +42,7 @@ struct ProdCSVEntry {
     pub fngs: Option<String>,
     pub title: Option<String>,
     pub moleskine: Option<String>,
+    pub bb_type: Option<String>,
 }
 
 const BACK_YARD_BB_PATH: &str = "migration_files/old/Backyard";
@@ -93,6 +94,10 @@ fn read_back_blast_csv() -> Result<Vec<BackBlastData>, AppError> {
         mapped.title = record.title.clone();
         mapped.moleskine = record.moleskine.clone();
         mapped.fngs = string_split_hash(record.fngs.unwrap_or_default().as_str(), ',');
+        mapped.bb_type = record
+            .bb_type
+            .map(|bb_type| BackBlastType::from(bb_type.as_str()))
+            .unwrap_or_default();
         results.push(mapped);
     }
     Ok(results)
