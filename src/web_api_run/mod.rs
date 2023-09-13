@@ -10,7 +10,6 @@ use crate::web_api_routes::back_blast_data::csv_download_all::{
     back_blasts_csv_html, download_back_blasts_csv_route,
 };
 use crate::web_api_routes::back_blast_data::pax_leaderboard_graph::pax_leaderboard_route;
-use crate::web_api_routes::back_blast_data::test_png::test_png_route;
 use crate::web_api_routes::back_blast_data::yearly_stats::get_yearly_stats_route;
 use crate::web_api_routes::back_blast_data::{
     get_all_back_blasts_route, get_all_double_downs_route, get_double_down_stats_route,
@@ -151,7 +150,7 @@ pub fn run(
                         "/pax-leaderboard-graph",
                         web::get().to(pax_leaderboard_route),
                     )
-                    .route("/test-png", web::get().to(test_png_route))
+                    // .route("/test-png", web::get().to(test_png_route))
                     .route("/download", web::get().to(back_blasts_csv_html))
                     .route(
                         "/download-csv",

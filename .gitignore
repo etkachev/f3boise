@@ -3,3 +3,4 @@
 .env
 .DS_Store
 /db_files
+/migration_files/prod_db/f3-boise.csv

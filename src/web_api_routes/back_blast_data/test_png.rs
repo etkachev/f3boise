@@ -10,7 +10,7 @@ pub async fn test_png_route(
 ) -> impl Responder {
     let ao = AO::Bellagio;
     // %Y/%m/%d-%Y/%m/%d
-    let range = "2023/08/01-2023-08-29";
+    let range = "2023/07/09-2023-09-29";
     match post_overall_pax_dd_leaderboard_graph(
         &db_pool,
         &web_state,
