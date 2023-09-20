@@ -1,5 +1,6 @@
 use crate::app_state::backblast_data::BackBlastData;
 use crate::app_state::MutableAppState;
+use crate::db::queries::users::get_slack_id_map;
 use crate::shared::common_errors::AppError;
 use crate::shared::constants;
 use crate::slack_api::channels::public_channels::PublicChannels;
@@ -128,10 +129,7 @@ async fn handle_q_lineup_interaction(
     if let InteractionTypes::QLineUp(action_combo) = &interaction_type {
         match action_type {
             ActionType::Button(ButtonAction { .. }) => {
-                let users = {
-                    let app = app_state.app.lock().expect("Could not lock app");
-                    app.get_slack_id_map()
-                };
+                let users = get_slack_id_map(db_pool).await.unwrap_or_default();
 
                 let slack_id = user.id.as_str();
                 // f3 name

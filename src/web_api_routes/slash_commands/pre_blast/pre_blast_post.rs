@@ -1,12 +1,13 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::equipment::AoEquipment;
-use crate::app_state::MutableAppState;
+use crate::db::queries::users::get_user_by_slack_id;
 use crate::slack_api::block_kit::block_elements::OptionElement;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
 use crate::web_api_routes::interactive_events::interaction_payload::BasicValue;
 use crate::web_api_routes::slash_commands::modal_utils::{value_utils, BlastWhere};
 use chrono::{NaiveDate, NaiveTime};
+use sqlx::PgPool;
 use std::collections::{HashMap, HashSet};
 
 #[derive(Debug)]
@@ -152,15 +153,14 @@ pub mod pre_blast_action_ids {
     pub const WHERE_POST: &str = "where_to_post.select";
 }
 
-pub fn convert_to_message(post: PreBlastPost, app_state: &MutableAppState) -> PostMessageRequest {
+pub async fn convert_to_message(db_pool: &PgPool, post: PreBlastPost) -> PostMessageRequest {
     let channel_id = match &post.post_where {
         BlastWhere::AoChannel => post.ao.channel_id().to_string(),
         BlastWhere::CurrentChannel(id) => id.to_string(),
     };
 
     let user = if let Some(id) = post.get_first_q() {
-        let app = app_state.app.lock().unwrap();
-        app.get_user(&id)
+        get_user_by_slack_id(db_pool, &id).await.unwrap_or_default()
     } else {
         None
     };

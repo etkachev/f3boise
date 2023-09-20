@@ -1,8 +1,8 @@
 use crate::app_state::backblast_data::BackBlastData;
-use crate::app_state::MutableAppState;
 use crate::db::queries::all_back_blasts::{
     get_dd_list_with_pax, get_list_with_pax, BackBlastJsonData,
 };
+use crate::db::queries::users::get_user_by_slack_id;
 use crate::shared::common_errors::AppError;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::web_api_routes::pax_data::PaxInfoResponse;
@@ -49,15 +49,12 @@ pub fn get_pax_info_from_bb_data(
 /// handle getting response for my stats.
 pub async fn handle_my_stats(
     db_pool: &PgPool,
-    app_state: &MutableAppState,
     form: &SlashCommandForm,
 ) -> Result<BlockBuilder, AppError> {
-    let user_name = {
-        let app = app_state.app.lock().expect("Could not lock app");
-        app.users
-            .get(&form.user_id)
-            .map(|user| user.name.to_string())
-    };
+    let user_name = get_user_by_slack_id(db_pool, &form.user_id)
+        .await
+        .unwrap_or_default()
+        .map(|user| user.name);
 
     if user_name.is_none() {
         return Err(AppError::General("User not found".to_string()));

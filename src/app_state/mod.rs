@@ -24,18 +24,13 @@ impl MutableAppState {
         }
     }
 
-    pub async fn sync_users(&self, db_pool: &PgPool) -> Result<(), AppError> {
-        let users = {
-            let app = self.app.lock().expect("Could not lock app state");
-            app.users.clone()
-        };
+    pub async fn sync_users(
+        &self,
+        db_pool: &PgPool,
+        users: HashMap<String, F3User>,
+    ) -> Result<(), AppError> {
         sync_users(db_pool, &users).await?;
         Ok(())
-    }
-
-    pub fn insert_users(&mut self, users: HashMap<String, F3User>) {
-        let mut app = self.app.lock().expect("Could not lock app state");
-        app.users.extend(users);
     }
 
     pub fn insert_bots(&mut self, bots: HashMap<String, BotUser>) {
@@ -59,7 +54,7 @@ impl Default for MutableAppState {
 #[derive(Debug, Default)]
 pub struct AppState {
     pub channels: HashMap<PublicChannels, ChannelData>,
-    pub users: HashMap<String, F3User>,
+    // pub users: HashMap<String, F3User>,
     pub bots: HashMap<String, BotUser>,
     /// id of the bot this app is.
     pub self_bot_id: Option<String>,
@@ -83,35 +78,35 @@ impl AppState {
         self.self_bot_id = matched_bot;
     }
 
-    pub fn add_user(&mut self, id: &str, user: F3User) {
-        self.users.insert(id.to_string(), user);
-    }
+    // pub fn add_user(&mut self, id: &str, user: F3User) {
+    //     self.users.insert(id.to_string(), user);
+    // }
 
     pub fn get_channel_data(&self, channel: PublicChannels) -> Option<&ChannelData> {
         self.channels.get(&channel)
     }
 
-    /// get hashmap where key is slack id and value is f3 name
-    pub fn get_slack_id_map(&self) -> HashMap<String, String> {
-        self.users
-            .iter()
-            .fold(HashMap::<String, String>::new(), |mut acc, (id, user)| {
-                acc.insert(id.to_string(), user.name.to_lowercase());
-                acc
-            })
-    }
+    // /// get hashmap where key is slack id and value is f3 name
+    // pub fn get_slack_id_map(&self) -> HashMap<String, String> {
+    //     self.users
+    //         .iter()
+    //         .fold(HashMap::<String, String>::new(), |mut acc, (id, user)| {
+    //             acc.insert(id.to_string(), user.name.to_lowercase());
+    //             acc
+    //         })
+    // }
 
-    /// get hashmap where key is f3 name and value is slack id
-    pub fn get_user_name_map(&self) -> HashMap<String, String> {
-        self.users
-            .iter()
-            .fold(HashMap::<String, String>::new(), |mut acc, (id, user)| {
-                acc.insert(user.name.to_lowercase(), id.to_string());
-                acc
-            })
-    }
+    // /// get hashmap where key is f3 name and value is slack id
+    // pub fn get_user_name_map(&self) -> HashMap<String, String> {
+    //     self.users
+    //         .iter()
+    //         .fold(HashMap::<String, String>::new(), |mut acc, (id, user)| {
+    //             acc.insert(user.name.to_lowercase(), id.to_string());
+    //             acc
+    //         })
+    // }
 
-    pub fn get_user(&self, id: &str) -> Option<F3User> {
-        self.users.get(id).cloned()
-    }
+    // pub fn get_user(&self, id: &str) -> Option<F3User> {
+    //     self.users.get(id).cloned()
+    // }
 }

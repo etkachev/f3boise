@@ -305,6 +305,30 @@
     },
     "query": "\n        WITH list_view AS (\n            SELECT\n                al.name as ao,\n                string_to_array(lower(qlu.qs), ',') as qs,\n                qlu.date,\n                qlu.closed\n            FROM q_line_up qlu\n                INNER JOIN ao_list al on qlu.channel_id = al.channel_id\n            WHERE al.channel_id = $2\n        )\n        \n    SELECT ao, qs as \"qs!\", date, closed\n    FROM list_view\n    WHERE date = $1;\n    "
   },
+  "552b59f2227c6f8701db28ecbb82c4eb7f56253cc33110ce5267ddcfae060f99": {
+    "describe": {
+      "columns": [
+        {
+          "name": "slack_id",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        SELECT slack_id, name\n        FROM users;\n        "
+  },
   "6b70eb56842bae3eadfad0c28fbae9c0d2e55a6b2a9ffa8b2e28225cadb15e1f": {
     "describe": {
       "columns": [
@@ -625,6 +649,44 @@
       }
     },
     "query": "\n        WITH list_view AS (\n            SELECT\n                al.name as ao,\n                string_to_array(lower(qlu.qs), ',') as qs,\n                qlu.date,\n                qlu.closed\n            FROM q_line_up qlu\n                INNER JOIN ao_list al on qlu.channel_id = al.channel_id\n        )\n        \n        SELECT ao, qs as \"qs!\", date, closed\n        FROM list_view\n        WHERE date BETWEEN $1 AND $2\n        ORDER BY date ASC;\n        "
+  },
+  "d2289716744a0c0b3536de525e67d9bbfeacb5ac271687d403e4eabdf83bf08f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "slack_id",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "email",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "img_url",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        SELECT slack_id, name, email, img_url\n        FROM users\n        WHERE slack_id = $1\n        LIMIT 1;\n        "
   },
   "d80f0dfd3c548e11a8c8d73cdde8eb00f7e43582449de8ab9e19cb3ac58ba777": {
     "describe": {

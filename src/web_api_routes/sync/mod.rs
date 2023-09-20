@@ -42,7 +42,7 @@ pub async fn sync_data_to_state(
     // scoped to limit lock
     {
         let mut app = app_state.app.lock().expect("Could not lock app state");
-        app.users = all_users;
+        // app.users = all_users;
         app.bots = slack_users.bots;
         app.set_self_bot_id();
     }
@@ -58,7 +58,8 @@ pub async fn sync_data_to_state(
     }
     println!("set channels");
 
-    app_state.sync_users(db_pool).await?;
+    app_state.sync_users(db_pool, all_users).await?;
+    // app_state.sync_users(db_pool).await?;
     println!("Synced users");
 
     println!("Synced all");

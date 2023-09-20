@@ -1,9 +1,10 @@
 use crate::app_state::ao_data::AO;
-use crate::app_state::MutableAppState;
+use crate::db::queries::users::get_user_by_slack_id;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
 use crate::web_api_routes::interactive_events::interaction_payload::BasicValue;
 use crate::web_api_routes::slash_commands::modal_utils::value_utils;
+use sqlx::PgPool;
 use std::collections::HashMap;
 
 pub mod post_ids {
@@ -109,17 +110,16 @@ impl From<HashMap<String, BasicValue>> for BlackDiamondRatingPost {
     }
 }
 
-pub fn convert_to_message(
+pub async fn convert_to_message(
     post: BlackDiamondRatingPost,
-    app_state: &MutableAppState,
+    db_pool: &PgPool,
     user_id: &str,
 ) -> PostMessageRequest {
     let channel_id = post.post_where.channel_id();
 
-    let user = {
-        let app = app_state.app.lock().unwrap();
-        app.get_user(user_id)
-    };
+    let user = get_user_by_slack_id(db_pool, user_id)
+        .await
+        .unwrap_or_default();
 
     let desc = format!(
         "1. # vests removed / Pax\n\

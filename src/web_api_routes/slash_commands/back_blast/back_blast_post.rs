@@ -1,6 +1,6 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::{BackBlastData, BackBlastType};
-use crate::app_state::MutableAppState;
+use crate::db::queries::users::get_user_by_slack_id;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
 use crate::slack_api::chat::update_message::request::UpdateMessageRequest;
@@ -9,6 +9,7 @@ use crate::web_api_routes::interactive_events::interaction_types::InteractionTyp
 use crate::web_api_routes::slack_events::event_times::EventTimes;
 use crate::web_api_routes::slash_commands::modal_utils::{value_utils, BlastWhere};
 use chrono::NaiveDate;
+use sqlx::PgPool;
 use std::collections::{HashMap, HashSet};
 
 pub mod back_blast_post_action_ids {
@@ -251,9 +252,9 @@ pub fn convert_to_update_message(
 }
 
 /// convert to post message request. pass in id of saved backblast in db
-pub fn convert_to_message(
+pub async fn convert_to_message(
     post: BackBlastPost,
-    app_state: &MutableAppState,
+    db_pool: &PgPool,
     is_valid: bool,
     id: Option<String>,
 ) -> PostMessageRequest {
@@ -263,8 +264,7 @@ pub fn convert_to_message(
     };
 
     let user = if let Some(id) = post.get_first_q() {
-        let app = app_state.app.lock().unwrap();
-        app.get_user(&id)
+        get_user_by_slack_id(db_pool, &id).await.unwrap_or_default()
     } else {
         None
     };

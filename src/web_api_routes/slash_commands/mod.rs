@@ -1,6 +1,7 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::BackBlastType;
 use crate::app_state::MutableAppState;
+use crate::db::queries::users::get_user_name_map;
 use crate::shared::time::local_boise_time;
 use crate::web_api_routes::graphs::ao_monthly_leaderboard::get_ao_monthly_stats_graph;
 use crate::web_api_routes::graphs::ao_pax_leaderboard::post_ao_pax_leaderboard_graph;
@@ -49,20 +50,17 @@ pub async fn slack_slash_commands_route(
 
     println!("form: {:?}", form);
     match form.command.as_str() {
-        "/my-stats" => match handle_my_stats(&db_pool, &app_state, &form).await {
+        "/my-stats" => match handle_my_stats(&db_pool, &form).await {
             Ok(response) => HttpResponse::Ok().json(response),
             Err(err) => HttpResponse::BadRequest().body(err.to_string()),
         },
-        "/invite-all" => match handle_invite_all(&web_state, &app_state, &form).await {
+        "/invite-all" => match handle_invite_all(&db_pool, &web_state, &form).await {
             Ok(response) => HttpResponse::Ok().body(response),
             Err(err) => HttpResponse::BadRequest().body(err.to_string()),
         },
         "/q-sheet" | "/post-q-sheet" => match QLineUpCommand::from(form.text.as_str()) {
             QLineUpCommand { ao: None, month } => {
-                let users = {
-                    let app = app_state.app.lock().expect("Could not lock app");
-                    app.get_user_name_map()
-                };
+                let users = get_user_name_map(&db_pool).await.unwrap_or_default();
                 let start_date = month
                     .map(|date| date.pred())
                     .unwrap_or_else(|| local_boise_time().date_naive());
@@ -128,10 +126,7 @@ pub async fn slack_slash_commands_route(
                 ao: Some(ao),
                 month,
             } => {
-                let users = {
-                    let app = app_state.app.lock().expect("Could not lock app");
-                    app.get_user_name_map()
-                };
+                let users = get_user_name_map(&db_pool).await.unwrap_or_default();
                 let start_date = month
                     .map(|date| date.pred())
                     .unwrap_or_else(|| local_boise_time().date_naive());

@@ -26,8 +26,8 @@ pub async fn handle_new_user(
         println!("Error handling new user: {:?}", err);
     }
     let channel_id = {
-        let mut app = app_state.app.lock().unwrap();
-        app.add_user(user.id.as_str(), mapped_user);
+        let app = app_state.app.lock().unwrap();
+        // app.add_user(user.id.as_str(), mapped_user);
         app.get_channel_data(PublicChannels::Welcome)
             .map(|data| data.id.to_string())
     };

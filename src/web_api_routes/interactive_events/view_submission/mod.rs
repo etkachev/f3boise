@@ -1,6 +1,5 @@
-use crate::app_state::MutableAppState;
+use crate::db::queries::users::get_slack_id_map;
 use crate::shared::common_errors::AppError;
-use crate::users::get_slack_id_map;
 use crate::web_api_routes::interactive_events::interaction_payload::{
     ActionUser, ViewSubmissionPayload, ViewSubmissionPayloadView, ViewSubmissionPayloadViewModal,
 };
@@ -15,7 +14,6 @@ use sqlx::PgPool;
 pub async fn handle_view_submission(
     payload: &str,
     web_state: &MutableWebState,
-    app_state: &MutableAppState,
     db_pool: &PgPool,
 ) -> Result<(), AppError> {
     let view_payload = serde_json::from_str::<ViewSubmissionPayload>(payload)?;
@@ -26,13 +24,13 @@ pub async fn handle_view_submission(
             if let Some(view_id) = modal.modal_view_id() {
                 match view_id {
                     ViewIds::PreBlast => {
-                        handle_pre_blast_submission(modal, web_state, app_state, user).await
+                        handle_pre_blast_submission(modal, db_pool, web_state, user).await
                     }
                     ViewIds::BackBlast => {
-                        handle_back_blast_submission(modal, web_state, app_state, db_pool).await
+                        handle_back_blast_submission(modal, web_state, db_pool).await
                     }
                     ViewIds::BlackDiamondRating => {
-                        handle_black_diamond_rating_submission(modal, web_state, app_state, user)
+                        handle_black_diamond_rating_submission(modal, web_state, db_pool, user)
                             .await
                     }
                     ViewIds::BackBlastEdit => {
@@ -50,12 +48,13 @@ pub async fn handle_view_submission(
 async fn handle_black_diamond_rating_submission(
     modal: &ViewSubmissionPayloadViewModal,
     web_state: &MutableWebState,
-    app_state: &MutableAppState,
+    db_pool: &PgPool,
     user: &ActionUser,
 ) -> Result<(), AppError> {
     let form_values = modal.state.get_values();
     let post = black_diamond_rating_post::BlackDiamondRatingPost::from(form_values);
-    let message = black_diamond_rating_post::convert_to_message(post, app_state, user.id.as_str());
+    let message =
+        black_diamond_rating_post::convert_to_message(post, db_pool, user.id.as_str()).await;
     web_state.post_message(message).await?;
     Ok(())
 }
@@ -101,7 +100,6 @@ async fn handle_edit_back_blast_submission(
 async fn handle_back_blast_submission(
     modal: &ViewSubmissionPayloadViewModal,
     web_state: &MutableWebState,
-    app_state: &MutableAppState,
     db_pool: &PgPool,
 ) -> Result<(), AppError> {
     use crate::db::save_back_blast;
@@ -117,7 +115,7 @@ async fn handle_back_blast_submission(
         let saved_id = save_back_blast::save_single(db_pool, &db_data).await?;
         id = Some(saved_id);
     }
-    let message = back_blast_post::convert_to_message(post, app_state, is_valid, id.clone());
+    let message = back_blast_post::convert_to_message(post, db_pool, is_valid, id.clone()).await;
     // post message to slack
     let ts = web_state.post_message(message).await?;
     if let (Some(id), Some(ts)) = (id, ts) {
@@ -129,14 +127,14 @@ async fn handle_back_blast_submission(
 
 async fn handle_pre_blast_submission(
     modal: &ViewSubmissionPayloadViewModal,
+    db_pool: &PgPool,
     web_state: &MutableWebState,
-    app_state: &MutableAppState,
     user: &ActionUser,
 ) -> Result<(), AppError> {
     let form_values = modal.state.get_values();
     let post = pre_blast_post::PreBlastPost::from(form_values);
     println!("from user {:?}", user.username);
-    let message = pre_blast_post::convert_to_message(post, app_state);
+    let message = pre_blast_post::convert_to_message(db_pool, post).await;
     web_state.post_message(message).await?;
     Ok(())
 }

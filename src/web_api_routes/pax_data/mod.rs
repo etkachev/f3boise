@@ -1,11 +1,10 @@
 use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::BackBlastData;
 use crate::app_state::double_downs::DoubleDownProgram;
-use crate::app_state::MutableAppState;
 use crate::db::queries::all_back_blasts::{
     get_all, get_dd_list_with_pax, get_list_with_pax, BackBlastJsonData,
 };
-use crate::db::queries::users::get_db_users;
+use crate::db::queries::users::{get_db_users, get_user_by_slack_id};
 use crate::shared::time::local_boise_time;
 use crate::users::f3_user::F3User;
 use actix_web::{web, HttpResponse, Responder};
@@ -99,15 +98,12 @@ impl Default for PaxInfoResponse {
 
 pub async fn get_pax_back_blasts(
     db_pool: web::Data<PgPool>,
-    app_state: web::Data<MutableAppState>,
     req: web::Query<PaxInfoQuery>,
 ) -> impl Responder {
-    let user_name = {
-        let app = app_state.app.lock().expect("Could not lock app");
-        app.users
-            .get(req.id.as_str())
-            .map(|user| user.name.to_string())
-    };
+    let user_name = get_user_by_slack_id(&db_pool, req.id.as_str())
+        .await
+        .unwrap_or_default()
+        .map(|user| user.name);
 
     if user_name.is_none() {
         return HttpResponse::NotFound().body("User not found");
@@ -126,15 +122,12 @@ pub async fn get_pax_back_blasts(
 
 pub async fn get_pax_double_downs(
     db_pool: web::Data<PgPool>,
-    app_state: web::Data<MutableAppState>,
     req: web::Query<PaxInfoQuery>,
 ) -> impl Responder {
-    let user_name = {
-        let app = app_state.app.lock().expect("Could not lock app");
-        app.users
-            .get(req.id.as_str())
-            .map(|user| user.name.to_string())
-    };
+    let user_name = get_user_by_slack_id(&db_pool, req.id.as_str())
+        .await
+        .unwrap_or_default()
+        .map(|user| user.name);
 
     if user_name.is_none() {
         return HttpResponse::NotFound().body("User not found");
@@ -153,15 +146,12 @@ pub async fn get_pax_double_downs(
 
 pub async fn get_pax_info(
     db_pool: web::Data<PgPool>,
-    app_state: web::Data<MutableAppState>,
     req: web::Query<PaxInfoQuery>,
 ) -> impl Responder {
-    let user_name = {
-        let app = app_state.app.lock().expect("Could not lock app");
-        app.users
-            .get(req.id.as_str())
-            .map(|user| user.name.to_string())
-    };
+    let user_name = get_user_by_slack_id(&db_pool, req.id.as_str())
+        .await
+        .unwrap_or_default()
+        .map(|user| user.name);
 
     if user_name.is_none() {
         return HttpResponse::NotFound().body("User not found");

@@ -54,13 +54,8 @@ pub async fn interactive_events(
             }
             InteractionPayload::ViewSubmission => {
                 println!("parsing view submission");
-                match view_submission::handle_view_submission(
-                    &body.payload,
-                    &web_state,
-                    &app_state,
-                    &db_pool,
-                )
-                .await
+                match view_submission::handle_view_submission(&body.payload, &web_state, &db_pool)
+                    .await
                 {
                     Ok(()) => println!("Successfully handled view submission"),
                     Err(err) => {
