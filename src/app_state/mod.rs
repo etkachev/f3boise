@@ -11,7 +11,6 @@ pub mod ao_data;
 pub mod backblast_data;
 pub mod double_downs;
 pub mod equipment;
-pub mod parse_backblast;
 
 pub struct MutableAppState {
     pub app: Mutex<AppState>,
@@ -54,7 +53,6 @@ impl Default for MutableAppState {
 #[derive(Debug, Default)]
 pub struct AppState {
     pub channels: HashMap<PublicChannels, ChannelData>,
-    // pub users: HashMap<String, F3User>,
     pub bots: HashMap<String, BotUser>,
     /// id of the bot this app is.
     pub self_bot_id: Option<String>,
@@ -78,35 +76,7 @@ impl AppState {
         self.self_bot_id = matched_bot;
     }
 
-    // pub fn add_user(&mut self, id: &str, user: F3User) {
-    //     self.users.insert(id.to_string(), user);
-    // }
-
     pub fn get_channel_data(&self, channel: PublicChannels) -> Option<&ChannelData> {
         self.channels.get(&channel)
     }
-
-    // /// get hashmap where key is slack id and value is f3 name
-    // pub fn get_slack_id_map(&self) -> HashMap<String, String> {
-    //     self.users
-    //         .iter()
-    //         .fold(HashMap::<String, String>::new(), |mut acc, (id, user)| {
-    //             acc.insert(id.to_string(), user.name.to_lowercase());
-    //             acc
-    //         })
-    // }
-
-    // /// get hashmap where key is f3 name and value is slack id
-    // pub fn get_user_name_map(&self) -> HashMap<String, String> {
-    //     self.users
-    //         .iter()
-    //         .fold(HashMap::<String, String>::new(), |mut acc, (id, user)| {
-    //             acc.insert(user.name.to_lowercase(), id.to_string());
-    //             acc
-    //         })
-    // }
-
-    // pub fn get_user(&self, id: &str) -> Option<F3User> {
-    //     self.users.get(id).cloned()
-    // }
 }

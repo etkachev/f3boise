@@ -50,7 +50,6 @@ impl From<&AO> for PublicChannels {
 }
 
 impl From<String> for PublicChannels {
-    // TODO use AO from
     fn from(name: String) -> Self {
         match name.as_str() {
             "downrange" => PublicChannels::DR,

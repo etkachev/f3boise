@@ -8,8 +8,6 @@ use crate::slack_api::channels::list::response::{ChannelData, ChannelsListRespon
 use crate::slack_api::channels::members::request::ConversationMembersRequest;
 use crate::slack_api::channels::members::response::ConversationMembersResponse;
 use crate::slack_api::channels::public_channels::PublicChannels;
-use crate::slack_api::channels::reactions_add::request::ReactionsAddRequest;
-use crate::slack_api::channels::reactions_add::response::ReactionsAddResponse;
 use crate::slack_api::channels::types::ChannelTypes;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
 use crate::slack_api::chat::post_message::response::PostMessageResponse;
@@ -112,60 +110,6 @@ impl MutableWebState {
             Err(AppError::General(
                 response.error.unwrap_or_else(|| "No error".to_string()),
             ))
-        }
-    }
-
-    pub async fn get_back_blasts(&self) {
-        // TODO
-        // let history_request = {
-        //     let app = self.app.lock().unwrap();
-        //     app.get_channel_data(PublicChannels::BotPlayground)
-        //         .map(|channel_data| ChannelHistoryRequest::new(&channel_data.id))
-        // };
-        // if let Some(request) = history_request {
-        //     let url = request.get_url_request(&self.base_api_url);
-        //     println!("Calling: {:?}", url.as_str());
-        //     let response = self.make_get_url_request(url).await;
-        //     let response: ChannelsHistoryResponse =
-        //         serde_json::from_slice(&response.body).expect("Could not parse response");
-        //     if let Some(messages) = response.messages {
-        //         let backblasts = messages
-        //             .iter()
-        //             .filter(|message| {
-        //                 let (first_line, _) = message.text.split_once('\n').unwrap_or(("", ""));
-        //                 first_line.to_lowercase().starts_with(BACK_BLAST_TAG)
-        //             })
-        //             .collect::<Vec<&MessageData>>();
-        //
-        //         for entry in backblasts {
-        //             println!("Entry: {}", entry.ts);
-        //             // scoped to limit lock
-        //             {
-        //                 // TODO
-        //                 // let app = self.app.lock().unwrap();
-        //                 // let data =
-        //                 //     parse_backblast::parse_back_blast(entry.text.as_str(), &app.users);
-        //                 // println!("{:?}", data);
-        //             }
-        //         }
-        //     }
-        // }
-    }
-
-    pub async fn back_blast_verified(&self, channel_request: Option<ReactionsAddRequest>) {
-        if let Some(request) = channel_request {
-            let url = request.get_url_request(&self.base_api_url);
-            println!("Calling: {:?}", url.as_str());
-            let response = self.make_get_url_request(url).await;
-            let response: ReactionsAddResponse =
-                serde_json::from_slice(&response.body).expect("Could not parse response");
-            println!("Emoji added!: {}", response.ok);
-            if !response.ok {
-                eprintln!(
-                    "Err: {}",
-                    response.error.unwrap_or_else(|| "err".to_string())
-                );
-            }
         }
     }
 

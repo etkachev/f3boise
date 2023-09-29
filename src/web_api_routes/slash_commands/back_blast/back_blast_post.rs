@@ -99,7 +99,7 @@ impl BackBlastPost {
             .filter_map(|item| {
                 let item = item.trim();
                 // filter out fngs names None.
-                if !matches!(item, "None") {
+                if !matches!(item, "none" | "None") {
                     Some(item.to_string())
                 } else {
                     None
@@ -338,26 +338,6 @@ pub fn get_first_message_section(post: &BackBlastPost) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::app_state::parse_backblast::parse_back_blast;
-    use crate::slack_api::channels::list::response::ChannelData;
-    use crate::slack_api::channels::public_channels::PublicChannels;
-    use crate::users::f3_user::F3User;
-
-    fn empty_channels() -> HashMap<PublicChannels, ChannelData> {
-        HashMap::from([])
-    }
-
-    fn hash_set_user(id: &str, name: &str) -> (String, F3User) {
-        (
-            id.to_string(),
-            F3User {
-                id: Some(id.to_string()),
-                name: name.to_string(),
-                email: "email@test.com".to_string(),
-                img_url: None,
-            },
-        )
-    }
 
     #[test]
     fn parse_from_back_blast_command() {
@@ -374,12 +354,9 @@ mod tests {
             bb_type: BackBlastType::BackBlast,
         };
 
-        let message = get_first_message_section(&post);
-        let users = HashMap::<String, F3User>::from([hash_set_user("U03SR452HL7", "Backslash")]);
-        let parsed = parse_back_blast(&message, &users, &empty_channels());
-        println!("{:?}", parsed);
-        assert!(parsed.includes_pax("Fng"));
-        assert!(!parsed.includes_pax("None"));
+        assert!(post.pax_list().contains("Fng"));
+        assert!(!post.pax_list().contains("none"));
+        assert!(!post.pax_list().contains("None"));
     }
 
     #[test]
