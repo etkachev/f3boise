@@ -18,6 +18,7 @@ pub enum PublicChannels {
     BlackDiamond,
     BlackOps,
     CamelsBack,
+    ReidMerrill,
     DR,
     Welcome,
     Unknown(String),
@@ -41,6 +42,7 @@ impl From<&AO> for PublicChannels {
             AO::BlackDiamond => PublicChannels::BlackDiamond,
             AO::BlackOps => PublicChannels::BlackOps,
             AO::CamelsBack => PublicChannels::CamelsBack,
+            AO::ReidMerrill => PublicChannels::ReidMerrill,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }
@@ -92,6 +94,7 @@ mod tests {
         test_channel_name("ao-black-ops", PublicChannels::BlackOps);
         test_channel_name("black-ops", PublicChannels::BlackOps);
         test_channel_name("camels-back-park", PublicChannels::CamelsBack);
+        test_channel_name("ao-reid-merrill-park", PublicChannels::ReidMerrill);
     }
 
     #[test]
