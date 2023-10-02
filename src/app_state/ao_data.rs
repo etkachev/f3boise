@@ -535,7 +535,7 @@ pub mod const_names {
     pub const REID_MERRILL_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/mycHr8xipwwqhhSu6";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 16] = [
+    pub const AO_LIST: [AO; 15] = [
         AO::Backyard,
         AO::Bellagio,
         AO::BlackDiamond,
@@ -546,7 +546,7 @@ pub mod const_names {
         AO::IronMountain,
         AO::OldGlory,
         AO::Rebel,
-        AO::ReidMerrill,
+        // AO::ReidMerrill,
         AO::Rise,
         AO::RuckershipEast,
         AO::RuckershipWest,

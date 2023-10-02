@@ -261,7 +261,7 @@ fn someone_signed_up_for_ao(
                 .qs
                 .iter()
                 .map(|q| {
-                    if let Some(slack_id) = users.get(q.trim()) {
+                    if let Some(slack_id) = users.get(&q.trim().to_lowercase()) {
                         map_slack_id_to_link(slack_id)
                     } else {
                         // if custom text, try to extract f3 names
@@ -282,7 +282,7 @@ fn map_words_to_slack_names(words: Vec<&str>, users: &HashMap<String, String>) -
     let words: Vec<String> = words
         .iter()
         .map(|word| {
-            if let Some(slack_id) = users.get(&word.to_string()) {
+            if let Some(slack_id) = users.get(&word.to_lowercase()) {
                 map_slack_id_to_link(slack_id)
             } else {
                 word.to_string()

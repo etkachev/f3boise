@@ -58,7 +58,7 @@ pub async fn get_user_name_map(db_pool: &PgPool) -> Result<HashMap<String, Strin
     let rows = query_slack_user_map(db_pool).await?;
 
     for item in rows {
-        results.insert(item.name.to_string(), item.slack_id.to_string());
+        results.insert(item.name.to_lowercase(), item.slack_id.to_string());
     }
 
     Ok(results)
