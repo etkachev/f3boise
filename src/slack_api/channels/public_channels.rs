@@ -92,7 +92,7 @@ mod tests {
         test_channel_name("ao-black-diamond", PublicChannels::BlackDiamond);
         test_channel_name("ao-black-ops", PublicChannels::BlackOps);
         test_channel_name("black-ops", PublicChannels::BlackOps);
-        test_channel_name("camels-back-park", PublicChannels::CamelsBack);
+        test_channel_name("camels-back", PublicChannels::CamelsBack);
         test_channel_name("ao-reid-merrill-park", PublicChannels::ReidMerrill);
     }
 

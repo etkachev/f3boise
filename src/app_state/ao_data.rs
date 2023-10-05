@@ -527,7 +527,7 @@ pub mod const_names {
     pub const BLACK_DIAMOND_GOOGLE_MAPS: &str = "https://goo.gl/maps/hsSKRSVHjifx4HdV6";
     pub const BLACK_OPS: &str = "black-ops";
     pub const BLACK_OPS_CHANNEL_ID: &str = "C050HTBNU3B";
-    pub const CAMELS_BACK: &str = "camels-back-park";
+    pub const CAMELS_BACK: &str = "camels-back";
     pub const CAMELS_BACK_CHANNEL_ID: &str = "C05AJDFUBM4";
     pub const CAMELS_BACK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/28RexfPU7yd7z2Zg8";
     pub const REID_MERRILL: &str = "reid-merrill-park";
