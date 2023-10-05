@@ -4,6 +4,7 @@ use resvg::usvg_text_layout::TreeTextToPath;
 pub mod ao_monthly_leaderboard;
 pub mod ao_pax_leaderboard;
 pub mod overall_pax_leaderboard;
+pub mod pax_bd_overtime;
 
 /// Trait for building graph with common methods like generating chart and declaring file name.
 pub trait GraphWrapper {

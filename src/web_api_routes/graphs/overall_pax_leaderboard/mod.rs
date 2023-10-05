@@ -3,15 +3,14 @@ use crate::db::queries::all_back_blasts::{
     get_all_dd_within_date_range, get_all_within_date_range, BackBlastJsonData,
 };
 use crate::shared::common_errors::AppError;
-use crate::shared::time::local_boise_time;
+use crate::shared::string_utils::resolve_date_range;
 use crate::slack_api::files::request::FileUploadRequest;
 use crate::web_api_routes::graphs::{graph_generator, GraphWrapper};
 use crate::web_api_state::MutableWebState;
 use charts::BarLabelPosition;
-use chrono::{Months, NaiveDate};
+use chrono::NaiveDate;
 use sqlx::PgPool;
 use std::collections::HashSet;
-use std::ops::Sub;
 
 /// post overall pax leaderboard graph
 pub async fn post_overall_pax_leaderboard_graph(
@@ -20,7 +19,7 @@ pub async fn post_overall_pax_leaderboard_graph(
     channel_id: String,
     date_range_text: &str,
 ) -> Result<(), AppError> {
-    let (start, end) = resolve_date_range(date_range_text);
+    let (start, end) = resolve_date_range(date_range_text, 1);
     let back_blasts = get_all_within_date_range(db_pool, &start, &end).await?;
     let graph = OverallPaxGraph::new(back_blasts, (start, end));
     let png = graph_generator(graph)?;
@@ -46,7 +45,7 @@ pub async fn post_overall_pax_dd_leaderboard_graph(
     channel_id: String,
     date_range_text: &str,
 ) -> Result<(), AppError> {
-    let (start, end) = resolve_date_range(date_range_text);
+    let (start, end) = resolve_date_range(date_range_text, 1);
     let dd_back_blasts = get_all_dd_within_date_range(db_pool, &start, &end).await?;
     let graph = OverallPaxGraph::new(dd_back_blasts, (start, end));
     let png = graph_generator(graph)?;
@@ -66,22 +65,6 @@ pub async fn post_overall_pax_dd_leaderboard_graph(
     );
     web_state.upload_file(file_request).await?;
     Ok(())
-}
-
-/// TODO util?
-fn resolve_date_range(possible_range: &str) -> (NaiveDate, NaiveDate) {
-    let now = local_boise_time().date_naive();
-    let thirty_days_ago = now.sub(Months::new(1));
-    possible_range
-        .split_once('-')
-        .map(|(start, end)| {
-            let date_format = "%Y/%m/%d";
-            let start_date =
-                NaiveDate::parse_from_str(start, date_format).unwrap_or(thirty_days_ago);
-            let end_date = NaiveDate::parse_from_str(end, date_format).unwrap_or(now);
-            (start_date, end_date)
-        })
-        .unwrap_or((thirty_days_ago, now))
 }
 
 /// TODO util?
