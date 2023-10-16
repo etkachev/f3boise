@@ -210,7 +210,7 @@ fn get_channel_id_from_action(
         all_channels
             .get(&channel)
             .map(|c| c.id.to_string())
-            .unwrap_or_else(String::new)
+            .unwrap_or_default()
     };
 
     if channel_id.is_empty() {
