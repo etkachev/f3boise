@@ -597,6 +597,6 @@ mod tests {
     fn ruckership_start_time() {
         let ao = AO::RuckershipWest;
         let start_time = ao.default_time(&Weekday::Fri).unwrap();
-        assert_eq!(start_time, NaiveTime::from_hms(5, 0, 0));
+        assert_eq!(start_time, NaiveTime::from_hms(5, 15, 0));
     }
 }
