@@ -191,7 +191,7 @@ impl AO {
                 _ => None,
             },
             Weekday::Fri => match self {
-                AO::RuckershipWest | AO::RuckershipEast => Some(five),
+                AO::RuckershipWest | AO::RuckershipEast => Some(five_fifteen),
                 ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
