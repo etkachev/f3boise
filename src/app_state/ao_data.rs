@@ -113,7 +113,7 @@ impl AO {
             AO::OldGlory => "Old Glory",
             AO::Rebel => "Rebel",
             AO::IronMountain => "Iron Mountain",
-            AO::RuckershipWest => "Ruckership West",
+            AO::RuckershipWest => "Ruckership",
             AO::RuckershipEast => "Ruckership East",
             AO::Backyard => "Backyard",
             AO::Rise => "Rise",
