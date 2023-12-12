@@ -1,8 +1,12 @@
 use crate::bot_data::{BotUser, UserBotCombo};
 use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
+use crate::slack_api::channels::history::request::ChannelHistoryRequest;
+use crate::slack_api::channels::history::response::ChannelsHistoryResponse;
 use crate::slack_api::channels::invite::request::InviteToConvoRequest;
 use crate::slack_api::channels::invite::response::InviteToConvoResponse;
+use crate::slack_api::channels::kick::request::KickFromChannelRequest;
+use crate::slack_api::channels::kick::response::KickFromChannelResponse;
 use crate::slack_api::channels::list::request::ConversationListRequest;
 use crate::slack_api::channels::list::response::{ChannelData, ChannelsListResponse};
 use crate::slack_api::channels::members::request::ConversationMembersRequest;
@@ -190,6 +194,35 @@ impl MutableWebState {
             Err(AppError::General(err))
         } else {
             Ok(())
+        }
+    }
+
+    pub async fn kick_user_from_channel(
+        &self,
+        request: KickFromChannelRequest,
+    ) -> Result<(), AppError> {
+        let url = request.get_plain_url_request(&self.base_api_url);
+        let body = serde_json::to_vec(&request)?;
+        let response = self.make_post_request(url, body).await;
+        let response: KickFromChannelResponse = serde_json::from_slice(&response.body)?;
+        if let Some(err) = response.error {
+            Err(AppError::General(err))
+        } else {
+            Ok(())
+        }
+    }
+
+    pub async fn get_history(
+        &self,
+        request: ChannelHistoryRequest,
+    ) -> Result<ChannelsHistoryResponse, AppError> {
+        let url = request.get_url_request(&self.base_api_url);
+        let response = self.make_get_url_request(url).await;
+        let response: ChannelsHistoryResponse = serde_json::from_slice(&response.body)?;
+        if let Some(err) = response.error {
+            Err(AppError::General(err))
+        } else {
+            Ok(response)
         }
     }
 

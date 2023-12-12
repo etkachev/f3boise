@@ -1,5 +1,6 @@
 pub mod request {
     use crate::slack_api::{api_endpoints, url_requests::SlackUrlRequest};
+    use chrono::NaiveDateTime;
     use serde::{Deserialize, Serialize};
 
     #[derive(Deserialize, Serialize)]
@@ -9,6 +10,10 @@ pub mod request {
         include_all_metadata: Option<bool>,
         inclusive: Option<bool>,
         limit: Option<u16>,
+        /// Only messages before this Unix timestamp will be included in results
+        latest: Option<String>,
+        /// Only messages after this Unix timestamp will be included in results
+        oldest: Option<String>,
     }
 
     impl ChannelHistoryRequest {
@@ -17,6 +22,17 @@ pub mod request {
                 channel: channel.to_string(),
                 ..Default::default()
             }
+        }
+
+        pub fn with_oldest(mut self, ts: NaiveDateTime) -> Self {
+            let ts = ts.timestamp();
+            self.oldest = Some(ts.to_string());
+            self
+        }
+
+        pub fn with_limit(mut self, limit: u16) -> Self {
+            self.limit = Some(limit);
+            self
         }
     }
 
@@ -34,6 +50,8 @@ pub mod request {
                 include_all_metadata: Some(true),
                 inclusive: Some(true),
                 limit: Some(100),
+                latest: None,
+                oldest: None,
             }
         }
     }
@@ -60,7 +78,7 @@ pub mod response {
         // timestamp
         pub ts: String,
         // user id that posted.
-        pub user: String,
+        pub user: Option<String>,
         pub reactions: Option<Vec<MessageReaction>>,
     }
 

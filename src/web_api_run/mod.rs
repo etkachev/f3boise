@@ -75,7 +75,7 @@ pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
         .connect_lazy_with(configuration.with_db())
 }
 
-fn init_web_state() -> MutableWebState {
+pub fn init_web_state() -> MutableWebState {
     let auth_token = env::var("BOT_OAUTH_TOKEN").expect("No auth token set in env");
     let signing_secret = env::var("SLACK_SIGNING_SECRET").expect("No Signing secret set in env");
     let verify_token = env::var("DEPRECATED_VERIFY_TOKEN").expect("No Verify token set in env");

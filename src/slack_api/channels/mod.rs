@@ -1,5 +1,6 @@
 pub mod history;
 pub mod invite;
+pub mod kick;
 pub mod list;
 pub mod members;
 pub mod public_channels;

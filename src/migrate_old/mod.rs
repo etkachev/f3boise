@@ -1,13 +1,24 @@
+use crate::app_state::ao_data::const_names::AO_LIST;
 use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::{BackBlastData, BackBlastType};
+use crate::db::queries::all_back_blasts::recent_bd_for_pax::get_recent_bd_for_pax;
+use crate::db::queries::all_back_blasts::{
+    get_all_dd_within_date_range, get_all_within_date_range,
+};
+use crate::db::queries::users::get_slack_id_map;
 use crate::db::save_q_line_up::NewQLineUpDbEntry;
 use crate::db::{save_back_blast, save_q_line_up};
 use crate::shared::common_errors::AppError;
 use crate::shared::string_utils::string_split_hash;
-use chrono::NaiveDate;
+use crate::shared::time::local_boise_time;
+use crate::slack_api::channels::history::request::ChannelHistoryRequest;
+use crate::slack_api::channels::kick::request::KickFromChannelRequest;
+use crate::web_api_run::init_web_state;
+use chrono::{Months, NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::HashSet;
+use std::ops::Sub;
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -78,6 +89,141 @@ pub async fn sync_prod_db(db_pool: &PgPool) -> Result<(), AppError> {
     let bb = read_back_blast_csv()?;
     save_back_blast::save_multiple(db_pool, &bb).await?;
     println!("Saved all");
+    Ok(())
+}
+
+pub async fn cleanup_pax_in_channels(db_pool: &PgPool) -> Result<(), AppError> {
+    let pax = get_slack_id_map(db_pool).await?;
+    let now = local_boise_time().date_naive();
+    let ninety_days_ago = now.sub(Months::new(3));
+    let (start, end) = (ninety_days_ago, now);
+
+    let bds = get_all_within_date_range(db_pool, &start, &end)
+        .await
+        .unwrap_or_default();
+    let dd = get_all_dd_within_date_range(db_pool, &start, &end)
+        .await
+        .unwrap_or_default();
+
+    dotenvy::dotenv().ok();
+    let api = init_web_state();
+
+    let ninety_days_ts = NaiveDateTime::new(ninety_days_ago, NaiveTime::default());
+    println!("90 days: {:?}", ninety_days_ts);
+    for ao in AO_LIST {
+        println!("Checking {}", ao.to_string());
+
+        let users_in_channel = api
+            .get_channel_members(ao.channel_id())
+            .await
+            .unwrap_or_default();
+
+        if users_in_channel.is_empty() {
+            println!("======");
+            println!("NO users!!!");
+            println!("======");
+        }
+
+        let request = ChannelHistoryRequest::new(ao.channel_id())
+            .with_limit(1000)
+            .with_oldest(ninety_days_ts);
+
+        match api.get_history(request).await {
+            Ok(history) => {
+                if let Some(messages) = history.messages {
+                    let mut active_users = HashSet::<String>::new();
+
+                    for message in messages {
+                        if let Some(user) = message.user {
+                            active_users.insert(user.to_string());
+                        }
+                    }
+
+                    println!("active messages: {}", active_users.len());
+
+                    for pax_id in users_in_channel {
+                        if active_users.contains(&pax_id) {
+                            // they messaged, so continue to next pax.
+                            // println!("====");
+                            // println!("{} has messaged to {}", pax_id, ao.to_string());
+                            // println!("====");
+                            continue;
+                        }
+
+                        // now check if they posted at bd or dd.
+                        if let Some(pax_name) = pax.get(&pax_id) {
+                            let pax_name = pax_name.to_lowercase();
+                            let most_recent_bd = get_recent_bd_for_pax(db_pool, &pax_name)
+                                .await
+                                .unwrap_or_default();
+                            if let Some(most_recent_bd) = most_recent_bd {
+                                let bd = BackBlastData::from(most_recent_bd);
+                                if bd.ao == ao {
+                                    println!(
+                                        "This is {pax_name}'s most recent bd at {}",
+                                        ao.to_string()
+                                    );
+                                    continue;
+                                }
+                            }
+                            // bd
+                            let attended_bds = bds
+                                .iter()
+                                .filter(|bd| {
+                                    let bd = BackBlastData::from(*bd);
+
+                                    bd.ao == ao && bd.includes_pax(&pax_name)
+                                })
+                                .count();
+
+                            // dd
+                            let attended_dds = dd
+                                .iter()
+                                .filter(|data| {
+                                    let dd_data = BackBlastData::from(*data);
+                                    dd_data.ao == ao && dd_data.includes_pax(&pax_name)
+                                })
+                                .count();
+
+                            if attended_bds == 0 && attended_dds == 0 {
+                                // kick them out.
+                                let request =
+                                    KickFromChannelRequest::new(pax_id.as_str(), ao.channel_id());
+                                println!("{} - {:?}", pax_name, request);
+                                match api.kick_user_from_channel(request).await {
+                                    Ok(_) => {
+                                        // println!()
+                                    }
+                                    Err(err) => {
+                                        println!("Error kicking: {:?}", err);
+                                    }
+                                }
+                            } else {
+                                println!("====");
+                                println!("{} has been to {}", pax_name, ao.to_string());
+                                println!("====");
+                            }
+                        } else {
+                            println!("Unknown pax: {}", pax_id);
+                        }
+                        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+                    }
+                } else {
+                    println!("======");
+                    println!("NO MESSAGES!!!");
+                    println!("======");
+                }
+            }
+            Err(err) => {
+                println!("{:?}", err);
+            }
+        }
+
+        println!("Finished with {}", ao.to_string());
+        tokio::time::sleep(tokio::time::Duration::from_secs(4)).await;
+    }
+
+    println!("Cleaned up!");
     Ok(())
 }
 
