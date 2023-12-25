@@ -113,7 +113,7 @@ impl AO {
             AO::OldGlory => "Old Glory",
             AO::Rebel => "Rebel",
             AO::IronMountain => "Iron Mountain",
-            AO::RuckershipWest => "Ruckership",
+            AO::RuckershipWest => "Ruckership West",
             AO::RuckershipEast => "Ruckership East",
             AO::Backyard => "Backyard",
             AO::Rise => "Rise",
@@ -501,7 +501,7 @@ pub mod const_names {
     pub const IRON_MOUNTAIN: &str = "iron-mountain";
     pub const IRON_MOUNTAIN_CHANNEL_ID: &str = "C03TZTTHDPZ";
     pub const IRON_MOUNTAIN_GOOGLE_MAPS: &str = "https://goo.gl/maps/V3ubQNeSkm8KhGx46";
-    pub const RUCKERSHIP_WEST: &str = "ruckership";
+    pub const RUCKERSHIP_WEST: &str = "ruckership-west";
     pub const RUCKERSHIP_WEST_CHANNEL_ID: &str = "C03V46DGXMW";
     pub const RUCKERSHIP_EAST: &str = "ruckership-east";
     pub const RUCKERSHIP_EAST_CHANNEL_ID: &str = "C04EQQZSFQA";
@@ -535,7 +535,7 @@ pub mod const_names {
     pub const REID_MERRILL_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/mycHr8xipwwqhhSu6";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 14] = [
+    pub const AO_LIST: [AO; 15] = [
         AO::Backyard,
         AO::Bellagio,
         AO::BlackDiamond,
@@ -548,7 +548,7 @@ pub mod const_names {
         AO::Rebel,
         // AO::ReidMerrill,
         AO::Rise,
-        // AO::RuckershipEast,
+        AO::RuckershipEast,
         AO::RuckershipWest,
         AO::Tower,
         AO::WarHorse,

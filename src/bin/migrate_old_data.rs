@@ -1,5 +1,5 @@
 use f3_api_rs::configuration::get_configuration;
-use f3_api_rs::migrate_old::{cleanup_pax_in_channels, sync_prod_db};
+use f3_api_rs::migrate_old::sync_prod_db;
 use f3_api_rs::web_api_run::get_connection_pool;
 use serde::{Deserialize, Serialize};
 
