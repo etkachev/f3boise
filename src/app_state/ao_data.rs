@@ -175,7 +175,6 @@ impl AO {
                 _ => None,
             },
             Weekday::Tue => match self {
-                AO::IronMountain => Some(five_thirty),
                 ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
@@ -186,7 +185,6 @@ impl AO {
                 _ => None,
             },
             Weekday::Thu => match self {
-                AO::IronMountain => Some(five_thirty),
                 ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
