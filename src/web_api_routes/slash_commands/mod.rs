@@ -215,6 +215,7 @@ pub async fn slack_slash_commands_route(
                 &web_state,
                 &form.channel_id,
                 &form.user_id,
+                false,
             )
             .await
             {
@@ -228,6 +229,7 @@ pub async fn slack_slash_commands_route(
                 &web_state,
                 &form.channel_id,
                 &form.user_id,
+                true,
             )
             .await
             {

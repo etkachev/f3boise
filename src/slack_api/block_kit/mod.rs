@@ -130,8 +130,10 @@ impl BlockBuilder {
         ));
     }
 
-    pub fn file_input(mut self, label: &str, action_id: &str) -> Self {
-        self.add_file_input(label, action_id);
+    pub fn file_input(mut self, label: &str, action_id: &str, trial_img: bool) -> Self {
+        if trial_img {
+            self.add_file_input(label, action_id);
+        }
         self
     }
 
