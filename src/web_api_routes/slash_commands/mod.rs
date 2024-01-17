@@ -222,6 +222,19 @@ pub async fn slack_slash_commands_route(
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
             }
         }
+        "/test" => {
+            match pre_blast::generate_modal(
+                form.trigger_id.as_str(),
+                &web_state,
+                &form.channel_id,
+                &form.user_id,
+            )
+            .await
+            {
+                Ok(_) => HttpResponse::Ok().body("Opening Preblast modal"),
+                Err(err) => HttpResponse::Ok().body(err.to_string()),
+            }
+        }
         "/bb" | "/backblast" | "/slackblast" | "/dd" | "/double-down" | "/down-range"
         | "/off-the-books" => {
             let back_blast_type = match form.command.as_str() {

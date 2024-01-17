@@ -108,6 +108,7 @@ fn create_pre_blast_modal(channel_id: &str, user_id: &str) -> ViewModal {
             None,
             true,
         )
+        .file_input("Upload Image", pre_blast_post::pre_blast_action_ids::FILE)
         .select(
             "Choose where to post this",
             pre_blast_post::pre_blast_action_ids::WHERE_POST,

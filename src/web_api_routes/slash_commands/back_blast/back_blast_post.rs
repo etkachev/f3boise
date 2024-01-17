@@ -23,6 +23,7 @@ pub mod back_blast_post_action_ids {
     pub const MOLESKINE: &str = "moleskine.textarea";
     pub const WHERE_TO_POST: &str = "where-post.select";
     pub const BB_TYPE: &str = "back_blast_type.select";
+    pub const FILE: &str = "file.input";
 }
 
 #[derive(Debug)]

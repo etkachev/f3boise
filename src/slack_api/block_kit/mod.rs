@@ -56,6 +56,19 @@ impl BlockBuilder {
             )));
     }
 
+    pub fn img(mut self, img_url: &str, alt_text: &str) -> Self {
+        self.add_img(img_url, alt_text);
+        self
+    }
+
+    pub fn add_img(&mut self, img_url: &str, alt_text: &str) {
+        // only add block if img url is not empty
+        if !img_url.is_empty() {
+            self.blocks
+                .push(BlockType::Image(ImageBlock::new(img_url, alt_text)));
+        }
+    }
+
     pub fn header(mut self, text: &str) -> Self {
         self.blocks
             .push(BlockType::Header(HeaderBlock::new_plain_text(text)));
@@ -115,6 +128,18 @@ impl BlockBuilder {
         self.blocks.push(BlockType::Input(
             InputBlock::new_input(label, action_id, place_holder, initial_value).optional(optional),
         ));
+    }
+
+    pub fn file_input(mut self, label: &str, action_id: &str) -> Self {
+        self.add_file_input(label, action_id);
+        self
+    }
+
+    pub fn add_file_input(&mut self, label: &str, action_id: &str) {
+        self.blocks
+            .push(BlockType::Input(InputBlock::new_file_input(
+                label, action_id,
+            )));
     }
 
     pub fn text_box(
@@ -363,6 +388,14 @@ impl InputBlock {
         InputBlock {
             label: TextObject::new_text(label),
             element: BlockElementType::new_plain_input(action_id, placeholder, initial_value),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_file_input(label: &str, action_id: &str) -> Self {
+        InputBlock {
+            label: TextObject::new_text(label),
+            element: BlockElementType::new_file_input(action_id),
             ..Default::default()
         }
     }
@@ -616,6 +649,16 @@ pub struct ImageBlock {
     /// An optional title for the image in the form of a text object that can only be of type: plain_text. Maximum length for the text in this field is 2000 characters.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<TextObject>,
+}
+
+impl ImageBlock {
+    pub fn new(image_url: &str, alt_text: &str) -> Self {
+        ImageBlock {
+            image_url: image_url.to_string(),
+            alt_text: alt_text.to_string(),
+            title: None,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

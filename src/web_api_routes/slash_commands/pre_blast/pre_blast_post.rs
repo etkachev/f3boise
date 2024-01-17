@@ -22,6 +22,7 @@ pub struct PreBlastPost {
     pub fng_message: Option<String>,
     pub mole_skin: Option<String>,
     pub post_where: BlastWhere,
+    pub img_url: String,
 }
 
 impl PreBlastPost {
@@ -67,6 +68,13 @@ impl From<HashMap<String, BasicValue>> for PreBlastPost {
             .get(pre_blast_action_ids::TITLE)
             .map(value_utils::get_single_string)
             .unwrap_or_else(|| String::from("Title"));
+
+        let img_url = value
+            .get(pre_blast_action_ids::FILE)
+            .map(value_utils::get_single_string)
+            .unwrap_or_default();
+
+        println!("img url: {}", img_url);
 
         let date = value
             .get(pre_blast_action_ids::DATE)
@@ -135,6 +143,7 @@ impl From<HashMap<String, BasicValue>> for PreBlastPost {
             fng_message,
             mole_skin,
             post_where,
+            img_url: String::new(),
         }
     }
 }
@@ -151,6 +160,7 @@ pub mod pre_blast_action_ids {
     pub const FNGS: &str = "fngs.input";
     pub const MOLE_SKINE: &str = "moleskin.textbox";
     pub const WHERE_POST: &str = "where_to_post.select";
+    pub const FILE: &str = "file.input";
 }
 
 pub async fn convert_to_message(db_pool: &PgPool, post: PreBlastPost) -> PostMessageRequest {
@@ -179,7 +189,8 @@ pub async fn convert_to_message(db_pool: &PgPool, post: PreBlastPost) -> PostMes
             "*Moleskine*: {}",
             post.mole_skin.unwrap_or_default()
         ))
-        .divider();
+        .divider()
+        .img(post.img_url.as_str(), "Pre-blast");
 
     if let Some(f3_user) = user {
         PostMessageRequest::new_as_user(&channel_id, block_builder.blocks, f3_user)

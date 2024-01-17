@@ -8,6 +8,7 @@ pub enum BlockElementType {
     Button(ButtonElement),
     Checkboxes(CheckboxesBlock),
     Datepicker(DatePickerBlock),
+    FileInput(FileInputBlock),
     Image(ImageBlock),
     MultiStaticSelect(MultiStaticSelectBlock),
     MultiExternalSelect,
@@ -62,6 +63,10 @@ impl BlockElementType {
                 .with_placeholder(placeholder)
                 .with_initial_value(initial_value),
         )
+    }
+
+    pub fn new_file_input(action_id: &str) -> Self {
+        BlockElementType::FileInput(FileInputBlock::new(action_id.to_string()))
     }
 
     pub fn new_text_box(
@@ -225,6 +230,41 @@ impl ImageBlock {
             image_url: image_url.to_string(),
             alt_text: alt_text.to_string(),
         }
+    }
+}
+
+/// Allows user to upload files
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct FileInputBlock {
+    pub action_id: String,
+    /// An array of valid file extensions that will be accepted for this element.
+    /// All file extensions will be accepted if filetypes is not specified.
+    /// This validation is provided for convenience only,
+    /// and you should perform your own file type validation based on what you expect to receive
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub filetypes: Option<Vec<String>>,
+    /// Maximum number of files that can be uploaded for this file_input element.
+    /// Minimum of 1, maximum of 10. Defaults to 10 if not specified
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_files: Option<u8>,
+}
+
+impl FileInputBlock {
+    pub fn new(action_id: String) -> Self {
+        FileInputBlock {
+            action_id,
+            ..Default::default()
+        }
+    }
+
+    pub fn with_max_files(mut self, max_files: u8) -> Self {
+        self.max_files = Some(max_files);
+        self
+    }
+
+    pub fn with_file_types(mut self, file_types: Vec<&str>) -> Self {
+        self.filetypes = Some(file_types.iter().map(|t| t.to_string()).collect());
+        self
     }
 }
 
