@@ -8,4 +8,5 @@ pub const CHAT_UPDATE_MESSAGE: &str = "chat.update";
 pub const CONVERSATION_INVITE: &str = "conversations.invite";
 pub const CONVERSATION_KICK: &str = "conversations.kick";
 pub const FILES_UPLOAD: &str = "files.upload";
+pub const FILES_REMOTE_SHARE: &str = "files.remote.share";
 pub const VIEWS_OPEN: &str = "views.open";

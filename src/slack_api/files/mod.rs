@@ -1,3 +1,5 @@
+pub mod remote_share;
+
 /// request structs and methods for uploading file to slack channel(s)
 pub mod request {
     use crate::slack_api::api_endpoints::FILES_UPLOAD;

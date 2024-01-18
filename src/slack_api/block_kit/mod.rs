@@ -69,6 +69,13 @@ impl BlockBuilder {
         }
     }
 
+    pub fn imgs(mut self, imgs: Vec<String>, alt_text: &str) -> Self {
+        for img in imgs {
+            self.add_img(&img, alt_text);
+        }
+        self
+    }
+
     pub fn header(mut self, text: &str) -> Self {
         self.blocks
             .push(BlockType::Header(HeaderBlock::new_plain_text(text)));

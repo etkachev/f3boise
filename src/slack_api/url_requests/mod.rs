@@ -3,6 +3,7 @@ use url::Url;
 pub trait SlackUrlRequest: serde::Serialize {
     fn get_api_url(&self) -> &str;
 
+    /// get url request along with query params
     fn get_url_request(&self, base_api: &str) -> Url
     where
         Self: Sized,
@@ -12,6 +13,7 @@ pub trait SlackUrlRequest: serde::Serialize {
             .unwrap_or_else(|_| Url::parse(base_api).unwrap())
     }
 
+    /// get url request without query params
     fn get_plain_url_request(&self, base_api: &str) -> Url
     where
         Self: Sized,

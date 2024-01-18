@@ -571,6 +571,13 @@ impl InteractionStateValues {
                             ),
                         );
                     }
+                    StateValueOptions::FileInput(FileInputValue { files }) => {
+                        let file_urls: Vec<String> = files
+                            .iter()
+                            .map(|file| file.permalink.to_string())
+                            .collect();
+                        results.insert(key, BasicValue::Multi(file_urls));
+                    }
                 }
             }
         }
@@ -613,6 +620,7 @@ pub enum StateValueOptions {
     Timepicker(TimePickerValue),
     Datepicker(DatePickerValue),
     ChannelsSelect(ChannelSelectValue),
+    FileInput(FileInputValue),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -633,6 +641,24 @@ pub struct ChannelSelectValue {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DatePickerValue {
     pub selected_date: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct FileInputValue {
+    pub files: Vec<FileItem>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct FileItem {
+    pub id: String,
+    pub title: String,
+    pub mimetype: String,
+    pub filetype: String,
+    /// id of slack user who uploaded
+    pub user: String,
+    pub size: usize,
+    pub permalink: String,
+    pub permalink_public: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -846,5 +872,22 @@ mod tests {
             action,
             InteractionTypes::EditBackBlast("fde3616a-413e-40ba-a8d1-ac1999baae8d".to_string())
         );
+    }
+
+    #[test]
+    fn parse_file_input() {
+        let payload = "{\"type\":\"view_submission\",\"team\":{\"id\":\"T03T5J6801Z\",\"domain\":\"f3-boise\"},\"user\":{\"id\":\"U03T87KHRFE\",\"username\":\"edwardtkachev\",\"name\":\"edwardtkachev\",\"team_id\":\"T03T5J6801Z\"},\"api_app_id\":\"A03UAGJC9QD\",\"token\":\"iqHCM8gJry9vury2mmDiv0Os\",\"trigger_id\":\"6481040169750.3923618272067.c592204d90d61abbc14320ad757a40a8\",\"view\":{\"id\":\"V06EBKNT2NN\",\"team_id\":\"T03T5J6801Z\",\"type\":\"modal\",\"blocks\":[{\"type\":\"input\",\"block_id\":\"lnMij\",\"label\":{\"type\":\"plain_text\",\"text\":\"Title\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"title.input\",\"placeholder\":{\"type\":\"plain_text\",\"text\":\"Snarky Title\",\"emoji\":true},\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"input\",\"block_id\":\"\\/o5Bh\",\"label\":{\"type\":\"plain_text\",\"text\":\"AO\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"channels_select\",\"action_id\":\"ao.select\",\"initial_channel\":\"C03TZV5RRF1\"}},{\"type\":\"input\",\"block_id\":\"bbmMo\",\"label\":{\"type\":\"plain_text\",\"text\":\"Workout Date\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"datepicker\",\"action_id\":\"date.select\",\"initial_date\":\"2024-01-18\"}},{\"type\":\"input\",\"block_id\":\"YKm+V\",\"label\":{\"type\":\"plain_text\",\"text\":\"Workout Time\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"timepicker\",\"action_id\":\"time.select\"}},{\"type\":\"input\",\"block_id\":\"zd6aQ\",\"label\":{\"type\":\"plain_text\",\"text\":\"The Q(s)\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"multi_users_select\",\"action_id\":\"qs.select\",\"initial_users\":[\"U03T87KHRFE\"]}},{\"type\":\"divider\",\"block_id\":\"juxUf\"},{\"type\":\"input\",\"block_id\":\"x87Qz\",\"label\":{\"type\":\"plain_text\",\"text\":\"The Why\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"why.input\",\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"input\",\"block_id\":\"Tfv25\",\"label\":{\"type\":\"plain_text\",\"text\":\"Equipment\",\"emoji\":true},\"optional\":true,\"dispatch_action\":false,\"element\":{\"type\":\"multi_static_select\",\"action_id\":\"equipment.select\",\"initial_options\":[{\"text\":{\"type\":\"plain_text\",\"text\":\"Coupons \\ud83e\\uddf1\",\"emoji\":true},\"value\":\"coupon\"}],\"options\":[{\"text\":{\"type\":\"plain_text\",\"text\":\"Coupons \\ud83e\\uddf1\",\"emoji\":true},\"value\":\"coupon\"},{\"text\":{\"type\":\"plain_text\",\"text\":\"Sandbag \\ud83d\\udc5d\",\"emoji\":true},\"value\":\"sandbag\"},{\"text\":{\"type\":\"plain_text\",\"text\":\"Ruck \\ud83c\\udf92\",\"emoji\":true},\"value\":\"ruck\"},{\"text\":{\"type\":\"plain_text\",\"text\":\"Running Shoes \\ud83d\\udc5f\",\"emoji\":true},\"value\":\"shoes\"}]}},{\"type\":\"input\",\"block_id\":\"oo5gq\",\"label\":{\"type\":\"plain_text\",\"text\":\"Other Equipment\",\"emoji\":true},\"optional\":true,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"other_equipment.input\",\"placeholder\":{\"type\":\"plain_text\",\"text\":\"Anything else to bring?\",\"emoji\":true},\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"input\",\"block_id\":\"xVRyF\",\"label\":{\"type\":\"plain_text\",\"text\":\"FNGs\",\"emoji\":true},\"optional\":true,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"fngs.input\",\"initial_value\":\"Always\",\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"divider\",\"block_id\":\"OgJ7b\"},{\"type\":\"input\",\"block_id\":\"Y9MdG\",\"label\":{\"type\":\"plain_text\",\"text\":\"The Moleskine\",\"emoji\":true},\"optional\":true,\"dispatch_action\":false,\"element\":{\"type\":\"plain_text_input\",\"action_id\":\"moleskin.textbox\",\"multiline\":true,\"dispatch_action_config\":{\"trigger_actions_on\":[\"on_enter_pressed\"]}}},{\"type\":\"input\",\"block_id\":\"AwLSA\",\"label\":{\"type\":\"plain_text\",\"text\":\"Upload Image\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"file_input\",\"action_id\":\"file.input\",\"max_files\":10,\"max_file_size_bytes\":10000000}},{\"type\":\"input\",\"block_id\":\"x6BGO\",\"label\":{\"type\":\"plain_text\",\"text\":\"Choose where to post this\",\"emoji\":true},\"optional\":false,\"dispatch_action\":false,\"element\":{\"type\":\"static_select\",\"action_id\":\"where_to_post.select\",\"initial_option\":{\"text\":{\"type\":\"plain_text\",\"text\":\"Current Channel\",\"emoji\":true},\"value\":\"current_channel::C03TZV5RRF1\"},\"options\":[{\"text\":{\"type\":\"plain_text\",\"text\":\"Ao Channel\",\"emoji\":true},\"value\":\"ao_channel\"},{\"text\":{\"type\":\"plain_text\",\"text\":\"Current Channel\",\"emoji\":true},\"value\":\"current_channel::C03TZV5RRF1\"}]}},{\"type\":\"context\",\"block_id\":\"jC2Zn\",\"elements\":[{\"type\":\"mrkdwn\",\"text\":\"Please wait after hitting submit!\",\"verbatim\":false}]}],\"private_metadata\":\"\",\"callback_id\":\"\",\"state\":{\"values\":{\"lnMij\":{\"title.input\":{\"type\":\"plain_text_input\",\"value\":\"testing preblast\"}},\"\\/o5Bh\":{\"ao.select\":{\"type\":\"channels_select\",\"selected_channel\":\"C03UEBT1QRZ\"}},\"bbmMo\":{\"date.select\":{\"type\":\"datepicker\",\"selected_date\":\"2024-01-18\"}},\"YKm+V\":{\"time.select\":{\"type\":\"timepicker\",\"selected_time\":\"02:00\"}},\"zd6aQ\":{\"qs.select\":{\"type\":\"multi_users_select\",\"selected_users\":[\"U03T87KHRFE\"]}},\"x87Qz\":{\"why.input\":{\"type\":\"plain_text_input\",\"value\":\"testing\"}},\"Tfv25\":{\"equipment.select\":{\"type\":\"multi_static_select\",\"selected_options\":[{\"text\":{\"type\":\"plain_text\",\"text\":\"Coupons \\ud83e\\uddf1\",\"emoji\":true},\"value\":\"coupon\"}]}},\"oo5gq\":{\"other_equipment.input\":{\"type\":\"plain_text_input\",\"value\":null}},\"xVRyF\":{\"fngs.input\":{\"type\":\"plain_text_input\",\"value\":\"Always\"}},\"Y9MdG\":{\"moleskin.textbox\":{\"type\":\"plain_text_input\",\"value\":\"testing some things\"}},\"AwLSA\":{\"file.input\":{\"type\":\"file_input\",\"files\":[{\"id\":\"F06DX3RG1DM\",\"created\":1705512948,\"timestamp\":1705512948,\"name\":\"IMG_7940.HEIC\",\"title\":\"IMG_7940.HEIC\",\"mimetype\":\"image\\/heic\",\"filetype\":\"heic\",\"pretty_type\":\"High Efficiency Image File\",\"user\":\"U03T87KHRFE\",\"user_team\":\"T03T5J6801Z\",\"editable\":false,\"size\":1447396,\"mode\":\"hosted\",\"is_external\":false,\"external_type\":\"\",\"is_public\":false,\"public_url_shared\":false,\"display_as_bot\":false,\"username\":\"\",\"url_private\":\"https:\\/\\/files.slack.com\\/files-pri\\/T03T5J6801Z-F06DX3RG1DM\\/img_7940.heic\",\"url_private_download\":\"https:\\/\\/files.slack.com\\/files-pri\\/T03T5J6801Z-F06DX3RG1DM\\/download\\/img_7940.heic\",\"media_display_type\":\"unknown\",\"thumb_64\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06DX3RG1DM-867d4297ab\\/img_7940_64.png\",\"thumb_80\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06DX3RG1DM-867d4297ab\\/img_7940_80.png\",\"thumb_360\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06DX3RG1DM-867d4297ab\\/img_7940_360.png\",\"thumb_360_w\":360,\"thumb_360_h\":270,\"thumb_480\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06DX3RG1DM-867d4297ab\\/img_7940_480.png\",\"thumb_480_w\":480,\"thumb_480_h\":360,\"thumb_160\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06DX3RG1DM-867d4297ab\\/img_7940_160.png\",\"thumb_720\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06DX3RG1DM-867d4297ab\\/img_7940_720.png\",\"thumb_720_w\":720,\"thumb_720_h\":540,\"thumb_800\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06DX3RG1DM-867d4297ab\\/img_7940_800.png\",\"thumb_800_w\":800,\"thumb_800_h\":600,\"thumb_960\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06DX3RG1DM-867d4297ab\\/img_7940_960.png\",\"thumb_960_w\":960,\"thumb_960_h\":720,\"thumb_1024\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06DX3RG1DM-867d4297ab\\/img_7940_1024.png\",\"thumb_1024_w\":1024,\"thumb_1024_h\":768,\"original_w\":3827,\"original_h\":2870,\"permalink\":\"https:\\/\\/f3-boise.slack.com\\/files\\/U03T87KHRFE\\/F06DX3RG1DM\\/img_7940.heic\",\"permalink_public\":\"https:\\/\\/slack-files.com\\/T03T5J6801Z-F06DX3RG1DM-d1e8dd0d8b\",\"comments_count\":0,\"shares\":{},\"channels\":[],\"groups\":[],\"ims\":[],\"has_more_shares\":false,\"has_rich_preview\":false,\"file_access\":\"visible\"},{\"id\":\"F06EBKYGG4S\",\"created\":1705512957,\"timestamp\":1705512957,\"name\":\"Capture.JPG\",\"title\":\"Capture.JPG\",\"mimetype\":\"image\\/jpeg\",\"filetype\":\"jpg\",\"pretty_type\":\"JPEG\",\"user\":\"U03T87KHRFE\",\"user_team\":\"T03T5J6801Z\",\"editable\":false,\"size\":29968,\"mode\":\"hosted\",\"is_external\":false,\"external_type\":\"\",\"is_public\":false,\"public_url_shared\":false,\"display_as_bot\":false,\"username\":\"\",\"url_private\":\"https:\\/\\/files.slack.com\\/files-pri\\/T03T5J6801Z-F06EBKYGG4S\\/capture.jpg\",\"url_private_download\":\"https:\\/\\/files.slack.com\\/files-pri\\/T03T5J6801Z-F06EBKYGG4S\\/download\\/capture.jpg\",\"media_display_type\":\"unknown\",\"thumb_64\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06EBKYGG4S-7c85ade98b\\/capture_64.jpg\",\"thumb_80\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06EBKYGG4S-7c85ade98b\\/capture_80.jpg\",\"thumb_360\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06EBKYGG4S-7c85ade98b\\/capture_360.jpg\",\"thumb_360_w\":360,\"thumb_360_h\":358,\"thumb_160\":\"https:\\/\\/files.slack.com\\/files-tmb\\/T03T5J6801Z-F06EBKYGG4S-7c85ade98b\\/capture_160.jpg\",\"original_w\":463,\"original_h\":461,\"thumb_tiny\":\"AwAvADBjetRVI\\/QU0AEisoFSHAZSoytWAMDFMK1drC3IwM091G3NBIzgU9x8lSAjKTTQpDCpgKXAqYlNDQKRhwaHJVcgdKQncMityCIDLcVO4+SmbcHipXGUrF6lbDWcK3qaTcTUSc5Y9zTxWkYpCbBnIpsTrvCkYBpTzTcDNUxEjMyMR1welPWQOOOD6VD1qMkq+RUyQ0z\\/2Q==\",\"permalink\":\"https:\\/\\/f3-boise.slack.com\\/files\\/U03T87KHRFE\\/F06EBKYGG4S\\/capture.jpg\",\"permalink_public\":\"https:\\/\\/slack-files.com\\/T03T5J6801Z-F06EBKYGG4S-52fa0526a7\",\"comments_count\":0,\"shares\":{},\"channels\":[],\"groups\":[],\"ims\":[],\"has_more_shares\":false,\"has_rich_preview\":false,\"file_access\":\"visible\"}]}},\"x6BGO\":{\"where_to_post.select\":{\"type\":\"static_select\",\"selected_option\":{\"text\":{\"type\":\"plain_text\",\"text\":\"Current Channel\",\"emoji\":true},\"value\":\"current_channel::C03TZV5RRF1\"}}}}},\"hash\":\"1705512868.U36n81lw\",\"title\":{\"type\":\"plain_text\",\"text\":\"Pre Blast\",\"emoji\":true},\"clear_on_close\":false,\"notify_on_close\":false,\"close\":null,\"submit\":{\"type\":\"plain_text\",\"text\":\"Submit\",\"emoji\":true},\"previous_view_id\":null,\"root_view_id\":\"V06EBKNT2NN\",\"app_id\":\"A03UAGJC9QD\",\"external_id\":\"pre_blast::382a8\",\"app_installed_team_id\":\"T03T5J6801Z\",\"bot_id\":\"B03UG6KRSN8\"},\"response_urls\":[],\"is_enterprise_install\":false,\"enterprise\":null}";
+        let parsed = serde_json::from_str::<ViewSubmissionPayload>(payload).unwrap();
+        match parsed.view {
+            ViewSubmissionPayloadView::Modal(modal) => {
+                let values = modal.state.get_values();
+                let files = values.get("file.input").unwrap();
+                if let BasicValue::Multi(files) = files {
+                    assert_eq!(files.len(), 2);
+                } else {
+                    assert_eq!(false, true);
+                }
+            }
+        }
     }
 }

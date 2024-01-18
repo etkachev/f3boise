@@ -22,7 +22,7 @@ pub struct PreBlastPost {
     pub fng_message: Option<String>,
     pub mole_skin: Option<String>,
     pub post_where: BlastWhere,
-    pub img_url: String,
+    pub img_urls: HashSet<String>,
 }
 
 impl PreBlastPost {
@@ -55,6 +55,10 @@ impl PreBlastPost {
             .first()
             .map(|q| q.to_string())
     }
+
+    pub fn img_urls(&self) -> Vec<String> {
+        self.img_urls.iter().map(|url| url.to_string()).collect()
+    }
 }
 
 impl From<HashMap<String, BasicValue>> for PreBlastPost {
@@ -69,12 +73,10 @@ impl From<HashMap<String, BasicValue>> for PreBlastPost {
             .map(value_utils::get_single_string)
             .unwrap_or_else(|| String::from("Title"));
 
-        let img_url = value
+        let img_urls = value
             .get(pre_blast_action_ids::FILE)
-            .map(value_utils::get_single_string)
+            .map(value_utils::get_hash_set_strings_from_multi)
             .unwrap_or_default();
-
-        println!("img url: {}", img_url);
 
         let date = value
             .get(pre_blast_action_ids::DATE)
@@ -143,7 +145,7 @@ impl From<HashMap<String, BasicValue>> for PreBlastPost {
             fng_message,
             mole_skin,
             post_where,
-            img_url: String::new(),
+            img_urls,
         }
     }
 }
@@ -175,6 +177,8 @@ pub async fn convert_to_message(db_pool: &PgPool, post: PreBlastPost) -> PostMes
         None
     };
 
+    let img_urls = post.img_urls();
+
     let block_builder = BlockBuilder::new()
         .section_markdown(&format!("*Preblast: {}*", post.title))
         .section_markdown(&format!("*Date*: {}", post.date))
@@ -190,7 +194,7 @@ pub async fn convert_to_message(db_pool: &PgPool, post: PreBlastPost) -> PostMes
             post.mole_skin.unwrap_or_default()
         ))
         .divider()
-        .img(post.img_url.as_str(), "Pre-blast");
+        .imgs(img_urls, "Pre-blast");
 
     if let Some(f3_user) = user {
         PostMessageRequest::new_as_user(&channel_id, block_builder.blocks, f3_user)
