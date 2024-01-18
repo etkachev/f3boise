@@ -23,6 +23,7 @@ pub enum AO {
     BlackOps,
     CamelsBack,
     ReidMerrill,
+    Molenaar,
     FirstF,
     DR,
     Unknown(String),
@@ -100,6 +101,7 @@ impl AO {
             AO::FirstF => HashSet::new(),
             AO::CamelsBack => HashSet::from([Weekday::Fri]),
             AO::ReidMerrill => HashSet::from([Weekday::Fri]),
+            AO::Molenaar => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
@@ -123,6 +125,7 @@ impl AO {
             AO::FirstF => "1st F",
             AO::CamelsBack => "Camel's Back",
             AO::ReidMerrill => "Reid Merrill",
+            AO::Molenaar => "Molenaar Park",
             AO::DR => "DR",
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -217,6 +220,7 @@ impl AO {
             AO::FirstF => AoType::Bootcamp,
             AO::CamelsBack => AoType::Bootcamp,
             AO::ReidMerrill => AoType::Bootcamp,
+            AO::Molenaar => AoType::Bootcamp,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
         }
@@ -246,6 +250,7 @@ impl AO {
             AO::FirstF => const_names::FIRST_F_CHANNEL_ID,
             AO::CamelsBack => const_names::CAMELS_BACK_CHANNEL_ID,
             AO::ReidMerrill => const_names::REID_MERRILL_CHANNEL_ID,
+            AO::Molenaar => const_names::MOLENAAR_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -266,6 +271,7 @@ impl AO {
             AO::Tower => Some("2121 E Lake Hazel Rd, Meridian, ID 83642"),
             AO::CamelsBack => Some("1200 Heron St, Boise, ID 83702"),
             AO::ReidMerrill => Some("637 E Shore Dr, Eagle, ID 83616"),
+            AO::Molenaar => Some("2815 S Maple Grove Rd, Boise, ID 83709"),
             AO::RuckershipEast
             | AO::RuckershipWest
             | AO::BlackOps
@@ -291,6 +297,7 @@ impl AO {
             AO::BlackDiamond => Some(const_names::BLACK_DIAMOND_GOOGLE_MAPS),
             AO::CamelsBack => Some(const_names::CAMELS_BACK_GOOGLE_MAPS),
             AO::ReidMerrill => Some(const_names::REID_MERRILL_GOOGLE_MAPS),
+            AO::Molenaar => Some(const_names::MOLENAAR_GOOGLE_MAPS),
             AO::RuckershipWest | AO::RuckershipEast => None,
             AO::DR | AO::BlackOps | AO::FirstF => None,
             AO::Unknown(_) => None,
@@ -326,6 +333,7 @@ impl AO {
             const_names::FIRST_F_CHANNEL_ID => AO::FirstF,
             const_names::CAMELS_BACK_CHANNEL_ID => AO::CamelsBack,
             const_names::REID_MERRILL_CHANNEL_ID => AO::ReidMerrill,
+            const_names::MOLENAAR_CHANNEL_ID => AO::Molenaar,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
         }
@@ -353,6 +361,7 @@ impl Clone for AO {
             AO::FirstF => AO::FirstF,
             AO::CamelsBack => AO::CamelsBack,
             AO::ReidMerrill => AO::ReidMerrill,
+            AO::Molenaar => AO::Molenaar,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
     }
@@ -378,6 +387,7 @@ impl ToString for AO {
             AO::FirstF => const_names::FIRST_F,
             AO::CamelsBack => const_names::CAMELS_BACK,
             AO::ReidMerrill => const_names::REID_MERRILL,
+            AO::Molenaar => const_names::MOLENAAR,
             AO::DR => "",
             AO::Unknown(_) => "",
         };
@@ -417,6 +427,7 @@ impl From<String> for AO {
             const_names::FIRST_F => AO::FirstF,
             const_names::CAMELS_BACK => AO::CamelsBack,
             const_names::REID_MERRILL => AO::ReidMerrill,
+            const_names::MOLENAAR => AO::Molenaar,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
         }
@@ -455,6 +466,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::FirstF => AO::FirstF,
         PublicChannels::CamelsBack => AO::CamelsBack,
         PublicChannels::ReidMerrill => AO::ReidMerrill,
+        PublicChannels::Molenaar => AO::Molenaar,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
@@ -541,9 +553,12 @@ pub mod const_names {
     pub const REID_MERRILL: &str = "reid-merrill-park";
     pub const REID_MERRILL_CHANNEL_ID: &str = "C05UUDKULGY";
     pub const REID_MERRILL_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/mycHr8xipwwqhhSu6";
+    pub const MOLENAAR: &str = "otb-molenaar-park";
+    pub const MOLENAAR_CHANNEL_ID: &str = "C06DP3D5VTK";
+    pub const MOLENAAR_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/B6xDeMgoV9LMbuke9";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 16] = [
+    pub const AO_LIST: [AO; 17] = [
         AO::Backyard,
         AO::Bellagio,
         AO::BlackDiamond,
@@ -557,6 +572,7 @@ pub mod const_names {
         AO::Rebel,
         // AO::ReidMerrill,
         AO::Rise,
+        AO::Molenaar,
         AO::RuckershipEast,
         AO::RuckershipWest,
         AO::Tower,
@@ -607,5 +623,11 @@ mod tests {
         let ao = AO::RuckershipWest;
         let start_time = ao.default_time(&Weekday::Fri).unwrap();
         assert_eq!(start_time, NaiveTime::from_hms(5, 15, 0));
+    }
+
+    #[test]
+    fn molenaar_park() {
+        let ao = AO::from("otb-molenaar-park".to_string());
+        assert_eq!(ao, AO::Molenaar);
     }
 }
