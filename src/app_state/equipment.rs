@@ -8,6 +8,7 @@ pub enum AoEquipment {
     Sandbag,
     Ruck,
     RunningShoes,
+    Headlamp,
     Other(String),
 }
 
@@ -35,6 +36,10 @@ impl From<&AoEquipment> for OptionElement {
                 &format!("{} 👟", AoEquipment::RunningShoes.to_string()),
                 "shoes",
             ),
+            AoEquipment::Headlamp => OptionElement::new(
+                &format!("{} 🔦", AoEquipment::Headlamp.to_string()),
+                "headlamp",
+            ),
             AoEquipment::Other(other) => OptionElement::new(other, other),
         }
     }
@@ -49,6 +54,7 @@ impl FromStr for AoEquipment {
             "sandbag" | "sandbags" | "sb" => AoEquipment::Sandbag,
             "ruck" | "rucksack" => AoEquipment::Ruck,
             "running_shoes" | "shoes" | "running shoes" => AoEquipment::RunningShoes,
+            "headlamp" | "head lamp" | "head_lamp" => AoEquipment::Headlamp,
             other => AoEquipment::Other(other.to_string()),
         };
 
@@ -63,6 +69,7 @@ impl ToString for AoEquipment {
             AoEquipment::Sandbag => String::from("Sandbag"),
             AoEquipment::Ruck => String::from("Ruck"),
             AoEquipment::RunningShoes => String::from("Running Shoes"),
+            AoEquipment::Headlamp => String::from("Headlamp"),
             AoEquipment::Other(other) => other.to_string(),
         }
     }

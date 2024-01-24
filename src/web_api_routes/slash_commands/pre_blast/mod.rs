@@ -147,5 +147,6 @@ fn equipment_list() -> Vec<OptionElement> {
         OptionElement::from(AoEquipment::Sandbag),
         OptionElement::from(AoEquipment::Ruck),
         OptionElement::from(AoEquipment::RunningShoes),
+        OptionElement::from(AoEquipment::Headlamp),
     ]
 }

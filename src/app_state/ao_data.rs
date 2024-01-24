@@ -60,7 +60,7 @@ impl AoType {
             AoType::HighIntensity => HashSet::from([AoEquipment::Ruck, AoEquipment::Sandbag]),
             AoType::Heavy => HashSet::from([AoEquipment::Ruck, AoEquipment::Sandbag]),
             AoType::Running => HashSet::from([AoEquipment::RunningShoes]),
-            AoType::Rucking => HashSet::from([AoEquipment::Ruck]),
+            AoType::Rucking => HashSet::from([AoEquipment::Ruck, AoEquipment::Headlamp]),
         }
     }
 }
