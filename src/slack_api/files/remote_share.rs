@@ -9,6 +9,15 @@ pub mod request {
         pub file: String,
     }
 
+    impl FileRemoteShareRequest {
+        pub fn new(channels: Vec<String>, file: &str) -> Self {
+            FileRemoteShareRequest {
+                channels: channels.join(","),
+                file: file.to_string(),
+            }
+        }
+    }
+
     impl SlackUrlRequest for FileRemoteShareRequest {
         fn get_api_url(&self) -> &str {
             FILES_REMOTE_SHARE

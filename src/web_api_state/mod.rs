@@ -17,6 +17,8 @@ use crate::slack_api::chat::post_message::request::PostMessageRequest;
 use crate::slack_api::chat::post_message::response::PostMessageResponse;
 use crate::slack_api::chat::update_message::request::UpdateMessageRequest;
 use crate::slack_api::chat::update_message::response::UpdateMessageResponse;
+use crate::slack_api::files::remote_share::request::FileRemoteShareRequest;
+use crate::slack_api::files::remote_share::response::FileRemoteShareResponse;
 use crate::slack_api::files::request::FileUploadRequest;
 use crate::slack_api::files::response::FileUploadResponse;
 use crate::slack_api::url_requests::SlackUrlRequest;
@@ -161,6 +163,27 @@ impl MutableWebState {
         } else {
             Ok(())
         }
+    }
+
+    /// shared multiple remote files to channel
+    pub async fn remote_share_files(
+        &self,
+        channel: &str,
+        file_ids: Vec<String>,
+    ) -> Result<(), AppError> {
+        let requests: Vec<FileRemoteShareRequest> = file_ids
+            .iter()
+            .map(|file_id| FileRemoteShareRequest::new(vec![channel.to_string()], file_id))
+            .collect();
+        for request in requests {
+            let url = request.get_url_request(&self.base_api_url);
+            let response = self.make_get_url_request(url).await;
+            let response: FileRemoteShareResponse = serde_json::from_slice(&response.body)?;
+            if let Some(err) = response.error {
+                return Err(AppError::General(err));
+            }
+        }
+        Ok(())
     }
 
     /// update message that exists in slack. returns ts

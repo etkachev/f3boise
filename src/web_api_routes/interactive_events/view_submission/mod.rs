@@ -133,8 +133,10 @@ async fn handle_pre_blast_submission(
 ) -> Result<(), AppError> {
     let form_values = modal.state.get_values();
     let post = pre_blast_post::PreBlastPost::from(form_values);
+    // let file_ids = post.img_urls();
     println!("from user {:?}", user.username);
     let message = pre_blast_post::convert_to_message(db_pool, post).await;
     web_state.post_message(message).await?;
+    // web_state.remote_share_files()
     Ok(())
 }

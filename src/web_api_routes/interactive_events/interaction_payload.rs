@@ -572,10 +572,8 @@ impl InteractionStateValues {
                         );
                     }
                     StateValueOptions::FileInput(FileInputValue { files }) => {
-                        let file_urls: Vec<String> = files
-                            .iter()
-                            .map(|file| file.permalink.to_string())
-                            .collect();
+                        let file_urls: Vec<String> =
+                            files.iter().map(|file| file.id.to_string()).collect();
                         results.insert(key, BasicValue::Multi(file_urls));
                     }
                 }
