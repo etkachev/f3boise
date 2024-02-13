@@ -93,7 +93,7 @@ impl AO {
             AO::RuckershipEast => HashSet::from([Weekday::Fri]),
             AO::Backyard => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::Rise => HashSet::from([Weekday::Mon, Weekday::Wed]),
-            AO::WarHorse => HashSet::from([Weekday::Mon]),
+            AO::WarHorse => HashSet::from([Weekday::Mon, Weekday::Thu]),
             AO::Bellagio => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Tower => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::BlackDiamond => HashSet::from([Weekday::Wed]),
@@ -263,7 +263,7 @@ impl AO {
             AO::Bleach => Some("801 Aurora Dr, Boise, ID 83709"),
             AO::OldGlory => Some("3064 W Malta Dr, Meridian, ID 83646"),
             AO::Rise => Some("4403 S Surprise Way, Boise, ID 83716"),
-            AO::WarHorse => Some("1304 7th St N, Nampa, ID 83687"),
+            AO::WarHorse => Some("7999 Cherry Ln, Nampa, ID 83687"),
             AO::Bellagio => Some("Kleiner Park Loop, Meridian, ID 83642"),
             AO::Gem => Some("3423 N Meridian Rd, Meridian, ID 83642"),
             AO::IronMountain => Some("75 Marjorie Ave, Middleton, ID 83644"),
@@ -531,7 +531,7 @@ pub mod const_names {
     pub const RISE_GOOGLE_MAPS: &str = "https://goo.gl/maps/wqZ1UD8DEAUCJTku9";
     pub const WAR_HORSE: &str = "warhorse";
     pub const WAR_HORSE_CHANNEL_ID: &str = "C0425DL9MT7";
-    pub const WAR_HORSE_GOOGLE_MAPS: &str = "https://goo.gl/maps/oariasYawYa5o7zs9";
+    pub const WAR_HORSE_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/6bcedmbincGxMtmM9";
     pub const BELLAGIO: &str = "bellagio";
     pub const BELLAGIO_CHANNEL_ID: &str = "C045SMRL43X";
     pub const BELLAGIO_GOOGLE_MAPS: &str = "https://goo.gl/maps/5xFSnaT57Ws1JAZR6";
