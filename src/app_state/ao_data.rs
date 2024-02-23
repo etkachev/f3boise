@@ -24,6 +24,7 @@ pub enum AO {
     CamelsBack,
     ReidMerrill,
     GooseDynasty,
+    RetaHuskey,
     FirstF,
     DR,
     Unknown(String),
@@ -102,6 +103,7 @@ impl AO {
             AO::CamelsBack => HashSet::from([Weekday::Fri]),
             AO::ReidMerrill => HashSet::from([Weekday::Fri]),
             AO::GooseDynasty => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
+            AO::RetaHuskey => HashSet::from([Weekday::Sat]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
@@ -126,6 +128,7 @@ impl AO {
             AO::CamelsBack => "Camel's Back",
             AO::ReidMerrill => "Reid Merrill",
             AO::GooseDynasty => "Goose Dynasty",
+            AO::RetaHuskey => "Reta Huskey Park",
             AO::DR => "DR",
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -221,6 +224,7 @@ impl AO {
             AO::CamelsBack => AoType::Bootcamp,
             AO::ReidMerrill => AoType::Bootcamp,
             AO::GooseDynasty => AoType::Bootcamp,
+            AO::RetaHuskey => AoType::Bootcamp,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
         }
@@ -251,6 +255,7 @@ impl AO {
             AO::CamelsBack => const_names::CAMELS_BACK_CHANNEL_ID,
             AO::ReidMerrill => const_names::REID_MERRILL_CHANNEL_ID,
             AO::GooseDynasty => const_names::GOOSE_DYNASTY_CHANNEL_ID,
+            AO::RetaHuskey => const_names::RETA_HUSKEY_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -272,6 +277,7 @@ impl AO {
             AO::CamelsBack => Some("1200 Heron St, Boise, ID 83702"),
             AO::ReidMerrill => Some("637 E Shore Dr, Eagle, ID 83616"),
             AO::GooseDynasty => Some("2815 S Maple Grove Rd, Boise, ID 83709"),
+            AO::RetaHuskey => Some("2887 W Tubac Dr, Meridian, ID  83646"),
             AO::RuckershipEast
             | AO::RuckershipWest
             | AO::BlackOps
@@ -298,6 +304,7 @@ impl AO {
             AO::CamelsBack => Some(const_names::CAMELS_BACK_GOOGLE_MAPS),
             AO::ReidMerrill => Some(const_names::REID_MERRILL_GOOGLE_MAPS),
             AO::GooseDynasty => Some(const_names::GOOSE_DYNASTY_GOOGLE_MAPS),
+            AO::RetaHuskey => Some(const_names::RETA_HUSKEY_GOOGLE_MAPS),
             AO::RuckershipWest | AO::RuckershipEast => None,
             AO::DR | AO::BlackOps | AO::FirstF => None,
             AO::Unknown(_) => None,
@@ -334,6 +341,7 @@ impl AO {
             const_names::CAMELS_BACK_CHANNEL_ID => AO::CamelsBack,
             const_names::REID_MERRILL_CHANNEL_ID => AO::ReidMerrill,
             const_names::GOOSE_DYNASTY_CHANNEL_ID => AO::GooseDynasty,
+            const_names::RETA_HUSKEY_CHANNEL_ID => AO::RetaHuskey,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
         }
@@ -362,6 +370,7 @@ impl Clone for AO {
             AO::CamelsBack => AO::CamelsBack,
             AO::ReidMerrill => AO::ReidMerrill,
             AO::GooseDynasty => AO::GooseDynasty,
+            AO::RetaHuskey => AO::RetaHuskey,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
     }
@@ -388,6 +397,7 @@ impl ToString for AO {
             AO::CamelsBack => const_names::CAMELS_BACK,
             AO::ReidMerrill => const_names::REID_MERRILL,
             AO::GooseDynasty => const_names::GOOSE_DYNASTY,
+            AO::RetaHuskey => const_names::RETA_HUSKEY,
             AO::DR => "",
             AO::Unknown(_) => "",
         };
@@ -428,6 +438,7 @@ impl From<String> for AO {
             const_names::CAMELS_BACK => AO::CamelsBack,
             const_names::REID_MERRILL => AO::ReidMerrill,
             const_names::GOOSE_DYNASTY | "otb-goose-dynasty" => AO::GooseDynasty,
+            const_names::RETA_HUSKEY => AO::RetaHuskey,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
         }
@@ -467,6 +478,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::CamelsBack => AO::CamelsBack,
         PublicChannels::ReidMerrill => AO::ReidMerrill,
         PublicChannels::GooseDynasty => AO::GooseDynasty,
+        PublicChannels::RetaHuskey => AO::RetaHuskey,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
@@ -556,9 +568,12 @@ pub mod const_names {
     pub const GOOSE_DYNASTY: &str = "goose-dynasty";
     pub const GOOSE_DYNASTY_CHANNEL_ID: &str = "C06DP3D5VTK";
     pub const GOOSE_DYNASTY_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/B6xDeMgoV9LMbuke9";
+    pub const RETA_HUSKEY: &str = "otb-reta-huskey-park";
+    pub const RETA_HUSKEY_CHANNEL_ID: &str = "C06LMEEDC1F";
+    pub const RETA_HUSKEY_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/qm2cW7sqki8q2hgg7";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 17] = [
+    pub const AO_LIST: [AO; 18] = [
         AO::Backyard,
         AO::Bellagio,
         AO::BlackDiamond,
@@ -571,6 +586,7 @@ pub mod const_names {
         AO::OldGlory,
         AO::Rebel,
         // AO::ReidMerrill,
+        AO::RetaHuskey,
         AO::Rise,
         AO::GooseDynasty,
         AO::RuckershipEast,

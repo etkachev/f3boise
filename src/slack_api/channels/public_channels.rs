@@ -20,6 +20,7 @@ pub enum PublicChannels {
     CamelsBack,
     ReidMerrill,
     GooseDynasty,
+    RetaHuskey,
     FirstF,
     DR,
     Welcome,
@@ -47,6 +48,7 @@ impl From<&AO> for PublicChannels {
             AO::CamelsBack => PublicChannels::CamelsBack,
             AO::ReidMerrill => PublicChannels::ReidMerrill,
             AO::GooseDynasty => PublicChannels::GooseDynasty,
+            AO::RetaHuskey => PublicChannels::RetaHuskey,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }
@@ -100,6 +102,7 @@ mod tests {
         test_channel_name("ao-reid-merrill-park", PublicChannels::ReidMerrill);
         test_channel_name("otb-goose-dynasty", PublicChannels::GooseDynasty);
         test_channel_name("goose-dynasty", PublicChannels::GooseDynasty);
+        test_channel_name("otb-reta-huskey-park", PublicChannels::RetaHuskey);
         test_channel_name("1st-f", PublicChannels::FirstF);
     }
 
