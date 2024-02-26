@@ -177,22 +177,6 @@
     },
     "query": "\n    UPDATE back_blasts\n    SET ao = $2,\n        q = $3,\n        pax = $4,\n        date = $5,\n        channel_id = $6,\n        active = $7,\n        title = $8,\n        moleskine = $9,\n        fngs = $10\n    WHERE id = $1\n    "
   },
-  "286f1afdaeb32bc417262c2dbbdb58d71de6586ad47cfcd4d11e908b561a4920": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text",
-          "Text",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\n    INSERT INTO ao_list (id, name, days, channel_id, active)\n    VALUES($1,$2,$3,$4,$5)\n    ON CONFLICT (name)\n    DO NOTHING;\n    "
-  },
   "2fb03ff2017dd6509de2775abcc19bf8dc5b557dfb12fed7fbb0656ceda75210": {
     "describe": {
       "columns": [
@@ -265,6 +249,22 @@
       }
     },
     "query": "\n        INSERT INTO q_line_up (id, qs, ao, date, closed, channel_id)\n        VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT ON CONSTRAINT q_line_up_channel_id_date_key\n            DO NOTHING;\n        "
+  },
+  "4bf89f86559042432ce893ca280b45d7b6fa4fc715e34fa794eb09a2c763ffad": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Text",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\n    INSERT INTO ao_list (id, name, days, channel_id, active)\n    VALUES($1,$2,$3,$4,$5)\n    ON CONFLICT (name)\n    DO UPDATE\n    SET days = EXCLUDED.days,\n        active = EXCLUDED.active;\n    "
   },
   "5440d790b55d5a56da30748d2a8b9a3db44e56731a5918130052943b8a83b9b2": {
     "describe": {

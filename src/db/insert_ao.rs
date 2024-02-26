@@ -18,7 +18,9 @@ pub async fn insert_ao_record(
     INSERT INTO ao_list (id, name, days, channel_id, active)
     VALUES($1,$2,$3,$4,$5)
     ON CONFLICT (name)
-    DO NOTHING;
+    DO UPDATE
+    SET days = EXCLUDED.days,
+        active = EXCLUDED.active;
     "#,
         id,
         name,
@@ -26,7 +28,7 @@ pub async fn insert_ao_record(
         channel_id,
         active
     )
-    .execute(transaction)
-    .await?;
+        .execute(transaction)
+        .await?;
     Ok(())
 }
