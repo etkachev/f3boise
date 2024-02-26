@@ -436,7 +436,7 @@ impl From<String> for AO {
             const_names::BLACK_OPS => AO::BlackOps,
             const_names::FIRST_F => AO::FirstF,
             const_names::CAMELS_BACK => AO::CamelsBack,
-            const_names::REID_MERRILL => AO::ReidMerrill,
+            const_names::REID_MERRILL | "otb-reid-merrill-park" => AO::ReidMerrill,
             const_names::GOOSE_DYNASTY | "otb-goose-dynasty" => AO::GooseDynasty,
             const_names::RETA_HUSKEY => AO::RetaHuskey,
             const_names::DR => AO::DR,
@@ -573,7 +573,7 @@ pub mod const_names {
     pub const RETA_HUSKEY_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/qm2cW7sqki8q2hgg7";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 18] = [
+    pub const AO_LIST: [AO; 19] = [
         AO::Backyard,
         AO::Bellagio,
         AO::BlackDiamond,
@@ -585,7 +585,7 @@ pub mod const_names {
         AO::IronMountain,
         AO::OldGlory,
         AO::Rebel,
-        // AO::ReidMerrill,
+        AO::ReidMerrill,
         AO::RetaHuskey,
         AO::Rise,
         AO::GooseDynasty,
