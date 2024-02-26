@@ -101,7 +101,7 @@ impl AO {
             AO::BlackOps => HashSet::new(),
             AO::FirstF => HashSet::new(),
             AO::CamelsBack => HashSet::from([Weekday::Fri]),
-            AO::ReidMerrill => HashSet::from([Weekday::Fri]),
+            AO::ReidMerrill => HashSet::from([Weekday::Mon, Weekday::Fri]),
             AO::GooseDynasty => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
             AO::RetaHuskey => HashSet::from([Weekday::Sat]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
@@ -224,7 +224,7 @@ impl AO {
             AO::CamelsBack => AoType::Bootcamp,
             AO::ReidMerrill => AoType::Bootcamp,
             AO::GooseDynasty => AoType::Bootcamp,
-            AO::RetaHuskey => AoType::Bootcamp,
+            AO::RetaHuskey => AoType::Running,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
         }
