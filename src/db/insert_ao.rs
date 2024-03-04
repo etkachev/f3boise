@@ -28,7 +28,7 @@ pub async fn insert_ao_record(
         channel_id,
         active
     )
-        .execute(transaction)
-        .await?;
+    .execute(transaction)
+    .await?;
     Ok(())
 }

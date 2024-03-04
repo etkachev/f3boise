@@ -91,7 +91,7 @@ impl AO {
             AO::Rebel => HashSet::from([Weekday::Mon, Weekday::Tue, Weekday::Thu]),
             AO::IronMountain => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::RuckershipWest => HashSet::from([Weekday::Fri]),
-            AO::RuckershipEast => HashSet::from([Weekday::Fri]),
+            AO::RuckershipEast => HashSet::from([Weekday::Sat]),
             AO::Backyard => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::Rise => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::WarHorse => HashSet::from([Weekday::Mon, Weekday::Thu]),
@@ -193,7 +193,7 @@ impl AO {
                 _ => None,
             },
             Weekday::Fri => match self {
-                AO::RuckershipWest | AO::RuckershipEast => Some(five_fifteen),
+                AO::RuckershipWest => Some(five_fifteen),
                 ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
