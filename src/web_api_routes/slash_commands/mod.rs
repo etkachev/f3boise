@@ -28,6 +28,7 @@ pub mod ao_monthly_stats_graph;
 pub mod ao_stats;
 pub mod back_blast;
 pub mod black_diamond_rating;
+mod check_name;
 pub mod invite_all;
 pub mod modal_utils;
 pub mod my_stats;
@@ -265,6 +266,10 @@ pub async fn slack_slash_commands_route(
         .await
         {
             Ok(_) => HttpResponse::Ok().body("Opening Black Diamond rating modal"),
+            Err(err) => HttpResponse::Ok().body(err.to_string()),
+        },
+        "/check-name" => match check_name::pax_name_taken(&db_pool, &form).await {
+            Ok(response) => HttpResponse::Ok().json(response),
             Err(err) => HttpResponse::Ok().body(err.to_string()),
         },
         _ => {
