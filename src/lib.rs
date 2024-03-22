@@ -5,6 +5,7 @@ pub mod cron_jobs;
 pub mod db;
 pub mod migrate_old;
 pub mod oauth_client;
+pub mod scheduler;
 pub mod shared;
 pub mod slack_api;
 pub mod users;

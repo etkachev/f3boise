@@ -1,5 +1,6 @@
 use dotenvy::dotenv;
 use f3_api_rs::configuration::get_configuration;
+use f3_api_rs::scheduler;
 use f3_api_rs::shared::common_errors::AppError;
 use f3_api_rs::web_api_run::Application;
 use std::fmt::{Debug, Display};
@@ -9,6 +10,10 @@ use tokio::task::JoinError;
 async fn main() -> Result<(), AppError> {
     dotenv().ok();
     let config = get_configuration().expect("Failed to read config");
+    let address = format!("{}:{}", config.application.host, config.application.port);
+    actix_rt::spawn(async move {
+        scheduler::start_daily_scheduler(address.as_str()).await;
+    });
     let app = Application::build(config).await?;
     let application_task = tokio::spawn(app.run_until_stopped());
     // TODO let worker_task

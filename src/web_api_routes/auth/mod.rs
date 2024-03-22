@@ -1,3 +1,5 @@
+pub mod internal_auth;
+
 use crate::web_api_state::MutableWebState;
 use actix_session::Session;
 use actix_web::{cookie::Key, get, http::header, web, HttpResponse, Responder};
