@@ -99,12 +99,16 @@ impl ProcessedType for LeaderboardState {
 
 impl NumberOfBeatDowns {
     pub fn new(count: u16) -> Self {
-        match count % 1000 {
-            0 => NumberOfBeatDowns::Thousand(count / 1000),
-            _ => match count % 100 {
-                0 => NumberOfBeatDowns::Hundred(count / 100),
-                _ => NumberOfBeatDowns::Common(count),
-            },
+        if count == 0 {
+            NumberOfBeatDowns::Common(0)
+        } else {
+            match count % 1000 {
+                0 => NumberOfBeatDowns::Thousand(count / 1000),
+                _ => match count % 100 {
+                    0 => NumberOfBeatDowns::Hundred(count / 100),
+                    _ => NumberOfBeatDowns::Common(count),
+                },
+            }
         }
     }
 
@@ -241,5 +245,11 @@ mod tests {
         );
         let message = state.message();
         assert_eq!(message, None);
+    }
+
+    #[test]
+    fn handle_0_bds() {
+        let bds = NumberOfBeatDowns::new(0);
+        assert_eq!(bds, NumberOfBeatDowns::Common(0));
     }
 }
