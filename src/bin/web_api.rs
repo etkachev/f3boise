@@ -11,8 +11,14 @@ async fn main() -> Result<(), AppError> {
     dotenv().ok();
     let config = get_configuration().expect("Failed to read config");
     let address = format!("{}:{}", config.application.host, config.application.port);
+    let address = std::sync::Arc::new(address);
+    let a_1 = std::sync::Arc::clone(&address);
+
     actix_rt::spawn(async move {
         scheduler::start_daily_scheduler(address.as_str()).await;
+    });
+    actix_rt::spawn(async move {
+        scheduler::start_leaderboard_scheduler(a_1.as_str()).await;
     });
     let app = Application::build(config).await?;
     let application_task = tokio::spawn(app.run_until_stopped());

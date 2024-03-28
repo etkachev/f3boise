@@ -12,6 +12,19 @@ pub async fn trigger_remind_missing_bb(base_url: &str) -> Result<(), AppError> {
     Ok(())
 }
 
+pub async fn trigger_leaderboard_stats(base_url: &str) -> Result<(), AppError> {
+    let url_call = build_url(base_url, "/pax/post-leaderboard");
+    let client = build_client()?;
+    let response = client.get(url_call).send().await?;
+    if response.status().is_success() {
+        println!("Successful leaderboard check");
+    } else {
+        println!("Unsuccessful leaderboard check");
+    }
+
+    Ok(())
+}
+
 fn build_client() -> Result<reqwest::Client, AppError> {
     let mut headers = reqwest::header::HeaderMap::new();
     headers.insert(

@@ -27,6 +27,13 @@ pub enum PublicChannels {
     Unknown(String),
 }
 
+impl PublicChannels {
+    pub fn channel_id(&self) -> String {
+        let ao = AO::from(self);
+        ao.channel_id().to_string()
+    }
+}
+
 impl From<&AO> for PublicChannels {
     fn from(ao: &AO) -> Self {
         match ao {

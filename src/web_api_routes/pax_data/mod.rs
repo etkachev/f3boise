@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::{HashMap, HashSet};
 
+pub mod pax_leaderboards;
 pub mod stats;
 
 #[derive(Deserialize, Serialize)]
