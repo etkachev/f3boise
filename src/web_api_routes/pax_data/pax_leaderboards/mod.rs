@@ -24,12 +24,12 @@ pub async fn post_pax_leaderboards(
 ) -> impl Responder {
     if internal_auth::valid_internal_request(&req).is_ok() {
         let pax_data = get_pax_data(&db_pool).await;
-        if pax_data.is_empty() {
+        let item_ids = pax_data.get_item_ids();
+        let existing_processed = filter_processed_items(&db_pool, &item_ids, &pax_data).await;
+
+        if existing_processed.is_empty() {
             HttpResponse::Ok().body("No leaderboards")
         } else {
-            let item_ids = pax_data.get_item_ids();
-            let existing_processed = filter_processed_items(&db_pool, &item_ids, &pax_data).await;
-
             match process_and_post(&db_pool, existing_processed, &web_state).await {
                 Ok(_) => HttpResponse::Ok().body("success"),
                 Err(err) => {
