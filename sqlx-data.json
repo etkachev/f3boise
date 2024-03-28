@@ -329,6 +329,42 @@
     },
     "query": "\n        SELECT slack_id, name\n        FROM users;\n        "
   },
+  "5ce7e3e6c0367b5ca1542af0f699d657ab63e2fc845da6cf0cd8b23d78acf60d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "slack_id",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "bd_count!",
+          "ordinal": 2,
+          "type_info": "Int8"
+        },
+        {
+          "name": "earliest_date",
+          "ordinal": 3,
+          "type_info": "Date"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n    WITH backblast_participants AS (\n    SELECT\n        bb.date,\n        unnest(string_to_array(lower(pax), ',')) as user_name\n    FROM\n        back_blasts bb\n    WHERE\n        bb.bb_type = 'backblast' AND bb.active = true\n),\n\n     user_backblast_info AS (\n         SELECT\n             user_name,\n             COUNT(*) AS bd_count,\n             MIN(date) AS earliest_date\n         FROM\n             backblast_participants\n         GROUP BY\n             user_name\n     )\n\nSELECT\n    u.slack_id,\n    u.name,\n    coalesce(ubi.bd_count, 0) as \"bd_count!\",\n    ubi.earliest_date\nFROM\n    users u\n        LEFT JOIN\n    user_backblast_info ubi ON lower(u.name) = lower(ubi.user_name);\n    "
+  },
   "6b70eb56842bae3eadfad0c28fbae9c0d2e55a6b2a9ffa8b2e28225cadb15e1f": {
     "describe": {
       "columns": [
@@ -650,6 +686,20 @@
     },
     "query": "\n        WITH list_view AS (\n            SELECT\n                al.name as ao,\n                string_to_array(lower(qlu.qs), ',') as qs,\n                qlu.date,\n                qlu.closed\n            FROM q_line_up qlu\n                INNER JOIN ao_list al on qlu.channel_id = al.channel_id\n        )\n        \n        SELECT ao, qs as \"qs!\", date, closed\n        FROM list_view\n        WHERE date BETWEEN $1 AND $2\n        ORDER BY date ASC;\n        "
   },
+  "c08957f16f6095c857a71faf3d7e0101069ca5e9889fe039dded89c42bd3f192": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n    INSERT INTO processed_items (id, item_type, item_id, date_updated, amt_processed)\n    VALUES($1,$2,$3,now(),1)\n    ON CONFLICT ON CONSTRAINT processed_items_item_type_item_id_key\n        DO UPDATE\n        SET date_updated = now(),\n            amt_processed = processed_items.amt_processed + 1;\n    "
+  },
   "d2289716744a0c0b3536de525e67d9bbfeacb5ac271687d403e4eabdf83bf08f": {
     "describe": {
       "columns": [
@@ -687,6 +737,56 @@
       }
     },
     "query": "\n        SELECT slack_id, name, email, img_url\n        FROM users\n        WHERE slack_id = $1\n        LIMIT 1;\n        "
+  },
+  "d426dff399a19a2bdbb60f51795cf600ff1a4a1231413fa7f9b3a24a0c5318e0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "item_type",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "item_id",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "initial_date_processed",
+          "ordinal": 3,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "date_updated",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "amt_processed",
+          "ordinal": 5,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "TextArray"
+        ]
+      }
+    },
+    "query": "\n    SELECT id, item_type, item_id, initial_date_processed, date_updated, amt_processed\n    FROM processed_items\n    WHERE CONCAT(item_type, '.', item_id) = ANY ($1);\n    "
   },
   "d80f0dfd3c548e11a8c8d73cdde8eb00f7e43582449de8ab9e19cb3ac58ba777": {
     "describe": {
