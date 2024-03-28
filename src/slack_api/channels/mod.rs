@@ -3,6 +3,7 @@ pub mod invite;
 pub mod kick;
 pub mod list;
 pub mod members;
+pub mod private_channels;
 pub mod public_channels;
 pub mod reactions_add;
 pub mod types;

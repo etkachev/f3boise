@@ -8,7 +8,7 @@ use crate::shared::processed_type::{NewProcessItem, ProcessedType, ResolvingProc
 use crate::shared::string_utils::map_slack_id_to_link;
 use crate::shared::time::local_boise_time;
 use crate::slack_api::block_kit::BlockBuilder;
-use crate::slack_api::channels::public_channels::PublicChannels;
+use crate::slack_api::channels::private_channels;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
 use crate::web_api_routes::auth::internal_auth;
 use crate::web_api_state::MutableWebState;
@@ -51,10 +51,9 @@ async fn process_and_post(
 ) -> Result<(), AppError> {
     process_items(db, &leaderboard).await?;
     let block_builder = get_blocks_for_leaderboard(&leaderboard);
-    let channel = PublicChannels::FirstF;
     web_state
         .post_message(PostMessageRequest::new(
-            channel.channel_id().as_str(),
+            private_channels::ACHIEVEMENTS_CHANNEL_ID,
             block_builder.blocks,
         ))
         .await?;
@@ -87,7 +86,7 @@ async fn get_pax_data(db: &PgPool) -> LeaderboardItems {
 }
 
 fn get_blocks_for_leaderboard(items: &LeaderboardItems) -> BlockBuilder {
-    let mut block_builder = BlockBuilder::new();
+    let mut block_builder = BlockBuilder::new().header("Leaderboard Summary");
 
     for (_, pax_list) in items.full_map.iter() {
         if let Some(msg) = pax_list.state.message() {
