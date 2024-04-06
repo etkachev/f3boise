@@ -103,7 +103,7 @@ impl AO {
             AO::CamelsBack => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::ReidMerrill => HashSet::from([Weekday::Mon, Weekday::Fri]),
             AO::GooseDynasty => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
-            AO::RetaHuskey => HashSet::from([Weekday::Sat]),
+            AO::RetaHuskey => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
