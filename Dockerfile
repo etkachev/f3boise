@@ -1,5 +1,5 @@
 # Builder stage
-FROM lukemathwalker/cargo-chef:latest-rust-1.77.2 AS chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.77.2-bullseye AS chef
 
 # Let's switch our working directory to `app` (equivalent to `cd app`)
 # The `app` folder will be created for us by Docker in case it does not
@@ -27,13 +27,13 @@ ENV SQLX_OFFLINE true
 RUN cargo build --release --bin f3webapi
 
 # Runtime stage
-FROM debian:bullseye-slim AS runtime
+FROM debian:bullseye AS runtime
 WORKDIR /app
 # Install OpenSSL - it is dynamically linked by some of our dependencies
 # Install ca-certificates - it is needed to verify TLS certificates
 # when establishing HTTPS connections
 RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends libssl openssl ca-certificates \
+    && apt-get install -y --no-install-recommends libssl-dev openssl ca-certificates \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
