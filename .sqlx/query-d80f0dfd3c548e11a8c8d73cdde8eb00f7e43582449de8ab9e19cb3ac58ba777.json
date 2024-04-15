@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    INSERT INTO back_blasts (id, ao, q, pax, date, bb_type, channel_id, active, title, moleskine, fngs)\n    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)\n    ON CONFLICT ON CONSTRAINT back_blasts_channel_id_date_bb_type_key\n        DO NOTHING;\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Date",
+        "Text",
+        "Text",
+        "Bool",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d80f0dfd3c548e11a8c8d73cdde8eb00f7e43582449de8ab9e19cb3ac58ba777"
+}

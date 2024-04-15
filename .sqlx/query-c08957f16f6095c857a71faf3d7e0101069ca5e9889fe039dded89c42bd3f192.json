@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    INSERT INTO processed_items (id, item_type, item_id, date_updated, amt_processed)\n    VALUES($1,$2,$3,now(),1)\n    ON CONFLICT ON CONSTRAINT processed_items_item_type_item_id_key\n        DO UPDATE\n        SET date_updated = now(),\n            amt_processed = processed_items.amt_processed + 1;\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c08957f16f6095c857a71faf3d7e0101069ca5e9889fe039dded89c42bd3f192"
+}

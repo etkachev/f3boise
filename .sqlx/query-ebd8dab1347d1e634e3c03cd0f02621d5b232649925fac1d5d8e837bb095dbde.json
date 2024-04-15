@@ -1,0 +1,80 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH list_view AS (\n        SELECT\n            bb.id as id,\n            al.name as ao,\n            string_to_array(lower(q), ',') as q,\n            string_to_array(lower(pax), ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id,\n            bb.title,\n            bb.moleskine,\n            string_to_array(lower(fngs), ',') as fngs,\n            bb.ts\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n    )\n    \n    SELECT id, ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type, title, moleskine, fngs, ts\n    FROM list_view\n    ORDER BY date DESC;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "ao",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "channel_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "q!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 4,
+        "name": "pax!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 5,
+        "name": "date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
+        "name": "bb_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "moleskine",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "fngs",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 10,
+        "name": "ts",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      false,
+      false,
+      true,
+      true,
+      null,
+      true
+    ]
+  },
+  "hash": "ebd8dab1347d1e634e3c03cd0f02621d5b232649925fac1d5d8e837bb095dbde"
+}

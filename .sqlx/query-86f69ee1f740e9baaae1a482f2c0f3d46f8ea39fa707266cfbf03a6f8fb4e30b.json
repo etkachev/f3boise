@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE \n        FROM q_line_up\n        WHERE channel_id = $1 AND date = $2;\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Date"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "86f69ee1f740e9baaae1a482f2c0f3d46f8ea39fa707266cfbf03a6f8fb4e30b"
+}

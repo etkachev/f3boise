@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT ao, date\n        FROM back_blasts\n        WHERE bb_type = 'backblast' AND active = true AND date >= $1\n        ORDER BY date DESC;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ao",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "date",
+        "type_info": "Date"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "17e465839b16cfe389bdd3d027304bd804dbebfba3bed41880d30730776539d9"
+}

@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH list_view AS (\n            SELECT\n                al.name as ao,\n                string_to_array(lower(qlu.qs), ',') as qs,\n                qlu.date,\n                qlu.closed\n            FROM q_line_up qlu\n                INNER JOIN ao_list al on qlu.channel_id = al.channel_id\n        )\n        \n        SELECT ao, qs as \"qs!\", date, closed\n        FROM list_view\n        WHERE date BETWEEN $1 AND $2\n        ORDER BY date ASC;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ao",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "qs!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 2,
+        "name": "date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "closed",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      false
+    ]
+  },
+  "hash": "b21ec7dcab3d13ccf2f3ffe5893016e00f001e5ba1b78a5c70b30643c29c3784"
+}

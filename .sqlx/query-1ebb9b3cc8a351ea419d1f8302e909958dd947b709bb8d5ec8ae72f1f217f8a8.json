@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    UPDATE back_blasts\n    SET ao = $2,\n        q = $3,\n        pax = $4,\n        date = $5,\n        channel_id = $6,\n        active = $7,\n        title = $8,\n        moleskine = $9,\n        fngs = $10\n    WHERE id = $1\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Date",
+        "Text",
+        "Bool",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1ebb9b3cc8a351ea419d1f8302e909958dd947b709bb8d5ec8ae72f1f217f8a8"
+}

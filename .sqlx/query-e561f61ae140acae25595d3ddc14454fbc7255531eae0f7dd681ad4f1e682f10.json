@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    UPDATE back_blasts\n    SET ts = $2\n    WHERE id = $1\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e561f61ae140acae25595d3ddc14454fbc7255531eae0f7dd681ad4f1e682f10"
+}

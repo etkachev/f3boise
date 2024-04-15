@@ -1,0 +1,61 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    WITH list_view AS (\n        SELECT\n            bb.id,\n            al.name as ao,\n            string_to_array(lower(q), ',') as q,\n            string_to_array(lower(pax), ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = $1 \n            AND bb.active = true \n            AND bb.channel_id = $2\n            AND bb.date >= $3\n            AND bb.date <= $4\n    )\n    \n    SELECT id, ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    ORDER BY date DESC;\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "ao",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "channel_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "q!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 4,
+        "name": "pax!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 5,
+        "name": "date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
+        "name": "bb_type",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      false,
+      false
+    ]
+  },
+  "hash": "6b70eb56842bae3eadfad0c28fbae9c0d2e55a6b2a9ffa8b2e28225cadb15e1f"
+}
