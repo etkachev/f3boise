@@ -1,5 +1,5 @@
 # Builder stage
-FROM lukemathwalker/cargo-chef:latest-rust-1.70.0 AS chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.77.2 AS chef
 
 # Let's switch our working directory to `app` (equivalent to `cd app`)
 # The `app` folder will be created for us by Docker in case it does not
@@ -33,7 +33,7 @@ WORKDIR /app
 # Install ca-certificates - it is needed to verify TLS certificates
 # when establishing HTTPS connections
 RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && apt-get install -y --no-install-recommends libssl openssl ca-certificates \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
