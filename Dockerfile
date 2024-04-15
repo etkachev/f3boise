@@ -1,5 +1,5 @@
 # Builder stage
-FROM lukemathwalker/cargo-chef:latest-rust-1.77.2 AS chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.77.2-bookworm AS chef
 
 # Let's switch our working directory to `app` (equivalent to `cd app`)
 # The `app` folder will be created for us by Docker in case it does not
