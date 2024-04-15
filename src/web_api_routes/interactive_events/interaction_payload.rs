@@ -839,7 +839,7 @@ mod tests {
                 );
 
                 let post = PreBlastPost::from(values);
-                assert_eq!(post.start_time, NaiveTime::from_hms(5, 15, 0));
+                assert_eq!(post.start_time, NaiveTime::from_hms_opt(5, 15, 0).unwrap());
             }
         }
     }

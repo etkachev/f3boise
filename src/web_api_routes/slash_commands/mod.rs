@@ -63,7 +63,7 @@ pub async fn slack_slash_commands_route(
             QLineUpCommand { ao: None, month } => {
                 let users = get_user_name_map(&db_pool).await.unwrap_or_default();
                 let start_date = month
-                    .map(|date| date.pred())
+                    .map(|date| date.pred_opt().unwrap())
                     .unwrap_or_else(|| local_boise_time().date_naive());
 
                 // see if request came from ao channel, then filter to ao data only, otherwise all
@@ -129,7 +129,7 @@ pub async fn slack_slash_commands_route(
             } => {
                 let users = get_user_name_map(&db_pool).await.unwrap_or_default();
                 let start_date = month
-                    .map(|date| date.pred())
+                    .map(|date| date.pred_opt().unwrap())
                     .unwrap_or_else(|| local_boise_time().date_naive());
                 match send_ao_q_line_up_message(
                     &db_pool,

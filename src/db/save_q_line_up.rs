@@ -89,7 +89,7 @@ async fn save_entry(
         db_entry.closed,
         db_entry.channel_id
     )
-    .execute(transaction)
+    .execute(&mut **transaction)
     .await?;
 
     Ok(())
@@ -134,7 +134,7 @@ async fn close_single_q_line_up(
         true,
         channel_id
     )
-    .execute(transaction)
+    .execute(&mut **transaction)
     .await?;
     Ok(())
 }
@@ -168,7 +168,7 @@ async fn delete_single_q_line_up(
         channel_id,
         date
     )
-    .execute(transaction)
+    .execute(&mut **transaction)
     .await?;
     Ok(())
 }

@@ -60,7 +60,7 @@ async fn upsert_processed_item(
         item_type,
         item_id
     )
-    .execute(transaction)
+    .execute(&mut **transaction)
     .await?;
     Ok(())
 }

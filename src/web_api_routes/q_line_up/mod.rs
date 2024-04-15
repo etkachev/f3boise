@@ -111,7 +111,7 @@ async fn q_line_up_results(
                     get_q_line_up_item_from_list(&results, current_date, &ao_string);
                 response.push(matching_entry);
             }
-            current_date = current_date.succ();
+            current_date = current_date.succ_opt().unwrap();
         }
 
         response
@@ -140,7 +140,7 @@ async fn q_line_up_results(
 
                 response.push(taken);
             }
-            current_date = current_date.succ();
+            current_date = current_date.succ_opt().unwrap();
         }
         response
     };
@@ -199,8 +199,8 @@ mod tests {
     #[test]
     fn valid_non_ao() {
         let result = validate_request(&QLineUpQuery {
-            start: NaiveDate::from_ymd(2022, 1, 1),
-            end: NaiveDate::from_ymd(2022, 2, 1),
+            start: NaiveDate::from_ymd_opt(2022, 1, 1).unwrap(),
+            end: NaiveDate::from_ymd_opt(2022, 2, 1).unwrap(),
             ao: None,
         })
         .unwrap();
@@ -211,8 +211,8 @@ mod tests {
     #[test]
     fn valid_ao() {
         let result = validate_request(&QLineUpQuery {
-            start: NaiveDate::from_ymd(2022, 1, 1),
-            end: NaiveDate::from_ymd(2022, 2, 13),
+            start: NaiveDate::from_ymd_opt(2022, 1, 1).unwrap(),
+            end: NaiveDate::from_ymd_opt(2022, 2, 13).unwrap(),
             ao: Some(String::from("ao-rebel")),
         })
         .unwrap();
@@ -223,8 +223,8 @@ mod tests {
     #[test]
     fn invalid_range() {
         let result = validate_request(&QLineUpQuery {
-            start: NaiveDate::from_ymd(2022, 1, 1),
-            end: NaiveDate::from_ymd(2023, 1, 2),
+            start: NaiveDate::from_ymd_opt(2022, 1, 1).unwrap(),
+            end: NaiveDate::from_ymd_opt(2023, 1, 2).unwrap(),
             ao: None,
         });
 
@@ -234,8 +234,8 @@ mod tests {
     #[test]
     fn end_before_start() {
         let result = validate_request(&QLineUpQuery {
-            start: NaiveDate::from_ymd(2022, 3, 2),
-            end: NaiveDate::from_ymd(2022, 3, 1),
+            start: NaiveDate::from_ymd_opt(2022, 3, 2).unwrap(),
+            end: NaiveDate::from_ymd_opt(2022, 3, 1).unwrap(),
             ao: None,
         });
 
@@ -245,8 +245,8 @@ mod tests {
     #[test]
     fn invalid_ao() {
         let result = validate_request(&QLineUpQuery {
-            start: NaiveDate::from_ymd(2022, 1, 1),
-            end: NaiveDate::from_ymd(2022, 2, 1),
+            start: NaiveDate::from_ymd_opt(2022, 1, 1).unwrap(),
+            end: NaiveDate::from_ymd_opt(2022, 2, 1).unwrap(),
             ao: Some(String::from("unknown")),
         });
 

@@ -28,9 +28,8 @@ use crate::slack_api::views::request::ViewsOpenRequest;
 use crate::slack_api::views::response::ViewsOpenResponse;
 use crate::users::f3_user::F3User;
 use http::header::CONTENT_TYPE;
-use http::{HeaderMap, Method};
 use oauth2::basic::BasicClient;
-use oauth2::reqwest::async_http_client;
+use reqwest::header::HeaderMap;
 use std::collections::HashMap;
 
 pub const LOCAL_URL: &str = "127.0.0.1";
@@ -55,8 +54,8 @@ impl MutableWebState {
         let url = request.get_url_request(&self.base_api_url);
         println!("Calling: {:?}", url.as_str());
         let response = self.make_get_url_request(url).await;
-
-        let response: ChannelsListResponse = serde_json::from_slice(&response.body)?;
+        let bytes = response.bytes().await?;
+        let response: ChannelsListResponse = serde_json::from_slice(&bytes)?;
 
         println!("Finished getting public channels");
         if let Some(channels) = response.channels {
@@ -81,8 +80,9 @@ impl MutableWebState {
         let url = UsersListRequest::default().get_url_request(&self.base_api_url);
         println!("Calling: {:?}", url.as_str());
         let response = self.make_get_url_request(url).await;
+        let bytes = response.bytes().await?;
         let response: UsersListResponse =
-            serde_json::from_slice(&response.body).expect("Could not parse response");
+            serde_json::from_slice(&bytes).expect("Could not parse response");
         println!("Got slack users back");
         if let Some(users) = response.members {
             let users_bots: UserBotCombo = users
@@ -108,8 +108,9 @@ impl MutableWebState {
     pub async fn get_channel_members(&self, channel_id: &str) -> Result<Vec<String>, AppError> {
         let url = ConversationMembersRequest::new(channel_id).get_url_request(&self.base_api_url);
         let response = self.make_get_url_request(url).await;
+        let bytes = response.bytes().await?;
         let response: ConversationMembersResponse =
-            serde_json::from_slice(&response.body).expect("Could not parse response");
+            serde_json::from_slice(&bytes).expect("Could not parse response");
         if let Some(members) = response.members {
             Ok(members)
         } else {
@@ -128,7 +129,8 @@ impl MutableWebState {
         println!("Calling: {:?}", url.as_str());
         let body = serde_json::to_vec(&request)?;
         let response = self.make_post_request(url, body).await;
-        let response: PostMessageResponse = serde_json::from_slice(&response.body)?;
+        let bytes = response.bytes().await?;
+        let response: PostMessageResponse = serde_json::from_slice(&bytes)?;
         if let Some(err) = response.error {
             Err(AppError::General(err))
         } else {
@@ -141,7 +143,8 @@ impl MutableWebState {
         let url = request.get_plain_url_request(&self.base_api_url);
         let body = serde_json::to_vec(&request)?;
         let response = self.make_post_request(url, body).await;
-        let response: ViewsOpenResponse = serde_json::from_slice(&response.body)?;
+        let bytes = response.bytes().await?;
+        let response: ViewsOpenResponse = serde_json::from_slice(&bytes)?;
         if let Some(err) = response.error {
             Err(AppError::General(err))
         } else if let Some(re) = response.view {
@@ -178,7 +181,8 @@ impl MutableWebState {
         for request in requests {
             let url = request.get_url_request(&self.base_api_url);
             let response = self.make_get_url_request(url).await;
-            let response: FileRemoteShareResponse = serde_json::from_slice(&response.body)?;
+            let bytes = response.bytes().await?;
+            let response: FileRemoteShareResponse = serde_json::from_slice(&bytes)?;
             if let Some(err) = response.error {
                 return Err(AppError::General(err));
             }
@@ -195,7 +199,8 @@ impl MutableWebState {
         println!("Calling: {:?}", url.as_str());
         let body = serde_json::to_vec(&request)?;
         let response = self.make_post_request(url, body).await;
-        let response: UpdateMessageResponse = serde_json::from_slice(&response.body)?;
+        let bytes = response.bytes().await?;
+        let response: UpdateMessageResponse = serde_json::from_slice(&bytes)?;
         if let Some(err) = response.error {
             Err(AppError::General(err))
         } else {
@@ -212,7 +217,8 @@ impl MutableWebState {
         println!("Calling: {:?}", url.as_str());
         let body = serde_json::to_vec(&request)?;
         let response = self.make_post_request(url, body).await;
-        let response: InviteToConvoResponse = serde_json::from_slice(&response.body)?;
+        let bytes = response.bytes().await?;
+        let response: InviteToConvoResponse = serde_json::from_slice(&bytes)?;
         if let Some(err) = response.error {
             Err(AppError::General(err))
         } else {
@@ -227,7 +233,8 @@ impl MutableWebState {
         let url = request.get_plain_url_request(&self.base_api_url);
         let body = serde_json::to_vec(&request)?;
         let response = self.make_post_request(url, body).await;
-        let response: KickFromChannelResponse = serde_json::from_slice(&response.body)?;
+        let bytes = response.bytes().await?;
+        let response: KickFromChannelResponse = serde_json::from_slice(&bytes)?;
         if let Some(err) = response.error {
             Err(AppError::General(err))
         } else {
@@ -241,7 +248,8 @@ impl MutableWebState {
     ) -> Result<ChannelsHistoryResponse, AppError> {
         let url = request.get_url_request(&self.base_api_url);
         let response = self.make_get_url_request(url).await;
-        let response: ChannelsHistoryResponse = serde_json::from_slice(&response.body)?;
+        let bytes = response.bytes().await?;
+        let response: ChannelsHistoryResponse = serde_json::from_slice(&bytes)?;
         if let Some(err) = response.error {
             Err(AppError::General(err))
         } else {
@@ -256,31 +264,48 @@ impl MutableWebState {
         header_map
     }
 
-    async fn make_get_url_request(&self, url: url::Url) -> oauth2::HttpResponse {
-        let request = oauth2::HttpRequest {
-            url,
-            method: Method::GET,
-            headers: self.get_auth_header(),
-            body: Vec::new(),
-        };
-        async_http_client(request)
+    async fn make_get_url_request(&self, url: url::Url) -> reqwest::Response {
+        let client = reqwest::Client::new();
+        client
+            .get(url)
+            .headers(self.get_auth_header())
+            .send()
             .await
             .expect("Failed to make request")
+        // let request = oauth2::HttpRequest {
+        //     url,
+        //     method: Method::GET,
+        //     headers: self.get_auth_header(),
+        //     body: Vec::new(),
+        // };
+        // async_http_client(request)
+        //     .await
+        //     .expect("Failed to make request")
     }
 
-    async fn make_post_request(&self, url: url::Url, body: Vec<u8>) -> oauth2::HttpResponse {
-        let mut request = oauth2::HttpRequest {
-            url,
-            method: Method::POST,
-            headers: self.get_auth_header(),
-            body,
-        };
-        request
-            .headers
-            .insert(CONTENT_TYPE, "application/json".parse().unwrap());
-        async_http_client(request)
+    async fn make_post_request(&self, url: url::Url, body: Vec<u8>) -> reqwest::Response {
+        let client = reqwest::Client::new();
+        let mut headers = self.get_auth_header();
+        headers.insert(CONTENT_TYPE, "application/json".parse().unwrap());
+        client
+            .post(url)
+            .headers(headers)
+            .body(body)
+            .send()
             .await
             .expect("Failed to make request")
+        // let mut request = oauth2::HttpRequest {
+        //     url,
+        //     method: Method::POST,
+        //     headers: self.get_auth_header(),
+        //     body,
+        // };
+        // request
+        //     .headers
+        //     .insert(CONTENT_TYPE, "application/json".parse().unwrap());
+        // async_http_client(request)
+        //     .await
+        //     .expect("Failed to make request")
     }
 
     /// make post request using multipart/form-data

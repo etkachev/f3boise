@@ -226,7 +226,7 @@ mod tests {
                 "puff".to_string(),
                 "fng-one".to_string(),
             ]),
-            NaiveDate::from_ymd(2023, 7, 3),
+            NaiveDate::from_ymd_opt(2023, 7, 3).unwrap(),
         );
         let users = HashMap::<String, F3User>::from([
             hash_set_user("123", "Stinger"),
@@ -256,7 +256,7 @@ mod tests {
                 "fng-one".to_string(),
                 "fng-two".to_string(),
             ]),
-            NaiveDate::from_ymd(2023, 7, 3),
+            NaiveDate::from_ymd_opt(2023, 7, 3).unwrap(),
         );
         bb_data.title = Some("My Title".to_string());
         bb_data.moleskine = Some("Some moleskine".to_string());

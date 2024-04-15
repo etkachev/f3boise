@@ -70,15 +70,15 @@ mod ao_times {
     use chrono::NaiveTime;
 
     pub fn five_fifteen() -> NaiveTime {
-        NaiveTime::from_hms(5, 15, 0)
+        NaiveTime::from_hms_opt(5, 15, 0).unwrap()
     }
 
     pub fn six() -> NaiveTime {
-        NaiveTime::from_hms(6, 0, 0)
+        NaiveTime::from_hms_opt(6, 0, 0).unwrap()
     }
 
     pub fn five() -> NaiveTime {
-        NaiveTime::from_hms(5, 0, 0)
+        NaiveTime::from_hms_opt(5, 0, 0).unwrap()
     }
 }
 
@@ -638,7 +638,7 @@ mod tests {
     fn ruckership_start_time() {
         let ao = AO::RuckershipWest;
         let start_time = ao.default_time(&Weekday::Fri).unwrap();
-        assert_eq!(start_time, NaiveTime::from_hms(5, 15, 0));
+        assert_eq!(start_time, NaiveTime::from_hms_opt(5, 15, 0).unwrap());
     }
 
     #[test]

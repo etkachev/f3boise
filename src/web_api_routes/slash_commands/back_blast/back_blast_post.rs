@@ -344,7 +344,7 @@ mod tests {
     fn parse_from_back_blast_command() {
         let post = BackBlastPost {
             title: "Title".to_string(),
-            date: NaiveDate::from_ymd(2023, 3, 2),
+            date: NaiveDate::from_ymd_opt(2023, 3, 2).unwrap(),
             ao: AO::Bleach,
             qs: HashSet::from(["Stinger".to_string()]),
             pax: HashSet::from(["Freighter".to_string(), "Backslash".to_string()]),
@@ -364,7 +364,7 @@ mod tests {
     fn double_down_context_str() {
         let post = BackBlastPost {
             title: "Title".to_string(),
-            date: NaiveDate::from_ymd(2023, 3, 2),
+            date: NaiveDate::from_ymd_opt(2023, 3, 2).unwrap(),
             ao: AO::Bleach,
             qs: HashSet::from(["Stinger".to_string()]),
             pax: HashSet::from(["Freighter".to_string(), "Backslash".to_string()]),

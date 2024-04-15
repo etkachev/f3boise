@@ -87,7 +87,7 @@ pub async fn get_missing_back_blasts(db_pool: web::Data<PgPool>) -> impl Respond
                             });
                         }
                     }
-                    date_to_check = date_to_check.succ();
+                    date_to_check = date_to_check.succ_opt().unwrap();
                 }
             }
 

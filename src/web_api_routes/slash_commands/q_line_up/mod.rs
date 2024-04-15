@@ -63,7 +63,7 @@ pub async fn get_q_line_up_message_all(
 ) -> Result<BlockBuilder, AppError> {
     let end_date = (*month_to_check)
         .checked_add_signed(Duration::days(5))
-        .unwrap_or_else(|| (*month_to_check).succ());
+        .unwrap_or_else(|| (*month_to_check).succ_opt().unwrap());
     let result = get_q_line_up_for_range(db_pool, month_to_check, end_date, users).await?;
     Ok(result)
 }
@@ -96,7 +96,7 @@ pub async fn get_q_line_up_for_ao(
     };
     let end_date = (*start_date)
         .checked_add_signed(Duration::days(days_ahead))
-        .unwrap_or_else(|| (*start_date).succ());
+        .unwrap_or_else(|| (*start_date).succ_opt().unwrap());
     let result = get_q_line_up_for_range_for_ao(db_pool, ao, start_date, end_date, users).await?;
     Ok(result)
 }
@@ -116,7 +116,7 @@ async fn get_q_line_up_for_range_for_ao(
 
     let existing_line_up =
         get_q_line_up_between_dates_for_ao(db_pool, &ao, start_date, &end_date).await?;
-    let mut date_to_check = (*start_date).succ();
+    let mut date_to_check = (*start_date).succ_opt().unwrap();
 
     while date_to_check < end_date && !block_builder.reached_max() {
         if ao.week_days().contains(&date_to_check.weekday()) {
@@ -144,7 +144,7 @@ async fn get_q_line_up_for_range_for_ao(
                 ));
             }
         }
-        date_to_check = date_to_check.succ();
+        date_to_check = date_to_check.succ_opt().unwrap();
     }
 
     block_builder.add_divider();
@@ -168,7 +168,7 @@ async fn get_q_line_up_for_range(
 
     let existing_line_up = get_line_up_map(db_pool, start_date, &end_date).await?;
 
-    let mut date_to_check = (*start_date).succ();
+    let mut date_to_check = (*start_date).succ_opt().unwrap_or_default();
 
     while date_to_check < end_date && !block_builder.reached_max() {
         for ao in AO_LIST {
@@ -203,7 +203,7 @@ async fn get_q_line_up_for_range(
                 }
             }
         }
-        date_to_check = date_to_check.succ();
+        date_to_check = date_to_check.succ_opt().unwrap();
     }
 
     block_builder.add_divider();

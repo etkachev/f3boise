@@ -49,7 +49,7 @@ pub async fn upsert_user(
         user.email,
         user.img_url
     )
-    .execute(transaction)
+    .execute(&mut **transaction)
     .await?;
 
     Ok(())
@@ -75,7 +75,7 @@ pub async fn update_user_profile_img(
         user.email,
         user.img_url
     )
-    .execute(transaction)
+    .execute(&mut **transaction)
     .await?;
 
     Ok(())

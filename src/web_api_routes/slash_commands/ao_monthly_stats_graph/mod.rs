@@ -14,7 +14,10 @@ impl AOMonthlyStatsGraphCommand {
         let date = NaiveDate::parse_from_str(format!("{}/1", form_text).as_str(), "%Y/%m/%d")
             .unwrap_or_else(|_| local_boise_time().date_naive());
         let next_month = date.add(Months::new(1));
-        let end_of_month = NaiveDate::from_ymd(next_month.year(), next_month.month(), 1).pred();
+        let end_of_month = NaiveDate::from_ymd_opt(next_month.year(), next_month.month(), 1)
+            .unwrap_or_default()
+            .pred_opt()
+            .unwrap_or_default();
         AOMonthlyStatsGraphCommand {
             month: end_of_month,
         }
@@ -29,6 +32,6 @@ mod tests {
     #[test]
     fn date_format_works() {
         let command = AOMonthlyStatsGraphCommand::new("2022/08");
-        assert_eq!(command.month, NaiveDate::from_ymd(2022, 8, 31));
+        assert_eq!(command.month, NaiveDate::from_ymd_opt(2022, 8, 31).unwrap());
     }
 }

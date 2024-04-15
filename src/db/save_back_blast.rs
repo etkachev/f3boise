@@ -84,7 +84,7 @@ pub async fn update_back_blast_ts(db_pool: &PgPool, id: &str, ts: String) -> Res
         uuid,
         ts
     )
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction
         .commit()
@@ -155,7 +155,7 @@ async fn save_back_blast(
         db_bb.moleskine,
         db_bb.fngs
     )
-    .execute(transaction)
+    .execute(&mut **transaction)
     .await?;
 
     Ok(())

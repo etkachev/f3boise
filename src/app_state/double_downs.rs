@@ -10,9 +10,12 @@ pub enum DoubleDownProgram {
 impl DoubleDownProgram {
     pub fn date_range(&self) -> Range<NaiveDate> {
         match self {
-            DoubleDownProgram::WolfPax => NaiveDate::MIN..NaiveDate::from_ymd(2023, 7, 9),
+            DoubleDownProgram::WolfPax => {
+                NaiveDate::MIN..NaiveDate::from_ymd_opt(2023, 7, 9).unwrap()
+            }
             DoubleDownProgram::KnightForge => {
-                NaiveDate::from_ymd(2023, 7, 9)..NaiveDate::from_ymd(2024, 7, 5)
+                NaiveDate::from_ymd_opt(2023, 7, 9).unwrap()
+                    ..NaiveDate::from_ymd_opt(2024, 7, 5).unwrap()
             }
         }
     }
@@ -50,10 +53,10 @@ mod tests {
 
     #[test]
     fn test_knight_forge_date() {
-        let date = NaiveDate::from_ymd(2023, 7, 9);
+        let date = NaiveDate::from_ymd_opt(2023, 7, 9).unwrap();
         let program = DoubleDownProgram::from(&date);
         assert_eq!(program, DoubleDownProgram::KnightForge);
-        let end = NaiveDate::from_ymd(2024, 7, 4);
+        let end = NaiveDate::from_ymd_opt(2024, 7, 4).unwrap();
         let program = DoubleDownProgram::from(&end);
         assert_eq!(program, DoubleDownProgram::KnightForge);
     }

@@ -19,7 +19,7 @@ pub async fn get_ao_monthly_stats_graph(
 ) -> Result<(), AppError> {
     let default_end_date = local_boise_time().date_naive();
     let end_date = date.unwrap_or(default_end_date);
-    let start_date = NaiveDate::from_ymd(end_date.year(), end_date.month(), 1);
+    let start_date = NaiveDate::from_ymd_opt(end_date.year(), end_date.month(), 1).unwrap();
     let bb_list = get_all_within_date_range(db_pool, &start_date, &end_date).await?;
     let ao_monthly_stats = AoMonthlyStatsGraph::new(bb_list, start_date);
     let file = graph_generator(ao_monthly_stats)?;

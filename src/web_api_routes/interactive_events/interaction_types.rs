@@ -99,7 +99,7 @@ mod tests {
             action_combo,
             InteractionTypes::QLineUp(QSheetActionComboData {
                 ao: AO::Bleach,
-                date: NaiveDate::from_ymd(2022, 3, 1)
+                date: NaiveDate::from_ymd_opt(2022, 3, 1).unwrap()
             })
         );
     }

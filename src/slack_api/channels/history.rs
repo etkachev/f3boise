@@ -25,7 +25,7 @@ pub mod request {
         }
 
         pub fn with_oldest(mut self, ts: NaiveDateTime) -> Self {
-            let ts = ts.timestamp();
+            let ts = ts.and_utc().timestamp();
             self.oldest = Some(ts.to_string());
             self
         }

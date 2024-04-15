@@ -248,7 +248,7 @@ mod tests {
             AO::Tower,
             HashSet::from(["backslash".to_string()]),
             HashSet::from(["stinger".to_string()]),
-            NaiveDate::from_ymd(2023, 1, 1),
+            NaiveDate::from_ymd_opt(2023, 1, 1).unwrap(),
         );
         let edit_data = BackBlastUsersEdit::new(
             vec![mock_user("123", "stinger"), mock_user("22", "backslash")],

@@ -1,5 +1,4 @@
 use crate::shared::common_errors::AppError;
-use resvg::usvg_text_layout::TreeTextToPath;
 
 pub mod ao_monthly_leaderboard;
 pub mod ao_pax_leaderboard;
@@ -20,20 +19,18 @@ pub trait GraphWrapper {
         let file = std::fs::read(self.file_path())?;
         let options = resvg::usvg::Options::default();
 
-        let mut fontdb = resvg::usvg_text_layout::fontdb::Database::new();
+        let mut fontdb = resvg::usvg::fontdb::Database::new();
         fontdb.load_system_fonts();
         fontdb.load_fonts_dir("./assets/fonts/");
-        let mut tree = resvg::usvg::Tree::from_data(&file, &options)?;
-        tree.convert_text(&fontdb);
+        let tree = resvg::usvg::Tree::from_data(&file, &options, &fontdb)?;
+        // tree.convert_text(&fontdb);
 
         let mut pixmap = resvg::tiny_skia::Pixmap::new(self.width(), self.height()).unwrap();
         resvg::render(
             &tree,
-            resvg::usvg::FitTo::Original,
             resvg::tiny_skia::Transform::default(),
-            pixmap.as_mut(),
-        )
-        .unwrap();
+            &mut pixmap.as_mut(),
+        );
         // pixmap.save_png("test.png").unwrap();
         let result = pixmap.encode_png().unwrap();
         // once converted, then also delete temporary file.

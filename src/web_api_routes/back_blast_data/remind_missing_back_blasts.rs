@@ -20,7 +20,7 @@ pub async fn remind_missing_back_blasts(
 ) -> impl Responder {
     if internal_auth::valid_internal_request(&req).is_ok() {
         let today = local_boise_time().date_naive();
-        let yesterday = today.pred();
+        let yesterday = today.pred_opt().unwrap();
         match (
             yesterdays_bb(&db_pool, &yesterday, &today).await,
             yesterdays_signups(&db_pool, &yesterday, &today).await,

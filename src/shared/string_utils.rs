@@ -37,7 +37,8 @@ pub fn map_month_str_to_future_date(month: &str, now: &NaiveDate) -> Option<Naiv
     NaiveDate::parse_from_str(&possible_date, "%Y/%m/%d")
         .map(|date| {
             if date < *now {
-                NaiveDate::from_ymd(date.year() + 1, date.month(), date.day())
+                NaiveDate::from_ymd_opt(date.year() + 1, date.month(), date.day())
+                    .unwrap_or_default()
             } else {
                 date
             }
@@ -72,9 +73,11 @@ pub fn floor_ceiling_date_range(
     default_months_ago: u32,
 ) -> (NaiveDate, NaiveDate) {
     let (start, end) = resolve_date_range(possible_range, default_months_ago);
-    let start = NaiveDate::from_ymd(start.year(), start.month(), 1);
-    let end_start = NaiveDate::from_ymd(end.year(), end.month(), 1).add(Months::new(1));
-    let end = end_start.pred();
+    let start = NaiveDate::from_ymd_opt(start.year(), start.month(), 1).unwrap_or_default();
+    let end_start = NaiveDate::from_ymd_opt(end.year(), end.month(), 1)
+        .unwrap_or_default()
+        .add(Months::new(1));
+    let end = end_start.pred_opt().unwrap_or_default();
     (start, end)
 }
 
@@ -124,20 +127,26 @@ mod tests {
 
     #[test]
     fn map_month_str_letters() {
-        let now = NaiveDate::from_ymd(2022, 9, 1);
+        let now = NaiveDate::from_ymd_opt(2022, 9, 1).unwrap_or_default();
         let date = map_month_str_to_future_date("11/01", &now);
-        assert_eq!(date, Some(NaiveDate::from_ymd(2022, 11, 1)));
+        assert_eq!(
+            date,
+            Some(NaiveDate::from_ymd_opt(2022, 11, 1)).unwrap_or_default()
+        );
 
         let date = map_month_str_to_future_date("08/15", &now);
-        assert_eq!(date, Some(NaiveDate::from_ymd(2023, 8, 15)));
+        assert_eq!(
+            date,
+            Some(NaiveDate::from_ymd_opt(2023, 8, 15)).unwrap_or_default()
+        );
     }
 
     #[test]
     fn correct_floor_ceiling_date_range() {
         let date_range = "2023/08/15-2023/11/03";
         let (start, end) = floor_ceiling_date_range(date_range, 1);
-        assert_eq!(start, NaiveDate::from_ymd(2023, 8, 1));
-        assert_eq!(end, NaiveDate::from_ymd(2023, 11, 30));
+        assert_eq!(start, NaiveDate::from_ymd_opt(2023, 8, 1).unwrap());
+        assert_eq!(end, NaiveDate::from_ymd_opt(2023, 11, 30).unwrap());
     }
 
     #[test]

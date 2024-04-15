@@ -37,7 +37,8 @@ impl LeaderboardState {
 
         // Construct potential anniversary date for this year
         let this_years_anniversary =
-            NaiveDate::from_ymd(today_year, anniversary.month(), anniversary.day());
+            NaiveDate::from_ymd_opt(today_year, anniversary.month(), anniversary.day())
+                .unwrap_or_default();
 
         // Calculate difference in days between today and this year's anniversary
         let days_until_anniversary = (this_years_anniversary - now).num_days();
@@ -187,8 +188,8 @@ mod tests {
 
     #[test]
     fn approaching_bd_birthday() {
-        let today = NaiveDate::from_ymd(2024, 3, 12);
-        let bd_bd = NaiveDate::from_ymd(2022, 3, 14);
+        let today = NaiveDate::from_ymd_opt(2024, 3, 12).unwrap();
+        let bd_bd = NaiveDate::from_ymd_opt(2022, 3, 14).unwrap();
         let state = LeaderboardState::b_day(bd_bd, today);
         assert_eq!(state, LeaderboardState::ApproachingBDBD(2));
     }
@@ -210,8 +211,8 @@ mod tests {
     #[test]
     fn approaching_3year_anniversary() {
         let state = LeaderboardState::b_day(
-            NaiveDate::from_ymd(2021, 3, 14),
-            NaiveDate::from_ymd(2024, 3, 12),
+            NaiveDate::from_ymd_opt(2021, 3, 14).unwrap(),
+            NaiveDate::from_ymd_opt(2024, 3, 12).unwrap(),
         );
         let message = state.message();
         assert_eq!(
@@ -223,8 +224,8 @@ mod tests {
     #[test]
     fn hit_5year_anniversary() {
         let state = LeaderboardState::b_day(
-            NaiveDate::from_ymd(2019, 3, 14),
-            NaiveDate::from_ymd(2024, 3, 14),
+            NaiveDate::from_ymd_opt(2019, 3, 14).unwrap(),
+            NaiveDate::from_ymd_opt(2024, 3, 14).unwrap(),
         );
         let message = state.message();
         assert_eq!(
@@ -240,8 +241,8 @@ mod tests {
         assert_eq!(message, None);
 
         let state = LeaderboardState::b_day(
-            NaiveDate::from_ymd(2019, 3, 5),
-            NaiveDate::from_ymd(2024, 3, 14),
+            NaiveDate::from_ymd_opt(2019, 3, 5).unwrap(),
+            NaiveDate::from_ymd_opt(2024, 3, 14).unwrap(),
         );
         let message = state.message();
         assert_eq!(message, None);

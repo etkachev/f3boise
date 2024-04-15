@@ -348,7 +348,7 @@ fn back_blast_path(folder: &str) -> String {
 fn map_to_bb(ao: &AO, old: OldBackBlast) -> Option<BackBlastData> {
     // date format: 10/8/2021
     let mut date_parsed = NaiveDate::parse_from_str(&old.date, "%m/%d/%Y").unwrap();
-    if date_parsed < NaiveDate::from_ymd(2000, 1, 1) {
+    if date_parsed < NaiveDate::from_ymd_opt(2000, 1, 1).unwrap() {
         date_parsed = NaiveDate::parse_from_str(&old.date, "%m/%d/%y").unwrap();
     }
     let pax = extract_names(&old.pax);

@@ -284,12 +284,32 @@ mod tests {
     #[test]
     fn initial_pax_list_and_filtered() {
         let pax_data: Vec<PaxBdStats> = vec![
-            new_pax_stat("U1", "Stinger", 299, NaiveDate::from_ymd(2022, 2, 1)),
-            new_pax_stat("U2", "Backslash", 345, NaiveDate::from_ymd(2023, 3, 29)),
-            new_pax_stat("U3", "Rocketman", 433, NaiveDate::from_ymd(2022, 1, 3)),
-            new_pax_stat("U4", "Puff", 299, NaiveDate::from_ymd(2023, 4, 3)),
+            new_pax_stat(
+                "U1",
+                "Stinger",
+                299,
+                NaiveDate::from_ymd_opt(2022, 2, 1).unwrap(),
+            ),
+            new_pax_stat(
+                "U2",
+                "Backslash",
+                345,
+                NaiveDate::from_ymd_opt(2023, 3, 29).unwrap(),
+            ),
+            new_pax_stat(
+                "U3",
+                "Rocketman",
+                433,
+                NaiveDate::from_ymd_opt(2022, 1, 3).unwrap(),
+            ),
+            new_pax_stat(
+                "U4",
+                "Puff",
+                299,
+                NaiveDate::from_ymd_opt(2023, 4, 3).unwrap(),
+            ),
         ];
-        let now = NaiveDate::from_ymd(2024, 3, 28);
+        let now = NaiveDate::from_ymd_opt(2024, 3, 28).unwrap();
         let items = LeaderboardItems::new(pax_data, now);
 
         println!("blocks: {:?}", get_blocks_for_leaderboard(&items));
