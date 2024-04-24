@@ -24,9 +24,9 @@ pub async fn start_daily_scheduler(base_url: &str) {
 
 pub async fn start_leaderboard_scheduler(base_url: &str) {
     let local = local_boise_time().timezone();
-    let daily = every(1)
-        .day()
-        .at(8, 0, 0)
+    let daily = every(3)
+        .hours()
+        .at(0, 0)
         .in_timezone(&local)
         .perform(|| async {
             match internal_requests::trigger_leaderboard_stats(base_url).await {

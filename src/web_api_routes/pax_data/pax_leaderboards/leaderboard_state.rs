@@ -35,6 +35,12 @@ impl LeaderboardState {
     pub fn b_day(anniversary: NaiveDate, now: NaiveDate) -> Self {
         let today_year = now.year();
 
+        let diff_years = (today_year - anniversary.year()) as u16;
+
+        if diff_years == 0 {
+            return LeaderboardState::None;
+        }
+
         // Construct potential anniversary date for this year
         let this_years_anniversary =
             NaiveDate::from_ymd_opt(today_year, anniversary.month(), anniversary.day())
@@ -45,8 +51,8 @@ impl LeaderboardState {
 
         match days_until_anniversary {
             // if birthday bd is within 3 days
-            1..=3 => LeaderboardState::ApproachingBDBD((now.year() - anniversary.year()) as u16),
-            0 => LeaderboardState::HitBDBD((now.year() - anniversary.year()) as u16),
+            1..=3 => LeaderboardState::ApproachingBDBD(diff_years),
+            0 => LeaderboardState::HitBDBD(diff_years),
             _ => LeaderboardState::None,
         }
     }
@@ -252,5 +258,15 @@ mod tests {
     fn handle_0_bds() {
         let bds = NumberOfBeatDowns::new(0);
         assert_eq!(bds, NumberOfBeatDowns::Common(0));
+    }
+
+    #[test]
+    fn same_day_should_be_none() {
+        let state = LeaderboardState::b_day(
+            NaiveDate::from_ymd_opt(2024, 3, 14).unwrap(),
+            NaiveDate::from_ymd_opt(2024, 3, 14).unwrap(),
+        );
+
+        assert_eq!(state.message(), None);
     }
 }
