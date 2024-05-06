@@ -58,7 +58,11 @@ impl AoType {
     pub fn equipment(&self) -> HashSet<AoEquipment> {
         match self {
             AoType::Bootcamp => HashSet::from([AoEquipment::Coupons]),
-            AoType::HighIntensity => HashSet::from([AoEquipment::Ruck, AoEquipment::Sandbag]),
+            AoType::HighIntensity => HashSet::from([
+                AoEquipment::WeightVest,
+                AoEquipment::HeartRateMonitor,
+                AoEquipment::Sandbag,
+            ]),
             AoType::Heavy => HashSet::from([AoEquipment::Ruck, AoEquipment::Sandbag]),
             AoType::Running => HashSet::from([AoEquipment::RunningShoes]),
             AoType::Rucking => HashSet::from([AoEquipment::Ruck, AoEquipment::Headlamp]),
