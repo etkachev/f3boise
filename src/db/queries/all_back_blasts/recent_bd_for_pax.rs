@@ -19,13 +19,14 @@ pub async fn get_recent_bd_for_pax(
             string_to_array(lower(pax), ',') as pax,
             date,
             bb_type,
-            bb.channel_id
+            bb.channel_id,
+            bb.title
         FROM back_blasts bb
         INNER JOIN ao_list al on bb.channel_id = al.channel_id
         WHERE bb.bb_type = 'backblast' AND bb.active = true
     )
     
-    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type
+    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type, title
     FROM list_view 
     WHERE pax @> array[$1]
     ORDER BY date DESC

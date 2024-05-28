@@ -219,7 +219,7 @@ impl From<&BackBlastJsonData> for BackBlastData {
             date: data.date,
             bb_type: BackBlastType::from(data.bb_type.as_str()),
             event_times: None,
-            title: None,
+            title: data.title.clone(),
             moleskine: None,
             fngs: HashSet::new(),
         }

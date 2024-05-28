@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n    WITH list_view AS (\n        SELECT\n            bb.id,\n            al.name as ao,\n            string_to_array(lower(q), ',') as q,\n            string_to_array(lower(pax), ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = 'backblast' AND bb.active = true\n    )\n    \n    SELECT id, ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type\n    FROM list_view \n    WHERE pax @> array[$1]\n    ORDER BY date DESC\n    LIMIT 1;\n    ",
+  "query": "\n    WITH list_view AS (\n        SELECT\n            bb.id,\n            al.name as ao,\n            string_to_array(lower(q), ',') as q,\n            string_to_array(lower(pax), ',') as pax,\n            date,\n            bb_type,\n            bb.channel_id,\n            title\n        FROM back_blasts bb\n        INNER JOIN ao_list al on bb.channel_id = al.channel_id\n        WHERE bb.bb_type = $1 AND bb.active = true AND bb.channel_id = $2\n    )\n    \n    SELECT id, ao, channel_id, q as \"q!\", pax as \"pax!\", date, bb_type, title\n    FROM list_view \n    ORDER BY date DESC;\n    ",
   "describe": {
     "columns": [
       {
@@ -37,10 +37,16 @@
         "ordinal": 6,
         "name": "bb_type",
         "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "title",
+        "type_info": "Text"
       }
     ],
     "parameters": {
       "Left": [
+        "Text",
         "Text"
       ]
     },
@@ -51,8 +57,9 @@
       null,
       null,
       false,
-      false
+      false,
+      true
     ]
   },
-  "hash": "853e072d9565b2508170853bb9f8b7a1f807f8c14cc3a6e45b59971a74fb663c"
+  "hash": "5b18a6c3d29f8d8def82f117bc83172e9f0d5a2ec30d24188bedc826a44ede5d"
 }

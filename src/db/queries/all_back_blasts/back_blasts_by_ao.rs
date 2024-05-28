@@ -38,13 +38,14 @@ async fn back_blasts_by_channel_id_and_type(
             string_to_array(lower(pax), ',') as pax,
             date,
             bb_type,
-            bb.channel_id
+            bb.channel_id,
+            title
         FROM back_blasts bb
         INNER JOIN ao_list al on bb.channel_id = al.channel_id
         WHERE bb.bb_type = $1 AND bb.active = true AND bb.channel_id = $2
     )
     
-    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type
+    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type, title
     FROM list_view 
     ORDER BY date DESC;
     "#,
@@ -107,7 +108,8 @@ async fn back_blasts_by_channel_id_and_date_range_and_type(
             string_to_array(lower(pax), ',') as pax,
             date,
             bb_type,
-            bb.channel_id
+            bb.channel_id,
+            bb.title
         FROM back_blasts bb
         INNER JOIN ao_list al on bb.channel_id = al.channel_id
         WHERE bb.bb_type = $1 
@@ -117,7 +119,7 @@ async fn back_blasts_by_channel_id_and_date_range_and_type(
             AND bb.date <= $4
     )
     
-    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type
+    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type, title
     FROM list_view 
     ORDER BY date DESC;
     "#,

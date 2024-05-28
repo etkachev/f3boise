@@ -110,13 +110,14 @@ async fn get_all_by_type(
             string_to_array(lower(pax), ',') as pax,
             date,
             bb_type,
-            bb.channel_id
+            bb.channel_id,
+            title
         FROM back_blasts bb
         INNER JOIN ao_list al on bb.channel_id = al.channel_id
         WHERE bb.bb_type = $1 AND bb.active = true
     )
     
-    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type
+    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type, title
     FROM list_view 
     ORDER BY date DESC;
     "#,
@@ -163,13 +164,14 @@ async fn get_all_with_date_range_by_type(
             string_to_array(lower(pax), ',') as pax,
             date,
             bb_type,
-            bb.channel_id
+            bb.channel_id,
+            title
         FROM back_blasts bb
         INNER JOIN ao_list al on bb.channel_id = al.channel_id
         WHERE bb.bb_type = $1 AND bb.active = true AND bb.date >= $2 AND bb.date <= $3
     )
     
-    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type
+    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type, title
     FROM list_view 
     ORDER BY date DESC;
     "#,
@@ -186,6 +188,7 @@ async fn get_all_with_date_range_by_type(
 #[derive(Deserialize, Serialize, Debug)]
 pub struct BackBlastJsonData {
     pub id: Uuid,
+    pub title: Option<String>,
     pub ao: String,
     pub channel_id: String,
     pub q: Vec<String>,
@@ -245,13 +248,14 @@ async fn get_list_with_pax_by_type(
             string_to_array(lower(pax), ',') as pax,
             date,
             bb_type,
-            bb.channel_id
+            bb.channel_id,
+            title
         FROM back_blasts bb
         INNER JOIN ao_list al on bb.channel_id = al.channel_id
         WHERE bb.bb_type = $1 AND bb.active = true
     )
     
-    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type
+    SELECT id, ao, channel_id, q as "q!", pax as "pax!", date, bb_type, title
     FROM list_view 
     WHERE pax @> array[$2]
     ORDER BY date DESC;
