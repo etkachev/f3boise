@@ -8,6 +8,14 @@ pub struct F3User {
     pub name: String,
     pub email: String,
     pub img_url: Option<String>,
+    pub invited_by: Option<F3Parent>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub enum F3Parent {
+    Pax(String),
+    Online,
 }
 
 impl F3User {
@@ -17,6 +25,7 @@ impl F3User {
             name: name.to_string(),
             email: email.to_string(),
             img_url: None,
+            invited_by: None,
         }
     }
 }
@@ -43,17 +52,52 @@ impl From<&SlackUserData> for F3User {
                 .as_ref()
                 .map(|email| email.to_string())
                 .unwrap_or_else(|| "UNKNOWN".to_string()),
+            invited_by: None,
         }
     }
 }
 
 impl From<DbUser> for F3User {
     fn from(user: DbUser) -> Self {
+        let invited_by = user
+            .parent_type
+            .map(|pt| match pt.as_str() {
+                "pax" => user.parent.map(|p| F3Parent::Pax(p.to_string())),
+                "online" => Some(F3Parent::Online),
+                _ => None,
+            })
+            .unwrap_or_default();
+
         F3User {
             id: Some(user.slack_id.to_string()),
             name: user.name.to_string(),
             email: user.email,
             img_url: user.img_url,
+            invited_by,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mapping_db_user_to_f3_user() {
+        let db_user = DbUser {
+            slack_id: "U67123".to_string(),
+            name: "Stinger".to_string(),
+            email: "edwardtkachev@gmail.com".to_string(),
+            img_url: None,
+            parent: Some("Canuck".to_string()),
+            parent_type: Some("pax".to_string()),
+        };
+
+        let f3_user = F3User::from(db_user);
+
+        assert_eq!(
+            f3_user.invited_by.unwrap(),
+            F3Parent::Pax("Canuck".to_string())
+        );
     }
 }

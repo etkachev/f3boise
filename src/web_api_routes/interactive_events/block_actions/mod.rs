@@ -234,6 +234,7 @@ mod tests {
             name: name.to_string(),
             email: "".to_string(),
             img_url: None,
+            invited_by: None,
         }
     }
 

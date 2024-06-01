@@ -211,6 +211,7 @@ mod tests {
                 name: name.to_string(),
                 email: "email@test.com".to_string(),
                 img_url: None,
+                invited_by: None,
             },
         )
     }

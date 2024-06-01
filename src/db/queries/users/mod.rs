@@ -11,7 +11,7 @@ pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, A
     let rows: Vec<DbUser> = sqlx::query_as!(
         DbUser,
         r#"
-        SELECT slack_id, name, email, img_url
+        SELECT slack_id, name, email, img_url, parent, parent_type
         FROM users;
     "#
     )
@@ -76,7 +76,7 @@ pub async fn get_user_by_name(db_pool: &PgPool, name: &str) -> Result<Option<F3U
     let result: Option<DbUser> = sqlx::query_as!(
         DbUser,
         r#"
-        SELECT slack_id, name, email, img_url
+        SELECT slack_id, name, email, img_url, parent, parent_type
         FROM users
         WHERE lower(name) = $1
         LIMIT 1;
@@ -93,7 +93,7 @@ pub async fn get_user_by_slack_id(db_pool: &PgPool, id: &str) -> Result<Option<F
     let result = sqlx::query_as!(
         DbUser,
         r#"
-        SELECT slack_id, name, email, img_url
+        SELECT slack_id, name, email, img_url, parent, parent_type
         FROM users
         WHERE slack_id = $1
         LIMIT 1;

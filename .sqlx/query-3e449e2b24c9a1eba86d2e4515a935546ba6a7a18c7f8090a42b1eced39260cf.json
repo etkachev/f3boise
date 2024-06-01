@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT slack_id, name, email, img_url\n        FROM users;\n    ",
+  "query": "\n        SELECT slack_id, name, email, img_url, parent, parent_type\n        FROM users\n        WHERE slack_id = $1\n        LIMIT 1;\n        ",
   "describe": {
     "columns": [
       {
@@ -22,17 +22,31 @@
         "ordinal": 3,
         "name": "img_url",
         "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "parent",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "parent_type",
+        "type_info": "Text"
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Text"
+      ]
     },
     "nullable": [
       false,
       false,
       false,
+      true,
+      true,
       true
     ]
   },
-  "hash": "13204ebbc5bfff0333e10082829f8de546f10b2d9ada6e18dca3aab17eec25ed"
+  "hash": "3e449e2b24c9a1eba86d2e4515a935546ba6a7a18c7f8090a42b1eced39260cf"
 }
