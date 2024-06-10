@@ -1,5 +1,6 @@
 use crate::shared::common_errors::AppError;
 use crate::slack_api::block_kit::block_elements::OptionElement;
+use std::fmt::Display;
 use std::str::FromStr;
 
 #[derive(Debug, Hash, PartialEq, Eq)]
@@ -23,33 +24,26 @@ impl From<AoEquipment> for OptionElement {
 impl From<&AoEquipment> for OptionElement {
     fn from(value: &AoEquipment) -> Self {
         match value {
-            AoEquipment::Coupons => OptionElement::new(
-                &format!("{} 🧱", AoEquipment::Coupons.to_string()),
-                "coupon",
-            ),
-            AoEquipment::Sandbag => OptionElement::new(
-                &format!("{} 👝", AoEquipment::Sandbag.to_string()),
-                "sandbag",
-            ),
-            AoEquipment::Ruck => {
-                OptionElement::new(&format!("{} 🎒", AoEquipment::Ruck.to_string()), "ruck")
+            AoEquipment::Coupons => {
+                OptionElement::new(&format!("{} 🧱", AoEquipment::Coupons), "coupon")
             }
-            AoEquipment::RunningShoes => OptionElement::new(
-                &format!("{} 👟", AoEquipment::RunningShoes.to_string()),
-                "shoes",
-            ),
-            AoEquipment::Headlamp => OptionElement::new(
-                &format!("{} 🔦", AoEquipment::Headlamp.to_string()),
-                "headlamp",
-            ),
+            AoEquipment::Sandbag => {
+                OptionElement::new(&format!("{} 👝", AoEquipment::Sandbag), "sandbag")
+            }
+            AoEquipment::Ruck => OptionElement::new(&format!("{} 🎒", AoEquipment::Ruck), "ruck"),
+            AoEquipment::RunningShoes => {
+                OptionElement::new(&format!("{} 👟", AoEquipment::RunningShoes), "shoes")
+            }
+            AoEquipment::Headlamp => {
+                OptionElement::new(&format!("{} 🔦", AoEquipment::Headlamp), "headlamp")
+            }
             AoEquipment::HeartRateMonitor => OptionElement::new(
-                &format!("{} 🫀", AoEquipment::HeartRateMonitor.to_string()),
+                &format!("{} 🫀", AoEquipment::HeartRateMonitor),
                 "hr_monitor",
             ),
-            AoEquipment::WeightVest => OptionElement::new(
-                &format!("{} 🦺", AoEquipment::WeightVest.to_string()),
-                "weight_vest",
-            ),
+            AoEquipment::WeightVest => {
+                OptionElement::new(&format!("{} 🦺", AoEquipment::WeightVest), "weight_vest")
+            }
             AoEquipment::Other(other) => OptionElement::new(other, other),
         }
     }
@@ -78,9 +72,9 @@ impl FromStr for AoEquipment {
     }
 }
 
-impl ToString for AoEquipment {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for AoEquipment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             AoEquipment::Coupons => String::from("Coupons"),
             AoEquipment::Sandbag => String::from("Sandbag"),
             AoEquipment::Ruck => String::from("Ruck"),
@@ -89,6 +83,7 @@ impl ToString for AoEquipment {
             AoEquipment::Headlamp => String::from("Headlamp"),
             AoEquipment::HeartRateMonitor => String::from("HR Monitor"),
             AoEquipment::Other(other) => other.to_string(),
-        }
+        };
+        write!(f, "{}", str)
     }
 }

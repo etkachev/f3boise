@@ -32,7 +32,7 @@ pub async fn get_top_pax_per_ao(
         .context(format!("{} - {}", start_date, end_date).as_str());
 
     for (ao, stats) in result.aos {
-        builder.add_section_markdown(format!("*{}*", ao.to_string()).as_str());
+        builder.add_section_markdown(format!("*{}*", ao).as_str());
         let (top_qs, amount) = stats.top_qs();
         builder.add_section_markdown(format!("Top Q posts: {:?} - {}", top_qs, amount).as_str());
         let (top_pax, amount) = stats.top_pax();

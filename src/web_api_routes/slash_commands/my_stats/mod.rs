@@ -72,8 +72,7 @@ pub async fn handle_my_stats(
         .section_markdown(
             format!(
                 "*{} DD Posts*: {}",
-                response.current_dd_program.to_string(),
-                response.dd_count
+                response.current_dd_program, response.dd_count
             )
             .as_str(),
         );

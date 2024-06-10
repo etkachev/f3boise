@@ -135,7 +135,7 @@ impl GraphWrapper for AoPaxGraph {
             .set_width(width)
             .set_height(height)
             .set_margins(top, right, bottom, left)
-            .add_title(format!("Top 10 PAX Posts for {}", self.ao.to_string()))
+            .add_title(format!("Top 10 PAX Posts for {}", self.ao))
             .add_view(&view)
             .add_axis_bottom(&x)
             .add_axis_left(&y)
@@ -146,9 +146,7 @@ impl GraphWrapper for AoPaxGraph {
     fn file_name(&self) -> String {
         format!(
             "ao-pax-leaderboard-{}-{}-{}",
-            self.ao.to_string(),
-            self.date_range.0,
-            self.date_range.1
+            self.ao, self.date_range.0, self.date_range.1
         )
     }
 }

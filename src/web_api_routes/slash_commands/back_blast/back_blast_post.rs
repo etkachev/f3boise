@@ -56,10 +56,10 @@ impl BackBlastPost {
             .pax
             .iter()
             .map(|item| format!("<@{}>", item))
-            .collect::<Vec<String>>();
+            .collect::<HashSet<String>>();
         pax.extend(self.non_slack_pax());
         pax.extend(self.fng_list());
-        pax.join(", ")
+        pax.into_iter().collect::<Vec<String>>().join(", ")
     }
 
     /// get the first q (to post message as)
@@ -74,7 +74,10 @@ impl BackBlastPost {
 
     /// fng list string with comma separated.
     pub fn fng_string_list(&self) -> String {
-        self.fng_list().join(", ")
+        self.fng_list()
+            .into_iter()
+            .collect::<Vec<String>>()
+            .join(", ")
     }
 
     /// get total pax count
@@ -94,7 +97,7 @@ impl BackBlastPost {
     }
 
     /// get list of fngs with names trimmed.
-    fn fng_list(&self) -> Vec<String> {
+    fn fng_list(&self) -> HashSet<String> {
         self.fngs
             .iter()
             .filter_map(|item| {
@@ -106,15 +109,15 @@ impl BackBlastPost {
                     None
                 }
             })
-            .collect::<Vec<String>>()
+            .collect::<HashSet<String>>()
     }
 
     /// get non-slack pax with names trimmed.
-    fn non_slack_pax(&self) -> Vec<String> {
+    fn non_slack_pax(&self) -> HashSet<String> {
         self.non_slack_pax
             .iter()
             .map(|item| item.trim().to_string())
-            .collect::<Vec<String>>()
+            .collect::<HashSet<String>>()
     }
 }
 
@@ -231,7 +234,7 @@ pub fn convert_to_bb_data(
     data.set_event_times(EventTimes::new("temp".to_string(), "temp".to_string()));
     data.title = Some(request.title.to_string());
     data.moleskine = Some(request.mole_skine.to_string());
-    data.fngs = request.fngs.clone();
+    data.fngs.clone_from(&request.fngs);
     data
 }
 

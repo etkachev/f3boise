@@ -51,8 +51,7 @@ async fn ao_list_data(db: &PgPool) -> Result<[AoMetaData; 19], AppError> {
 
         if meta_data
             .workout_dates
-            .get(tomorrow_week_day.as_str())
-            .is_some()
+            .contains_key(tomorrow_week_day.as_str())
         {
             let q = tomorrow_qs
                 .get(ao.to_string().as_str())

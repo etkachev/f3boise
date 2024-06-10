@@ -20,7 +20,7 @@ pub async fn get_ao_stats_block(
     let stats = AOBackBlastsStats::new(results);
 
     let block_builder = BlockBuilder::new()
-        .section_markdown(format!("*Stats for {}*", possible_ao.to_string()).as_str())
+        .section_markdown(format!("*Stats for {}*", possible_ao).as_str())
         .section_markdown(format!("*Total BDs*: {}", stats.total).as_str())
         .section_markdown(format!("*Total unique pax*: {}", stats.unique_pax).as_str())
         .section_markdown(format!("*Pax post per BD*: {:.2}", stats.avg_pax_per_bd).as_str());

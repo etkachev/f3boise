@@ -1,4 +1,5 @@
 use chrono::NaiveDate;
+use std::fmt::Display;
 use std::ops::Range;
 
 #[derive(PartialEq, Debug)]
@@ -21,13 +22,14 @@ impl DoubleDownProgram {
     }
 }
 
-impl ToString for DoubleDownProgram {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for DoubleDownProgram {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             DoubleDownProgram::WolfPax => "WolfPax",
             DoubleDownProgram::KnightForge => "KnightForge",
         }
-        .to_string()
+        .to_string();
+        write!(f, "{}", str)
     }
 }
 

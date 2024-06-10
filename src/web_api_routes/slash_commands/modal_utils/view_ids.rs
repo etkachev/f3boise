@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 /// enum of available views (modals) that we generate for the app)
 #[derive(Default, PartialEq, Debug)]
 pub enum ViewIds {
@@ -9,17 +11,18 @@ pub enum ViewIds {
     Unknown,
 }
 
-impl ToString for ViewIds {
-    fn to_string(&self) -> String {
+impl Display for ViewIds {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let id = uuid::Uuid::new_v4().to_string();
         let (uid, _) = id.split_at(5);
-        match self {
+        let str = match self {
             ViewIds::BackBlast => format!("{}::{uid}", BACK_BLAST_ID),
             ViewIds::BackBlastEdit => format!("{}::{uid}", BACK_BLAST_EDIT_ID),
             ViewIds::PreBlast => format!("{}::{uid}", PRE_BLAST_ID),
             ViewIds::BlackDiamondRating => format!("{}::{uid}", BLACK_DIAMOND_RATING_ID),
             ViewIds::Unknown => "UNKNOWN".to_string(),
-        }
+        };
+        write!(f, "{}", str)
     }
 }
 

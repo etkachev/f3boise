@@ -1,5 +1,6 @@
 use crate::slack_api::block_kit::TextObject;
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
@@ -676,12 +677,13 @@ pub enum ButtonStyle {
 const BTN_PRIMARY_STYLE: &str = "primary";
 const BTN_DANGER_STYLE: &str = "danger";
 
-impl ToString for ButtonStyle {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for ButtonStyle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             ButtonStyle::Danger => BTN_DANGER_STYLE.to_string(),
             ButtonStyle::Primary => BTN_PRIMARY_STYLE.to_string(),
-        }
+        };
+        write!(f, "{}", str)
     }
 }
 

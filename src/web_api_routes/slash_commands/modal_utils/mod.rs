@@ -1,6 +1,7 @@
 use crate::app_state::backblast_data::BackBlastType;
 use crate::shared::common_errors::AppError;
 use crate::slack_api::block_kit::block_elements::OptionElement;
+use std::fmt::Display;
 use std::str::FromStr;
 
 pub mod value_utils;
@@ -14,12 +15,13 @@ pub enum BlastWhere {
     CurrentChannel(String),
 }
 
-impl ToString for BlastWhere {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for BlastWhere {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             BlastWhere::AoChannel => String::from("Ao Channel"),
             BlastWhere::CurrentChannel(_) => String::from("Current Channel"),
-        }
+        };
+        write!(f, "{}", str)
     }
 }
 

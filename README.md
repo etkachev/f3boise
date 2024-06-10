@@ -7,7 +7,7 @@
 1. Make sure to run sqlx local snapshot
 
 ```
-cargo sqlx prepare -- --lib
+cargo sqlx prepare
 ```
 
 2. Run clippy and tests

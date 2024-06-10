@@ -110,7 +110,7 @@ async fn get_q_line_up_for_range_for_ao(
 ) -> Result<BlockBuilder, AppError> {
     let month_display = start_date.format("%B %Y").to_string();
     let mut block_builder = BlockBuilder::new()
-        .header(format!(":calendar: Q Line-up for {} :calendar:", ao.to_string()).as_str())
+        .header(format!(":calendar: Q Line-up for {} :calendar:", ao).as_str())
         .context(format!("*{}*  |  Fill em up!", month_display).as_str())
         .divider();
 

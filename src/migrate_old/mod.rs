@@ -111,7 +111,7 @@ pub async fn cleanup_pax_in_channels(db_pool: &PgPool) -> Result<(), AppError> {
     let ninety_days_ts = NaiveDateTime::new(ninety_days_ago, NaiveTime::default());
     println!("90 days: {:?}", ninety_days_ts);
     for ao in AO_LIST {
-        println!("Checking {}", ao.to_string());
+        println!("Checking {}", ao);
 
         let users_in_channel = api
             .get_channel_members(ao.channel_id())
@@ -159,10 +159,7 @@ pub async fn cleanup_pax_in_channels(db_pool: &PgPool) -> Result<(), AppError> {
                             if let Some(most_recent_bd) = most_recent_bd {
                                 let bd = BackBlastData::from(most_recent_bd);
                                 if bd.ao == ao {
-                                    println!(
-                                        "This is {pax_name}'s most recent bd at {}",
-                                        ao.to_string()
-                                    );
+                                    println!("This is {pax_name}'s most recent bd at {}", ao);
                                     continue;
                                 }
                             }
@@ -200,7 +197,7 @@ pub async fn cleanup_pax_in_channels(db_pool: &PgPool) -> Result<(), AppError> {
                                 }
                             } else {
                                 println!("====");
-                                println!("{} has been to {}", pax_name, ao.to_string());
+                                println!("{} has been to {}", pax_name, ao);
                                 println!("====");
                             }
                         } else {
@@ -219,7 +216,7 @@ pub async fn cleanup_pax_in_channels(db_pool: &PgPool) -> Result<(), AppError> {
             }
         }
 
-        println!("Finished with {}", ao.to_string());
+        println!("Finished with {}", ao);
         tokio::time::sleep(tokio::time::Duration::from_secs(4)).await;
     }
 
@@ -237,8 +234,8 @@ fn read_back_blast_csv() -> Result<Vec<BackBlastData>, AppError> {
         let qs = string_split_hash(record.q.as_str(), ',');
         let pax = string_split_hash(record.pax.as_str(), ',');
         let mut mapped = BackBlastData::new(ao, qs, pax, date);
-        mapped.title = record.title.clone();
-        mapped.moleskine = record.moleskine.clone();
+        mapped.title.clone_from(&record.title);
+        mapped.moleskine.clone_from(&record.moleskine);
         mapped.fngs = string_split_hash(record.fngs.unwrap_or_default().as_str(), ',');
         mapped.bb_type = record
             .bb_type

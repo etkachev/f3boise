@@ -7,6 +7,7 @@ use crate::web_api_routes::slack_events::event_times::EventTimes;
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+use std::fmt::Display;
 
 pub const BACK_BLAST_TAG: &str = "#backblast";
 pub const SLACK_BLAST_TAG: &str = "*slackblast*:";
@@ -90,12 +91,7 @@ impl BackBlastData {
 
     /// combo of ao, date, and type
     pub fn get_unique_id(&self) -> String {
-        format!(
-            "{}-{}-{}",
-            self.ao.to_string(),
-            self.date,
-            self.bb_type.to_string()
-        )
+        format!("{}-{}-{}", self.ao, self.date, self.bb_type)
     }
 }
 
@@ -107,13 +103,14 @@ pub enum BackBlastType {
     OffTheBooks,
 }
 
-impl ToString for BackBlastType {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for BackBlastType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             BackBlastType::BackBlast => "backblast".to_string(),
             BackBlastType::DoubleDown => "doubledown".to_string(),
             BackBlastType::OffTheBooks => "otb".to_string(),
-        }
+        };
+        write!(f, "{}", str)
     }
 }
 

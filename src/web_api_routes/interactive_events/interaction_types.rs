@@ -1,5 +1,6 @@
 use crate::app_state::ao_data::AO;
 use chrono::NaiveDate;
+use std::fmt::Display;
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq)]
@@ -31,13 +32,14 @@ impl From<&str> for InteractionTypes {
     }
 }
 
-impl ToString for InteractionTypes {
-    fn to_string(&self) -> String {
-        match self {
-            InteractionTypes::QLineUp(data) => format!("{Q_LINE_UP}::{}", data.to_string()),
+impl Display for InteractionTypes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            InteractionTypes::QLineUp(data) => format!("{Q_LINE_UP}::{}", data),
             InteractionTypes::EditBackBlast(id) => format!("{EDIT_BACK_BLAST}::{}", id),
             InteractionTypes::Unknown => "unknown".to_string(),
-        }
+        };
+        write!(f, "{}", str)
     }
 }
 
@@ -73,9 +75,9 @@ impl From<&str> for QSheetActionComboData {
     }
 }
 
-impl ToString for QSheetActionComboData {
-    fn to_string(&self) -> String {
-        format!("{}::{}", self.date, self.ao.to_string())
+impl Display for QSheetActionComboData {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", format_args!("{}::{}", self.date, self.ao))
     }
 }
 

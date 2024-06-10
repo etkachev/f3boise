@@ -3,6 +3,7 @@ use crate::slack_api::channels::public_channels::PublicChannels;
 use chrono::{Duration, NaiveTime, Weekday};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+use std::fmt::Display;
 
 /// Different AO options.
 #[derive(PartialEq, Debug, Deserialize, Serialize, Eq, Hash)]
@@ -42,15 +43,16 @@ pub enum AoType {
     Rucking,
 }
 
-impl ToString for AoType {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for AoType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             AoType::Bootcamp => String::from("Bootcamp"),
             AoType::HighIntensity => String::from("High Intensity"),
             AoType::Heavy => String::from("Ruck/Sandbag"),
             AoType::Running => String::from("Running"),
             AoType::Rucking => String::from("Ruck/Hike"),
-        }
+        };
+        write!(f, "{}", str)
     }
 }
 
@@ -380,8 +382,8 @@ impl Clone for AO {
     }
 }
 
-impl ToString for AO {
-    fn to_string(&self) -> String {
+impl Display for AO {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
             AO::Bleach => const_names::BLEACH,
             AO::Gem => const_names::GEM,
@@ -405,7 +407,7 @@ impl ToString for AO {
             AO::DR => "",
             AO::Unknown(_) => "",
         };
-        name.to_string()
+        write!(f, "{}", name)
     }
 }
 
