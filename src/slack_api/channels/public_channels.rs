@@ -21,6 +21,7 @@ pub enum PublicChannels {
     ReidMerrill,
     GooseDynasty,
     RetaHuskey,
+    BernieFisher,
     FirstF,
     DR,
     Welcome,
@@ -56,6 +57,7 @@ impl From<&AO> for PublicChannels {
             AO::ReidMerrill => PublicChannels::ReidMerrill,
             AO::GooseDynasty => PublicChannels::GooseDynasty,
             AO::RetaHuskey => PublicChannels::RetaHuskey,
+            AO::BernieFisher => PublicChannels::BernieFisher,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }
