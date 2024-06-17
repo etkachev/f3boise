@@ -1,3 +1,7 @@
+mod pax_parent_relationships;
+
+use crate::db::pax_parent_tree::ParentPaxRelation;
+use crate::db::queries::users::pax_parent_relationships::get_pax_parent_relationships;
 use crate::db::save_user::DbUser;
 use crate::shared::common_errors::AppError;
 use crate::users::f3_user::F3User;
@@ -11,8 +15,9 @@ pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, A
     let rows: Vec<DbUser> = sqlx::query_as!(
         DbUser,
         r#"
-        SELECT slack_id, name, email, img_url, parent, parent_type
-        FROM users;
+        SELECT u.slack_id, u.name, u.email, u.img_url, ppr.parent
+        FROM users u
+        LEFT JOIN parent_pax_relationships ppr ON lower(u.name) = lower(ppr.pax_name);
     "#
     )
     .fetch_all(db_pool)
@@ -21,6 +26,23 @@ pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, A
     for item in rows {
         results.insert(item.slack_id.to_string(), F3User::from(item));
     }
+    Ok(results)
+}
+
+/// get pax tree relationship list
+pub async fn get_pax_tree_relationship(
+    db_pool: &PgPool,
+) -> Result<HashMap<String, ParentPaxRelation>, AppError> {
+    let records = get_pax_parent_relationships(db_pool).await?;
+
+    let results = records.into_iter().fold(
+        HashMap::<String, ParentPaxRelation>::new(),
+        |mut acc, item| {
+            acc.insert(item.pax_name.to_lowercase(), item);
+            acc
+        },
+    );
+
     Ok(results)
 }
 
@@ -76,9 +98,10 @@ pub async fn get_user_by_name(db_pool: &PgPool, name: &str) -> Result<Option<F3U
     let result: Option<DbUser> = sqlx::query_as!(
         DbUser,
         r#"
-        SELECT slack_id, name, email, img_url, parent, parent_type
-        FROM users
-        WHERE lower(name) = $1
+        SELECT u.slack_id, u.name, u.email, u.img_url, ppr.parent
+        FROM users u
+        LEFT JOIN parent_pax_relationships ppr ON lower(u.name) = lower(ppr.pax_name)
+        WHERE lower(u.name) = $1
         LIMIT 1;
         "#,
         name
@@ -93,9 +116,10 @@ pub async fn get_user_by_slack_id(db_pool: &PgPool, id: &str) -> Result<Option<F
     let result = sqlx::query_as!(
         DbUser,
         r#"
-        SELECT slack_id, name, email, img_url, parent, parent_type
-        FROM users
-        WHERE slack_id = $1
+        SELECT u.slack_id, u.name, u.email, u.img_url, ppr.parent
+        FROM users u
+        LEFT JOIN parent_pax_relationships ppr ON lower(u.name) = lower(ppr.pax_name)
+        WHERE u.slack_id = $1
         LIMIT 1;
         "#,
         id

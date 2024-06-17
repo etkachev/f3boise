@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::{HashMap, HashSet};
 
+pub mod get_pax_tree;
 pub mod pax_leaderboards;
 pub mod set_pax_parent;
 pub mod stats;

@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT slack_id, pax_name, parent\n        FROM parent_pax_relationships;\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "slack_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "pax_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "parent",
+        "type_info": "Json"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "341d1e273ce4b79e6c6c38794609e46f82cc2c3ad79b2989c92b5ff685e5aad8"
+}

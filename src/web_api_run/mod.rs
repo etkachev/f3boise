@@ -17,8 +17,9 @@ use crate::web_api_routes::back_blast_data::{
     get_missing_back_blasts, get_top_pax_data_route,
 };
 use crate::web_api_routes::interactive_events::interactive_events;
+use crate::web_api_routes::pax_data::get_pax_tree::get_pax_tree;
 use crate::web_api_routes::pax_data::pax_leaderboards::post_pax_leaderboards;
-use crate::web_api_routes::pax_data::set_pax_parent::set_pax_parent_route;
+use crate::web_api_routes::pax_data::set_pax_parent::set_pax_parent_tree_route;
 use crate::web_api_routes::pax_data::stats::pax_stats_route;
 use crate::web_api_routes::pax_data::{
     get_bad_data, get_pax_back_blasts, get_pax_double_downs, get_pax_info, get_users,
@@ -139,7 +140,8 @@ pub fn run(
                     .route("/all", web::get().to(get_users))
                     .route("/bad-data", web::get().to(get_bad_data))
                     .route("/post-leaderboard", web::get().to(post_pax_leaderboards))
-                    .route("/set-parent", web::post().to(set_pax_parent_route))
+                    .route("/set-pax-parent", web::post().to(set_pax_parent_tree_route))
+                    .route("/tree", web::get().to(get_pax_tree))
                     .route("/stats/{name}", web::get().to(pax_stats_route)),
             )
             .service(

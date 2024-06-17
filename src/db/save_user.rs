@@ -1,5 +1,5 @@
 use crate::shared::common_errors::AppError;
-use crate::users::f3_user::{F3Parent, F3User};
+use crate::users::f3_user::F3User;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
@@ -10,8 +10,7 @@ pub struct DbUser {
     pub name: String,
     pub email: String,
     pub img_url: Option<String>,
-    pub parent: Option<String>,
-    pub parent_type: Option<String>,
+    pub parent: Option<serde_json::Value>,
 }
 
 impl From<&F3User> for DbUser {
@@ -21,21 +20,12 @@ impl From<&F3User> for DbUser {
         } else {
             String::new()
         };
-        let (parent_type, parent) = user
-            .invited_by
-            .as_ref()
-            .map(|invited_by| match invited_by {
-                F3Parent::Pax(pax) => (Some("pax"), Some(pax.to_string())),
-                F3Parent::Online => (Some("online"), None),
-            })
-            .unwrap_or((None, None));
         DbUser {
             slack_id: id,
             name: user.name.to_string(),
             email: user.email.to_string(),
             img_url: user.img_url.clone(),
-            parent,
-            parent_type: parent_type.map(|pt| pt.to_string()),
+            parent: None,
         }
     }
 }
@@ -60,26 +50,6 @@ pub async fn upsert_user(
         user.name,
         user.email,
         user.img_url
-    )
-    .execute(&mut **transaction)
-    .await?;
-
-    Ok(())
-}
-
-/// update parent info for a pax
-pub async fn update_user_parent_data(
-    transaction: &mut Transaction<'_, Postgres>,
-    user: &DbUser,
-) -> Result<(), AppError> {
-    sqlx::query!(
-        r#"
-        UPDATE users SET parent = $2, parent_type = $3
-        WHERE slack_id = $1 AND parent IS NULL
-        "#,
-        user.slack_id,
-        user.parent,
-        user.parent_type
     )
     .execute(&mut **transaction)
     .await?;

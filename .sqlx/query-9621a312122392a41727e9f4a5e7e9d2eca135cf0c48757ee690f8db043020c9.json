@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    INSERT INTO parent_pax_relationships (id, pax_name, slack_id, parent)\n    VALUES($1,$2,$3,$4)\n    ON CONFLICT (pax_name)\n        DO UPDATE\n        SET slack_id = EXCLUDED.slack_id,\n            parent = EXCLUDED.parent;\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Json"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9621a312122392a41727e9f4a5e7e9d2eca135cf0c48757ee690f8db043020c9"
+}

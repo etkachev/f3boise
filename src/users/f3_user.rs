@@ -1,3 +1,4 @@
+use crate::db::pax_parent_tree::F3Parent;
 use crate::db::save_user::DbUser;
 use crate::slack_api::users::users_list::response::SlackUserData;
 use serde::{Deserialize, Serialize};
@@ -8,14 +9,7 @@ pub struct F3User {
     pub name: String,
     pub email: String,
     pub img_url: Option<String>,
-    pub invited_by: Option<F3Parent>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "camelCase")]
-pub enum F3Parent {
-    Pax(String),
-    Online,
+    pub parent: Option<F3Parent>,
 }
 
 impl F3User {
@@ -25,7 +19,7 @@ impl F3User {
             name: name.to_string(),
             email: email.to_string(),
             img_url: None,
-            invited_by: None,
+            parent: None,
         }
     }
 }
@@ -52,20 +46,16 @@ impl From<&SlackUserData> for F3User {
                 .as_ref()
                 .map(|email| email.to_string())
                 .unwrap_or_else(|| "UNKNOWN".to_string()),
-            invited_by: None,
+            parent: None,
         }
     }
 }
 
 impl From<DbUser> for F3User {
     fn from(user: DbUser) -> Self {
-        let invited_by = user
-            .parent_type
-            .map(|pt| match pt.as_str() {
-                "pax" => user.parent.map(|p| F3Parent::Pax(p.to_string())),
-                "online" => Some(F3Parent::Online),
-                _ => None,
-            })
+        let parent = user
+            .parent
+            .map(|p| serde_json::from_value::<F3Parent>(p).ok())
             .unwrap_or_default();
 
         F3User {
@@ -73,7 +63,7 @@ impl From<DbUser> for F3User {
             name: user.name.to_string(),
             email: user.email,
             img_url: user.img_url,
-            invited_by,
+            parent,
         }
     }
 }
@@ -81,6 +71,7 @@ impl From<DbUser> for F3User {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     #[test]
     fn mapping_db_user_to_f3_user() {
@@ -89,15 +80,18 @@ mod tests {
             name: "Stinger".to_string(),
             email: "edwardtkachev@gmail.com".to_string(),
             img_url: None,
-            parent: Some("Canuck".to_string()),
-            parent_type: Some("pax".to_string()),
+            parent: Some(json!({
+                "type": "pax",
+                "name": "Canuck",
+                "slackId": "U040AL30FA8"
+            })),
         };
 
         let f3_user = F3User::from(db_user);
 
         assert_eq!(
-            f3_user.invited_by.unwrap(),
-            F3Parent::Pax("Canuck".to_string())
+            f3_user.parent.unwrap(),
+            F3Parent::new_pax("Canuck", Some(String::from("U040AL30FA8")))
         );
     }
 }

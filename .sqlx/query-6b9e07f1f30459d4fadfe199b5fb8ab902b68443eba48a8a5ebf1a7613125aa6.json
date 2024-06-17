@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT slack_id, name, email, img_url, parent, parent_type\n        FROM users\n        WHERE slack_id = $1\n        LIMIT 1;\n        ",
+  "query": "\n        SELECT u.slack_id, u.name, u.email, u.img_url, ppr.parent\n        FROM users u\n        LEFT JOIN parent_pax_relationships ppr ON lower(u.name) = lower(ppr.pax_name)\n        WHERE lower(u.name) = $1\n        LIMIT 1;\n        ",
   "describe": {
     "columns": [
       {
@@ -26,12 +26,7 @@
       {
         "ordinal": 4,
         "name": "parent",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 5,
-        "name": "parent_type",
-        "type_info": "Text"
+        "type_info": "Json"
       }
     ],
     "parameters": {
@@ -44,9 +39,8 @@
       false,
       false,
       true,
-      true,
-      true
+      false
     ]
   },
-  "hash": "3e449e2b24c9a1eba86d2e4515a935546ba6a7a18c7f8090a42b1eced39260cf"
+  "hash": "6b9e07f1f30459d4fadfe199b5fb8ab902b68443eba48a8a5ebf1a7613125aa6"
 }
