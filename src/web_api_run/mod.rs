@@ -44,6 +44,9 @@ impl Application {
         let listener = TcpListener::bind(address)?;
         let port = listener.local_addr().unwrap().port();
 
+        sqlx::migrate!().run(&connection_pool).await?;
+        println!("Migrations successfully applied!");
+
         let server = run(web_state, app_state, listener, connection_pool)?;
         Ok(Self { port, server })
     }
