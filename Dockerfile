@@ -22,9 +22,13 @@ RUN cargo chef cook --release --recipe-path recipe.json
 # all layers should be cached.
 COPY . .
 ENV SQLX_OFFLINE true
+
+WORKDIR /
 # Let's build our binary!
 # We'll use the release profile to make it faaaast
-RUN cargo build --release --bin f3webapi
+RUN cargo build --release --bin f3webapi --target-dir app/target
+
+WORKDIR /app
 
 # Runtime stage
 FROM debian:bullseye AS runtime
