@@ -44,7 +44,13 @@ impl Application {
         let listener = TcpListener::bind(address)?;
         let port = listener.local_addr().unwrap().port();
 
-        sqlx::migrate!().run(&connection_pool).await?;
+        let migration_path = std::path::Path::new("migrations");
+        let migrator = sqlx::migrate::Migrator::new(migration_path)
+            .await
+            .expect("Couldn't read custom migration folder");
+
+        migrator.run(&connection_pool).await?;
+        // sqlx::migrate!().run(&connection_pool).await?;
         println!("Migrations successfully applied!");
 
         let server = run(web_state, app_state, listener, connection_pool)?;
