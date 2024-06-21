@@ -15,7 +15,7 @@ pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, A
     let rows: Vec<DbUser> = sqlx::query_as!(
         DbUser,
         r#"
-        SELECT u.slack_id, u.name, u.email, u.img_url, ppr.parent
+        SELECT u.slack_id, u.name, u.email, u.img_url, COALESCE(ppr.parent, 'null') as parent
         FROM users u
         LEFT JOIN parent_pax_relationships ppr ON lower(u.name) = lower(ppr.pax_name);
     "#
@@ -98,7 +98,7 @@ pub async fn get_user_by_name(db_pool: &PgPool, name: &str) -> Result<Option<F3U
     let result: Option<DbUser> = sqlx::query_as!(
         DbUser,
         r#"
-        SELECT u.slack_id, u.name, u.email, u.img_url, ppr.parent
+        SELECT u.slack_id, u.name, u.email, u.img_url, COALESCE(ppr.parent, 'null') as parent
         FROM users u
         LEFT JOIN parent_pax_relationships ppr ON lower(u.name) = lower(ppr.pax_name)
         WHERE lower(u.name) = $1
@@ -116,7 +116,7 @@ pub async fn get_user_by_slack_id(db_pool: &PgPool, id: &str) -> Result<Option<F
     let result = sqlx::query_as!(
         DbUser,
         r#"
-        SELECT u.slack_id, u.name, u.email, u.img_url, ppr.parent
+        SELECT u.slack_id, u.name, u.email, u.img_url, COALESCE(ppr.parent, 'null') as parent
         FROM users u
         LEFT JOIN parent_pax_relationships ppr ON lower(u.name) = lower(ppr.pax_name)
         WHERE u.slack_id = $1
