@@ -53,7 +53,10 @@ pub async fn slack_slash_commands_route(
     match form.command.as_str() {
         "/my-stats" => match handle_my_stats(&db_pool, &form).await {
             Ok(response) => HttpResponse::Ok().json(response),
-            Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+            Err(err) => {
+                println!("stats error: {}", err);
+                HttpResponse::BadRequest().body(err.to_string())
+            }
         },
         "/invite-all" => match handle_invite_all(&db_pool, &web_state, &form).await {
             Ok(response) => HttpResponse::Ok().body(response),
