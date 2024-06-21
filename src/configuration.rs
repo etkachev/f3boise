@@ -48,7 +48,7 @@ impl DatabaseSettings {
             .username(&self.username)
             .password(self.password.expose_secret())
             .port(self.port)
-            .ssl_mode(ssl_mode)
+            .ssl_mode(PgSslMode::Prefer)
     }
 
     pub fn with_db(&self) -> PgConnectOptions {
