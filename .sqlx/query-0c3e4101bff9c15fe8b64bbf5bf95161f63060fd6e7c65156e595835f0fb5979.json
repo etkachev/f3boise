@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT u.slack_id, u.name, u.email, u.img_url, ppr.parent\n        FROM users u\n        LEFT JOIN parent_pax_relationships ppr ON lower(u.name) = lower(ppr.pax_name);\n    ",
+  "query": "\n        SELECT u.slack_id, u.name, u.email, u.img_url, COALESCE(ppr.parent, 'null') as parent\n        FROM users u\n        LEFT JOIN parent_pax_relationships ppr ON lower(u.name) = lower(ppr.pax_name);\n    ",
   "describe": {
     "columns": [
       {
@@ -37,8 +37,8 @@
       false,
       false,
       true,
-      true
+      null
     ]
   },
-  "hash": "24491885b6f47647345b00e2bd600b4c062189b29b60c2916d74d0873104ba7e"
+  "hash": "0c3e4101bff9c15fe8b64bbf5bf95161f63060fd6e7c65156e595835f0fb5979"
 }
