@@ -13,7 +13,7 @@ use crate::web_api_routes::auth::get_key;
 use crate::web_api_routes::interactive_events::interactive_events;
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::slash_commands::slack_slash_commands_route;
-use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route, sync_q_line_up};
+use crate::web_api_routes::sync::{sync_data_route, sync_data_to_state, sync_old_data_route, sync_q_line_up};
 use crate::web_api_routes::sync_user_img::sync_user_imgs_route;
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
@@ -53,6 +53,8 @@ impl Application {
         migrator.run(&connection_pool).await?;
         // sqlx::migrate!().run(&connection_pool).await?;
         println!("Migrations successfully applied!");
+
+        sync_data_to_state(&connection_pool, &web_state, &app_state).await?;
 
         let server = run(web_state, app_state, listener, connection_pool)?;
         Ok(Self { port, server })
