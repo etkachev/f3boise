@@ -23,7 +23,7 @@ default_self_signed = true
 
 [[http_service.checks]]
 grace_period = "10s"
-interval = "50m0s"
+interval = "1m0s"
 method = "GET"
 timeout = "10s"
 path = "/health_check"
