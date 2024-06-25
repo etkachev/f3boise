@@ -45,16 +45,21 @@ impl Application {
         let listener = TcpListener::bind(address)?;
         let port = listener.local_addr().unwrap().port();
 
+        let start = std::time::Instant::now();
         let migration_path = std::path::Path::new("migrations");
         let migrator = sqlx::migrate::Migrator::new(migration_path)
             .await
             .expect("Couldn't read custom migration folder");
 
         migrator.run(&connection_pool).await?;
+        let duration = start.elapsed();
         // sqlx::migrate!().run(&connection_pool).await?;
-        println!("Migrations successfully applied!");
+        println!("Migrations successfully applied! - {:?}", duration);
 
+        let start = std::time::Instant::now();
         sync_data_to_state(&connection_pool, &web_state, &app_state).await?;
+        let duration = start.elapsed();
+        println!("Finished sync - {:?}", duration);
 
         let server = run(web_state, app_state, listener, connection_pool)?;
         Ok(Self { port, server })

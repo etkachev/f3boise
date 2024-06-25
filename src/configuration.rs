@@ -31,13 +31,6 @@ pub struct DatabaseSettings {
 
 impl DatabaseSettings {
     pub fn without_db(&self) -> PgConnectOptions {
-        println!("host - {}", self.host);
-        println!("un - {}", self.username);
-        println!("pw - {}", self.password.expose_secret());
-        println!("port - {}", self.port);
-        println!("ssl - {}", self.require_ssl);
-        println!("db name - {}", self.database_name);
-
         let ssl_mode = if self.require_ssl {
             PgSslMode::Require
         } else {
