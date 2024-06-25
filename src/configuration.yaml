@@ -1,5 +1,4 @@
 application_port: 8080
-application_run_cron_jobs: false
 database:
   host: "127.0.0.1"
   port: 5432
