@@ -13,6 +13,7 @@ pub struct Settings {
 pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
+    pub run_cron_jobs: bool,
     pub host: String,
     // pub base_url: String,
     pub hmac_secret: Secret<String>,
