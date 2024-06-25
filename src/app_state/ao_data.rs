@@ -25,7 +25,7 @@ pub enum AO {
     CamelsBack,
     ReidMerrill,
     GooseDynasty,
-    RetaHuskey,
+    DarkStride,
     BernieFisher,
     FirstF,
     DR,
@@ -110,7 +110,7 @@ impl AO {
             AO::CamelsBack => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::ReidMerrill => HashSet::from([Weekday::Mon, Weekday::Fri]),
             AO::GooseDynasty => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
-            AO::RetaHuskey => HashSet::from([Weekday::Tue, Weekday::Sat]),
+            AO::DarkStride => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::BernieFisher => HashSet::from([Weekday::Mon, Weekday::Thu]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
@@ -136,7 +136,7 @@ impl AO {
             AO::CamelsBack => "Camel's Back",
             AO::ReidMerrill => "Reid Merrill",
             AO::GooseDynasty => "Goose Dynasty",
-            AO::RetaHuskey => "Reta Huskey Park",
+            AO::DarkStride => "Dark Stride",
             AO::BernieFisher => "Bernie Fisher Park",
             AO::DR => "DR",
             AO::Unknown(_) => "UNKNOWN",
@@ -233,7 +233,7 @@ impl AO {
             AO::CamelsBack => AoType::Bootcamp,
             AO::ReidMerrill => AoType::Bootcamp,
             AO::GooseDynasty => AoType::Bootcamp,
-            AO::RetaHuskey => AoType::Running,
+            AO::DarkStride => AoType::Running,
             AO::BernieFisher => AoType::Bootcamp,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
@@ -265,7 +265,7 @@ impl AO {
             AO::CamelsBack => const_names::CAMELS_BACK_CHANNEL_ID,
             AO::ReidMerrill => const_names::REID_MERRILL_CHANNEL_ID,
             AO::GooseDynasty => const_names::GOOSE_DYNASTY_CHANNEL_ID,
-            AO::RetaHuskey => const_names::RETA_HUSKEY_CHANNEL_ID,
+            AO::DarkStride => const_names::DARK_STRIDE_CHANNEL_ID,
             AO::BernieFisher => const_names::BERNIE_FISHER_PARK_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
             AO::Unknown(_) => "UNKNOWN",
@@ -288,7 +288,7 @@ impl AO {
             AO::CamelsBack => Some("1200 Heron St, Boise, ID 83702"),
             AO::ReidMerrill => Some("637 E Shore Dr, Eagle, ID 83616"),
             AO::GooseDynasty => Some("2815 S Maple Grove Rd, Boise, ID 83709"),
-            AO::RetaHuskey => Some("2887 W Tubac Dr, Meridian, ID  83646"),
+            AO::DarkStride => Some("2887 W Tubac Dr, Meridian, ID  83646"),
             AO::BernieFisher => Some("201 W Main St, Kuna, ID 83634"),
             AO::RuckershipEast
             | AO::RuckershipWest
@@ -316,7 +316,7 @@ impl AO {
             AO::CamelsBack => Some(const_names::CAMELS_BACK_GOOGLE_MAPS),
             AO::ReidMerrill => Some(const_names::REID_MERRILL_GOOGLE_MAPS),
             AO::GooseDynasty => Some(const_names::GOOSE_DYNASTY_GOOGLE_MAPS),
-            AO::RetaHuskey => Some(const_names::RETA_HUSKEY_GOOGLE_MAPS),
+            AO::DarkStride => Some(const_names::DARK_STRIDE_GOOGLE_MAPS),
             AO::BernieFisher => Some(const_names::BERNIE_FISHER_PARK_GOOGLE_MAPS),
             AO::RuckershipWest | AO::RuckershipEast => None,
             AO::DR | AO::BlackOps | AO::FirstF => None,
@@ -354,7 +354,7 @@ impl AO {
             const_names::CAMELS_BACK_CHANNEL_ID => AO::CamelsBack,
             const_names::REID_MERRILL_CHANNEL_ID => AO::ReidMerrill,
             const_names::GOOSE_DYNASTY_CHANNEL_ID => AO::GooseDynasty,
-            const_names::RETA_HUSKEY_CHANNEL_ID => AO::RetaHuskey,
+            const_names::DARK_STRIDE_CHANNEL_ID => AO::DarkStride,
             const_names::BERNIE_FISHER_PARK_CHANNEL_ID => AO::BernieFisher,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
@@ -384,7 +384,7 @@ impl Clone for AO {
             AO::CamelsBack => AO::CamelsBack,
             AO::ReidMerrill => AO::ReidMerrill,
             AO::GooseDynasty => AO::GooseDynasty,
-            AO::RetaHuskey => AO::RetaHuskey,
+            AO::DarkStride => AO::DarkStride,
             AO::BernieFisher => AO::BernieFisher,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
@@ -412,7 +412,7 @@ impl Display for AO {
             AO::CamelsBack => const_names::CAMELS_BACK,
             AO::ReidMerrill => const_names::REID_MERRILL,
             AO::GooseDynasty => const_names::GOOSE_DYNASTY,
-            AO::RetaHuskey => const_names::RETA_HUSKEY,
+            AO::DarkStride => const_names::DARK_STRIDE,
             AO::BernieFisher => const_names::BERNIE_FISHER_PARK,
             AO::DR => "",
             AO::Unknown(_) => "",
@@ -454,7 +454,7 @@ impl From<String> for AO {
             const_names::CAMELS_BACK => AO::CamelsBack,
             const_names::REID_MERRILL | "otb-reid-merrill-park" => AO::ReidMerrill,
             const_names::GOOSE_DYNASTY | "otb-goose-dynasty" => AO::GooseDynasty,
-            const_names::RETA_HUSKEY => AO::RetaHuskey,
+            const_names::DARK_STRIDE => AO::DarkStride,
             const_names::BERNIE_FISHER_PARK => AO::BernieFisher,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
@@ -495,7 +495,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::CamelsBack => AO::CamelsBack,
         PublicChannels::ReidMerrill => AO::ReidMerrill,
         PublicChannels::GooseDynasty => AO::GooseDynasty,
-        PublicChannels::RetaHuskey => AO::RetaHuskey,
+        PublicChannels::DarkStride => AO::DarkStride,
         PublicChannels::BernieFisher => AO::BernieFisher,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
@@ -586,9 +586,9 @@ pub mod const_names {
     pub const GOOSE_DYNASTY: &str = "goose-dynasty";
     pub const GOOSE_DYNASTY_CHANNEL_ID: &str = "C06DP3D5VTK";
     pub const GOOSE_DYNASTY_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/B6xDeMgoV9LMbuke9";
-    pub const RETA_HUSKEY: &str = "otb-reta-huskey-park";
-    pub const RETA_HUSKEY_CHANNEL_ID: &str = "C06LMEEDC1F";
-    pub const RETA_HUSKEY_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/qm2cW7sqki8q2hgg7";
+    pub const DARK_STRIDE: &str = "dark-stride";
+    pub const DARK_STRIDE_CHANNEL_ID: &str = "C06LMEEDC1F";
+    pub const DARK_STRIDE_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/qm2cW7sqki8q2hgg7";
     pub const BERNIE_FISHER_PARK: &str = "otb-bernie-fisher-park";
     pub const BERNIE_FISHER_PARK_CHANNEL_ID: &str = "C077KEU5RQF";
     pub const BERNIE_FISHER_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/iYeFcADGnE3hJU3f9";
@@ -608,7 +608,7 @@ pub mod const_names {
         AO::OldGlory,
         AO::Rebel,
         AO::ReidMerrill,
-        AO::RetaHuskey,
+        AO::DarkStride,
         AO::Rise,
         AO::GooseDynasty,
         AO::RuckershipEast,
