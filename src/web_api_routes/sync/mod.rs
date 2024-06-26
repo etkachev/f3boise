@@ -1,13 +1,21 @@
+pub mod db_sync;
+
+use crate::app_state::ao_data::AO;
+use crate::app_state::backblast_data::{BackBlastData, BackBlastType};
 use crate::app_state::MutableAppState;
 use crate::db::init::sync_ao_list;
 use crate::db::queries::users::get_db_users;
 use crate::migrate_old::{save_old_back_blasts, save_old_q_line_up};
 use crate::shared::common_errors::AppError;
+use crate::shared::string_utils::string_split_hash;
 use crate::users::f3_user::F3User;
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
+use chrono::NaiveDate;
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::HashMap;
+use std::io::Read;
 
 /// sync old backblasts to db.
 pub async fn sync_old_data_route(db_pool: web::Data<PgPool>) -> impl Responder {
@@ -77,4 +85,40 @@ pub async fn sync_data_route(
         Ok(_) => HttpResponse::Ok().body("Synced!"),
         Err(err) => HttpResponse::BadRequest().body(err.to_string()),
     }
+}
+
+/// extract backblast from csv reader
+pub fn extract_back_blasts<R: Read>(
+    mut rdr: csv::Reader<R>,
+) -> Result<Vec<BackBlastData>, AppError> {
+    let mut results: Vec<BackBlastData> = vec![];
+    for record in rdr.deserialize() {
+        let record: ProdCSVEntry = record?;
+        let date = NaiveDate::parse_from_str(record.date.as_str(), "%Y-%m-%d").unwrap();
+        let ao = AO::from(record.ao.to_string());
+        let qs = string_split_hash(record.q.as_str(), ',');
+        let pax = string_split_hash(record.pax.as_str(), ',');
+        let mut mapped = BackBlastData::new(ao, qs, pax, date);
+        mapped.title.clone_from(&record.title);
+        mapped.moleskine.clone_from(&record.moleskine);
+        mapped.fngs = string_split_hash(record.fngs.unwrap_or_default().as_str(), ',');
+        mapped.bb_type = record
+            .bb_type
+            .map(|bb_type| BackBlastType::from(bb_type.as_str()))
+            .unwrap_or_default();
+        results.push(mapped);
+    }
+    Ok(results)
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct ProdCSVEntry {
+    pub ao: String,
+    pub q: String,
+    pub pax: String,
+    pub date: String,
+    pub fngs: Option<String>,
+    pub title: Option<String>,
+    pub moleskine: Option<String>,
+    pub bb_type: Option<String>,
 }

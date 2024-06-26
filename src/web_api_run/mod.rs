@@ -17,7 +17,9 @@ use crate::web_api_routes::back_blast_data::{
     get_missing_back_blasts, get_top_pax_data_route,
 };
 use crate::web_api_routes::interactive_events::interactive_events;
-use crate::web_api_routes::pax_data::get_pax_tree::get_pax_tree;
+use crate::web_api_routes::pax_data::get_pax_tree::{
+    download_pax_relationship_csv_route, get_pax_tree,
+};
 use crate::web_api_routes::pax_data::pax_leaderboards::post_pax_leaderboards;
 use crate::web_api_routes::pax_data::set_pax_parent::set_pax_parent_tree_route;
 use crate::web_api_routes::pax_data::stats::pax_stats_route;
@@ -28,6 +30,7 @@ use crate::web_api_routes::q_line_up::q_line_up_route;
 use crate::web_api_routes::region_data::ao_meta_data::ao_list_meta_data_route;
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::slash_commands::slack_slash_commands_route;
+use crate::web_api_routes::sync::db_sync::sync_prod_back_blasts;
 use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route, sync_q_line_up};
 use crate::web_api_routes::sync_user_img::sync_user_imgs_route;
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
@@ -142,6 +145,10 @@ pub fn run(
                     .route("/post-leaderboard", web::get().to(post_pax_leaderboards))
                     .route("/set-pax-parent", web::post().to(set_pax_parent_tree_route))
                     .route("/tree", web::get().to(get_pax_tree))
+                    .route(
+                        "/download-parent-pax-csv",
+                        web::get().to(download_pax_relationship_csv_route),
+                    )
                     .route("/stats/{name}", web::get().to(pax_stats_route)),
             )
             .service(
@@ -167,8 +174,9 @@ pub fn run(
                         "/download-csv",
                         web::get().to(download_back_blasts_csv_route),
                     )
-                    .route("/{ao_name}", web::get().to(get_back_blast_stats_by_ao))
-                    .route("/single/{id}", web::get().to(get_single_back_blast_data)),
+                    .route("/sync-via-url", web::get().to(sync_prod_back_blasts))
+                    .route("/single/{id}", web::get().to(get_single_back_blast_data))
+                    .route("/{ao_name}", web::get().to(get_back_blast_stats_by_ao)),
             )
             .service(
                 web::scope("/double_downs")

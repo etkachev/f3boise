@@ -8,6 +8,8 @@ use crate::users::f3_user::F3User;
 use sqlx::PgPool;
 use std::collections::HashMap;
 
+pub use pax_parent_relationships::{get_pax_parent_relationship_entries, ParentPaxRelationDbItem};
+
 /// get existing db users. key is slack id
 pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, AppError> {
     let mut results = HashMap::<String, F3User>::new();

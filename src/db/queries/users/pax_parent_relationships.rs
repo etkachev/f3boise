@@ -26,9 +26,10 @@ impl TryFrom<ParentPaxRelationDbItem> for ParentPaxRelation {
     }
 }
 
-pub async fn get_pax_parent_relationships(
+/// raw entries from db for pax parent relationships
+pub async fn get_pax_parent_relationship_entries(
     db_pool: &PgPool,
-) -> Result<Vec<ParentPaxRelation>, AppError> {
+) -> Result<Vec<ParentPaxRelationDbItem>, AppError> {
     let rows: Vec<ParentPaxRelationDbItem> = sqlx::query_as!(
         ParentPaxRelationDbItem,
         r#"
@@ -38,6 +39,14 @@ pub async fn get_pax_parent_relationships(
     )
     .fetch_all(db_pool)
     .await?;
+    Ok(rows)
+}
+
+/// get mapped list of pax parent relationships
+pub async fn get_pax_parent_relationships(
+    db_pool: &PgPool,
+) -> Result<Vec<ParentPaxRelation>, AppError> {
+    let rows = get_pax_parent_relationship_entries(db_pool).await?;
 
     let mapped: Vec<ParentPaxRelation> = rows
         .into_iter()

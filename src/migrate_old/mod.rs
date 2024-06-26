@@ -1,6 +1,6 @@
 use crate::app_state::ao_data::const_names::AO_LIST;
 use crate::app_state::ao_data::AO;
-use crate::app_state::backblast_data::{BackBlastData, BackBlastType};
+use crate::app_state::backblast_data::BackBlastData;
 use crate::db::queries::all_back_blasts::recent_bd_for_pax::get_recent_bd_for_pax;
 use crate::db::queries::all_back_blasts::{
     get_all_dd_within_date_range, get_all_within_date_range,
@@ -9,10 +9,10 @@ use crate::db::queries::users::get_slack_id_map;
 use crate::db::save_q_line_up::NewQLineUpDbEntry;
 use crate::db::{save_back_blast, save_q_line_up};
 use crate::shared::common_errors::AppError;
-use crate::shared::string_utils::string_split_hash;
 use crate::shared::time::local_boise_time;
 use crate::slack_api::channels::history::request::ChannelHistoryRequest;
 use crate::slack_api::channels::kick::request::KickFromChannelRequest;
+use crate::web_api_routes::sync::extract_back_blasts;
 use crate::web_api_run::init_web_state;
 use chrono::{Months, NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
@@ -42,18 +42,6 @@ struct OldQSheetRow {
     pub ironmountain: Option<String>,
     pub rise: Option<String>,
     pub lakeview_park: Option<String>,
-}
-
-#[derive(Serialize, Deserialize)]
-struct ProdCSVEntry {
-    pub ao: String,
-    pub q: String,
-    pub pax: String,
-    pub date: String,
-    pub fngs: Option<String>,
-    pub title: Option<String>,
-    pub moleskine: Option<String>,
-    pub bb_type: Option<String>,
 }
 
 const BACK_YARD_BB_PATH: &str = "migration_files/old/Backyard";
@@ -225,25 +213,8 @@ pub async fn cleanup_pax_in_channels(db_pool: &PgPool) -> Result<(), AppError> {
 }
 
 fn read_back_blast_csv() -> Result<Vec<BackBlastData>, AppError> {
-    let mut rdr = csv::ReaderBuilder::new().from_path("migration_files/prod_db/f3-boise.csv")?;
-    let mut results: Vec<BackBlastData> = vec![];
-    for record in rdr.deserialize() {
-        let record: ProdCSVEntry = record?;
-        let date = NaiveDate::parse_from_str(record.date.as_str(), "%Y-%m-%d").unwrap();
-        let ao = AO::from(record.ao.to_string());
-        let qs = string_split_hash(record.q.as_str(), ',');
-        let pax = string_split_hash(record.pax.as_str(), ',');
-        let mut mapped = BackBlastData::new(ao, qs, pax, date);
-        mapped.title.clone_from(&record.title);
-        mapped.moleskine.clone_from(&record.moleskine);
-        mapped.fngs = string_split_hash(record.fngs.unwrap_or_default().as_str(), ',');
-        mapped.bb_type = record
-            .bb_type
-            .map(|bb_type| BackBlastType::from(bb_type.as_str()))
-            .unwrap_or_default();
-        results.push(mapped);
-    }
-    Ok(results)
+    let rdr = csv::ReaderBuilder::new().from_path("migration_files/prod_db/f3-boise.csv")?;
+    extract_back_blasts(rdr)
 }
 
 pub async fn save_old_q_line_up(db_pool: &PgPool) -> Result<(), AppError> {
