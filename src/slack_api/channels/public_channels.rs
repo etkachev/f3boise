@@ -22,6 +22,7 @@ pub enum PublicChannels {
     GooseDynasty,
     DarkStride,
     BernieFisher,
+    WestCanyonElementary,
     FirstF,
     DR,
     Welcome,
@@ -58,6 +59,7 @@ impl From<&AO> for PublicChannels {
             AO::GooseDynasty => PublicChannels::GooseDynasty,
             AO::DarkStride => PublicChannels::DarkStride,
             AO::BernieFisher => PublicChannels::BernieFisher,
+            AO::WestCanyonElementary => PublicChannels::WestCanyonElementary,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }
@@ -112,6 +114,10 @@ mod tests {
         test_channel_name("otb-goose-dynasty", PublicChannels::GooseDynasty);
         test_channel_name("goose-dynasty", PublicChannels::GooseDynasty);
         test_channel_name("ao-dark-stride", PublicChannels::DarkStride);
+        test_channel_name(
+            "otb-west-canyon-elementary",
+            PublicChannels::WestCanyonElementary,
+        );
         test_channel_name("1st-f", PublicChannels::FirstF);
     }
 
