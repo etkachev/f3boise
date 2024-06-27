@@ -13,6 +13,15 @@ pub use pax_parent_relationships::{get_pax_parent_relationship_entries, ParentPa
 /// get existing db users. key is slack id
 pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, AppError> {
     let mut results = HashMap::<String, F3User>::new();
+    let rows = get_db_user_list(db_pool).await?;
+    for item in rows {
+        results.insert(item.slack_id.to_string(), F3User::from(item));
+    }
+    Ok(results)
+}
+
+/// flat list of db users
+pub async fn get_db_user_list(db_pool: &PgPool) -> Result<Vec<DbUser>, AppError> {
     println!("Fetch all users from db");
     let rows: Vec<DbUser> = sqlx::query_as!(
         DbUser,
@@ -25,10 +34,7 @@ pub async fn get_db_users(db_pool: &PgPool) -> Result<HashMap<String, F3User>, A
     .fetch_all(db_pool)
     .await?;
     println!("Finished fetching users");
-    for item in rows {
-        results.insert(item.slack_id.to_string(), F3User::from(item));
-    }
-    Ok(results)
+    Ok(rows)
 }
 
 /// get pax tree relationship list

@@ -35,7 +35,7 @@ use crate::web_api_routes::sync::db_sync::{
 };
 use crate::web_api_routes::sync::{
     download_processed_items_csv, download_q_line_up_csv, sync_data_route, sync_old_data_route,
-    sync_q_line_up,
+    sync_q_line_up, users_db_csv_download,
 };
 use crate::web_api_routes::sync_user_img::sync_user_imgs_route;
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
@@ -148,6 +148,7 @@ pub fn run(
                     .route("/all", web::get().to(get_users))
                     .route("/bad-data", web::get().to(get_bad_data))
                     .route("/post-leaderboard", web::get().to(post_pax_leaderboards))
+                    .route("/download_users_csv", web::get().to(users_db_csv_download))
                     .route("/set-pax-parent", web::post().to(set_pax_parent_tree_route))
                     .route("/tree", web::get().to(get_pax_tree))
                     .route(

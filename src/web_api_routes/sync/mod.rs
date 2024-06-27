@@ -1,6 +1,7 @@
 pub mod db_sync;
 mod processed_items_db_download;
 mod q_line_up_download_db;
+mod users_db_download;
 
 use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::{BackBlastData, BackBlastType};
@@ -21,6 +22,7 @@ use std::io::Read;
 
 pub use processed_items_db_download::download_processed_items_csv;
 pub use q_line_up_download_db::download_q_line_up_csv;
+pub use users_db_download::users_db_csv_download;
 
 /// sync old backblasts to db.
 pub async fn sync_old_data_route(db_pool: web::Data<PgPool>) -> impl Responder {
