@@ -3,7 +3,7 @@ use crate::db::queries::users::{
 };
 use crate::shared::common_errors::AppError;
 use actix_web::{web, HttpResponse, Responder};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
 /// get pax tree list
@@ -39,8 +39,8 @@ async fn get_pax_relationship_data(db: &PgPool) -> Result<Vec<u8>, AppError> {
     }
 }
 
-#[derive(Serialize)]
-struct ParentPaxCSVItem {
+#[derive(Serialize, Deserialize)]
+pub struct ParentPaxCSVItem {
     /// f3 name of pax
     pub pax_name: String,
     /// optional slack id of pax

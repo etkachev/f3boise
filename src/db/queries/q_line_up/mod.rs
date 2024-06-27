@@ -110,3 +110,29 @@ pub async fn get_q_line_up_between_dates_for_ao(
     .await?;
     Ok(rows)
 }
+
+/// get all q line up db items for syncing
+pub async fn get_all_q_line_up_db_items(
+    db_pool: &PgPool,
+) -> Result<Vec<RawQLineUpDbEntry>, AppError> {
+    let rows: Vec<RawQLineUpDbEntry> = sqlx::query_as!(
+        RawQLineUpDbEntry,
+        r#"
+        SELECT qs, ao, date, closed, channel_id
+        FROM q_line_up
+        ORDER BY date ASC;
+        "#,
+    )
+    .fetch_all(db_pool)
+    .await?;
+    Ok(rows)
+}
+
+#[derive(Deserialize)]
+pub struct RawQLineUpDbEntry {
+    pub qs: String,
+    pub ao: String,
+    pub date: NaiveDate,
+    pub closed: bool,
+    pub channel_id: String,
+}

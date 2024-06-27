@@ -41,6 +41,24 @@ pub async fn process_items(
     Ok(())
 }
 
+/// db sync all processed items (tuple with 0 - item_type and 1 - item_id).
+pub async fn sync_db_processed_items(
+    db: &PgPool,
+    items: &[(String, String)],
+) -> Result<(), AppError> {
+    let mut transaction = db.begin().await.expect("Failed to begin transaction");
+
+    for (item_type, id) in items.iter() {
+        upsert_processed_item(&mut transaction, item_type, id).await?;
+    }
+
+    transaction
+        .commit()
+        .await
+        .expect("Could not commit transaction");
+    Ok(())
+}
+
 async fn upsert_processed_item(
     transaction: &mut Transaction<'_, Postgres>,
     item_type: &str,

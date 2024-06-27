@@ -30,9 +30,12 @@ use crate::web_api_routes::q_line_up::q_line_up_route;
 use crate::web_api_routes::region_data::ao_meta_data::ao_list_meta_data_route;
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::slash_commands::slack_slash_commands_route;
-use crate::web_api_routes::sync::db_sync::{sync_prod_back_blasts, sync_prod_pax_parents};
+use crate::web_api_routes::sync::db_sync::{
+    sync_processed_items, sync_prod_back_blasts, sync_prod_pax_parents,
+};
 use crate::web_api_routes::sync::{
-    download_processed_items_csv, sync_data_route, sync_old_data_route, sync_q_line_up,
+    download_processed_items_csv, download_q_line_up_csv, sync_data_route, sync_old_data_route,
+    sync_q_line_up,
 };
 use crate::web_api_routes::sync_user_img::sync_user_imgs_route;
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
@@ -189,13 +192,18 @@ pub fn run(
                     .route("/all", web::get().to(get_all_double_downs_route))
                     .route("/stats", web::get().to(get_double_down_stats_route)),
             )
-            .service(web::scope("/q_line_up").route("/list", web::get().to(q_line_up_route)))
+            .service(
+                web::scope("/q_line_up")
+                    .route("/list", web::get().to(q_line_up_route))
+                    .route("/download-csv", web::get().to(download_q_line_up_csv)),
+            )
             .service(
                 web::scope("/region").route("/workouts", web::get().to(ao_list_meta_data_route)),
             )
             .service(
                 web::scope("/processed_items")
-                    .route("/download_csv", web::get().to(download_processed_items_csv)),
+                    .route("/download_csv", web::get().to(download_processed_items_csv))
+                    .route("/sync-items-via-url", web::get().to(sync_processed_items)),
             )
             .app_data(web_app_data.clone())
             .app_data(app_state_data.clone())
