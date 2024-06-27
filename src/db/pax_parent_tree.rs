@@ -1,6 +1,6 @@
 use crate::shared::common_errors::AppError;
 use serde::{Deserialize, Serialize};
-use sqlx::{Postgres, Transaction};
+use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
 /// Upsert pax to parent relationship
@@ -30,8 +30,24 @@ pub async fn upsert_pax_parent_relationship(
     Ok(())
 }
 
+/// for syncing from other DB the entries of pax parent relationships
+pub async fn upsert_multiple_pax_parent_relationships(
+    db: &PgPool,
+    relationships: &[ParentPaxRelation],
+) -> Result<(), AppError> {
+    let mut transaction = db.begin().await.expect("Failed to begin transaction");
+    for r in relationships.iter() {
+        upsert_pax_parent_relationship(&mut transaction, r).await?;
+    }
+    transaction
+        .commit()
+        .await
+        .expect("Could not commit transaction");
+    Ok(())
+}
+
 /// db representation of parent pax relationship row.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ParentPaxRelation {
     /// f3 name of pax
     pub pax_name: String,

@@ -65,6 +65,20 @@ async fn upsert_processed_item(
     Ok(())
 }
 
+/// get all processed items in db
+pub async fn get_all_processed_items(db: &PgPool) -> Result<Vec<ProcessedItem>, AppError> {
+    let results: Vec<ProcessedItem> = sqlx::query_as!(
+        ProcessedItem,
+        r#"
+    SELECT id, item_type, item_id, initial_date_processed, date_updated, amt_processed
+    FROM processed_items;
+    "#,
+    )
+    .fetch_all(db)
+    .await?;
+    Ok(results)
+}
+
 pub async fn get_processed_items(
     db: &PgPool,
     items: &[String],

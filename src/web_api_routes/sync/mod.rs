@@ -1,4 +1,5 @@
 pub mod db_sync;
+mod processed_items_db_download;
 
 use crate::app_state::ao_data::AO;
 use crate::app_state::backblast_data::{BackBlastData, BackBlastType};
@@ -16,6 +17,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::io::Read;
+
+pub use processed_items_db_download::download_processed_items_csv;
 
 /// sync old backblasts to db.
 pub async fn sync_old_data_route(db_pool: web::Data<PgPool>) -> impl Responder {

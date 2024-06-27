@@ -30,8 +30,10 @@ use crate::web_api_routes::q_line_up::q_line_up_route;
 use crate::web_api_routes::region_data::ao_meta_data::ao_list_meta_data_route;
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::slash_commands::slack_slash_commands_route;
-use crate::web_api_routes::sync::db_sync::sync_prod_back_blasts;
-use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route, sync_q_line_up};
+use crate::web_api_routes::sync::db_sync::{sync_prod_back_blasts, sync_prod_pax_parents};
+use crate::web_api_routes::sync::{
+    download_processed_items_csv, sync_data_route, sync_old_data_route, sync_q_line_up,
+};
 use crate::web_api_routes::sync_user_img::sync_user_imgs_route;
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
@@ -146,6 +148,10 @@ pub fn run(
                     .route("/set-pax-parent", web::post().to(set_pax_parent_tree_route))
                     .route("/tree", web::get().to(get_pax_tree))
                     .route(
+                        "/sync-pax-parent-via-url",
+                        web::get().to(sync_prod_pax_parents),
+                    )
+                    .route(
                         "/download-parent-pax-csv",
                         web::get().to(download_pax_relationship_csv_route),
                     )
@@ -186,6 +192,10 @@ pub fn run(
             .service(web::scope("/q_line_up").route("/list", web::get().to(q_line_up_route)))
             .service(
                 web::scope("/region").route("/workouts", web::get().to(ao_list_meta_data_route)),
+            )
+            .service(
+                web::scope("/processed_items")
+                    .route("/download_csv", web::get().to(download_processed_items_csv)),
             )
             .app_data(web_app_data.clone())
             .app_data(app_state_data.clone())

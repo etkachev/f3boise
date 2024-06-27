@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    SELECT id, item_type, item_id, initial_date_processed, date_updated, amt_processed\n    FROM processed_items;\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "item_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "item_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "initial_date_processed",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 4,
+        "name": "date_updated",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 5,
+        "name": "amt_processed",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6c64e871e9933735e156f446c3619ea537d90101004ff2a1ed61b5284b45578e"
+}
