@@ -2,16 +2,22 @@ use crate::db::pax_parent_tree;
 use crate::db::pax_parent_tree::{F3Parent, ParentPaxRelation};
 use crate::db::queries::processed_items;
 use crate::db::save_back_blast;
+use crate::db::save_q_line_up;
+use crate::db::save_user::{upsert_user, DbUser};
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::pax_data::get_pax_tree::ParentPaxCSVItem;
 use crate::web_api_routes::sync::extract_back_blasts;
 use crate::web_api_routes::sync::processed_items_db_download::ProcessedCSVItem;
+use crate::web_api_routes::sync::q_line_up_download_db::QLineUpCSVItem;
+use crate::web_api_routes::sync::users_db_download::UserCSVItem;
 use actix_web::web::Bytes;
 use actix_web::{web, HttpResponse, Responder};
+use chrono::NaiveDate;
 use csv::Reader;
 use serde::Deserialize;
 use sqlx::PgPool;
 use std::io::{Cursor, Read};
+use uuid::Uuid;
 
 #[derive(Deserialize)]
 pub struct SyncProdReq {
@@ -90,6 +96,98 @@ fn extract_processed_items<R: Read>(mut rdr: Reader<R>) -> Result<Vec<(String, S
     }
 
     Ok(results)
+}
+
+/// route to sync db items for q line up table
+pub async fn sync_q_line_up_db(
+    db_pool: web::Data<PgPool>,
+    req: web::Query<SyncProdReq>,
+) -> impl Responder {
+    match fetch_and_sync_q_line_up(&req.url, &db_pool).await {
+        Ok(_) => HttpResponse::Ok().body("Success"),
+        Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+    }
+}
+
+async fn fetch_and_sync_q_line_up(url: &str, db: &PgPool) -> Result<(), AppError> {
+    let rdr = get_data_bytes_to_reader(url).await?;
+    let results = extract_q_line_up(rdr)?;
+    save_q_line_up::save_list(db, &results).await?;
+    Ok(())
+}
+
+fn extract_q_line_up<R: Read>(
+    mut rdr: Reader<R>,
+) -> Result<Vec<save_q_line_up::NewQLineUpDbEntry>, AppError> {
+    let mut results: Vec<save_q_line_up::NewQLineUpDbEntry> = vec![];
+
+    for record in rdr.deserialize() {
+        let record: QLineUpCSVItem = record?;
+        results.push(save_q_line_up::NewQLineUpDbEntry::from(record));
+    }
+
+    Ok(results)
+}
+
+impl From<QLineUpCSVItem> for save_q_line_up::NewQLineUpDbEntry {
+    fn from(value: QLineUpCSVItem) -> Self {
+        save_q_line_up::NewQLineUpDbEntry {
+            qs: value.qs.to_string(),
+            ao: value.ao.to_string(),
+            channel_id: value.channel_id.to_string(),
+            date: NaiveDate::parse_from_str(&value.date, "%Y-%m-%d").unwrap(),
+            closed: value.closed,
+            id: Uuid::new_v4(),
+        }
+    }
+}
+
+/// route to sync users from deployed url
+pub async fn sync_users_db(
+    db_pool: web::Data<PgPool>,
+    req: web::Query<SyncProdReq>,
+) -> impl Responder {
+    match fetch_and_sync_users_db(&req.url, &db_pool).await {
+        Ok(_) => HttpResponse::Ok().body("Success"),
+        Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+    }
+}
+
+async fn fetch_and_sync_users_db(url: &str, db: &PgPool) -> Result<(), AppError> {
+    let rdr = get_data_bytes_to_reader(url).await?;
+    let results = extract_users_from_csv(rdr)?;
+    let mut transaction = db.begin().await.expect("Failed to begin transaction");
+    for user in results.iter() {
+        upsert_user(&mut transaction, user).await?;
+    }
+    transaction
+        .commit()
+        .await
+        .expect("Could not commit transaction");
+    Ok(())
+}
+
+fn extract_users_from_csv<R: Read>(mut rdr: Reader<R>) -> Result<Vec<DbUser>, AppError> {
+    let mut results: Vec<DbUser> = vec![];
+
+    for record in rdr.deserialize() {
+        let record: UserCSVItem = record?;
+        results.push(DbUser::from(record));
+    }
+
+    Ok(results)
+}
+
+impl From<UserCSVItem> for DbUser {
+    fn from(value: UserCSVItem) -> Self {
+        DbUser {
+            name: value.name.to_string(),
+            email: value.email.to_string(),
+            slack_id: value.slack_id.to_string(),
+            img_url: value.img_url.clone(),
+            parent: None,
+        }
+    }
 }
 
 async fn get_data_bytes_to_reader(url: &str) -> Result<Reader<Cursor<Bytes>>, AppError> {
