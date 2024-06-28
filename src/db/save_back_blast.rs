@@ -59,6 +59,21 @@ pub async fn save_multiple(db_pool: &PgPool, list: &[BackBlastData]) -> Result<(
     Ok(())
 }
 
+/// sync backblasts to db (for syncing from other DB purposes).
+pub async fn sync_multiple(db_pool: &PgPool, list: &[BackBlastData]) -> Result<(), AppError> {
+    let mut transaction = db_pool.begin().await.expect("Failed to begin transaction");
+    for back_blast in list {
+        let db_bb = BackBlastDbEntry::from(back_blast);
+        sync_back_blast(&mut transaction, &db_bb).await?;
+    }
+
+    transaction
+        .commit()
+        .await
+        .expect("Could not commit transaction");
+    Ok(())
+}
+
 pub async fn save_single(db_pool: &PgPool, data: &BackBlastData) -> Result<String, AppError> {
     let db_bb = BackBlastDbEntry::from(data);
     let id = db_bb.id.to_string();
@@ -157,6 +172,46 @@ async fn save_back_blast(
     )
     .execute(&mut **transaction)
     .await?;
+
+    Ok(())
+}
+
+/// update backblast with expectation on sync from other db
+async fn sync_back_blast(
+    transaction: &mut Transaction<'_, Postgres>,
+    db_bb: &BackBlastDbEntry,
+) -> Result<(), AppError> {
+    sqlx::query!(
+        r#"
+    INSERT INTO back_blasts (id, ao, q, pax, date, bb_type, channel_id, active, title, moleskine, fngs)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+    ON CONFLICT ON CONSTRAINT back_blasts_channel_id_date_bb_type_key
+        DO UPDATE
+    SET ao = EXCLUDED.ao,
+        q = EXCLUDED.q,
+        pax = EXCLUDED.pax,
+        date = EXCLUDED.date,
+        bb_type = EXCLUDED.bb_type,
+        channel_id = EXCLUDED.channel_id,
+        active = EXCLUDED.active,
+        title = EXCLUDED.title,
+        moleskine = EXCLUDED.moleskine,
+        fngs = EXCLUDED.fngs;
+    "#,
+        db_bb.id,
+        db_bb.ao,
+        db_bb.q,
+        db_bb.pax,
+        db_bb.date,
+        db_bb.bb_type,
+        db_bb.channel_id,
+        db_bb.active,
+        db_bb.title,
+        db_bb.moleskine,
+        db_bb.fngs
+    )
+        .execute(&mut **transaction)
+        .await?;
 
     Ok(())
 }

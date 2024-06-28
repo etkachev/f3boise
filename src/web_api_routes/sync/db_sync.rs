@@ -37,7 +37,7 @@ pub async fn sync_prod_back_blasts(
 async fn fetch_and_sync_back_blasts(url: &str, db: &PgPool) -> Result<(), AppError> {
     let rdr = get_data_bytes_to_reader(url).await?;
     let results = extract_back_blasts(rdr)?;
-    save_back_blast::save_multiple(db, &results).await?;
+    save_back_blast::sync_multiple(db, &results).await?;
     Ok(())
 }
 
