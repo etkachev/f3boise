@@ -1,43 +1,19 @@
+mod back_blasts;
+mod double_downs;
+mod pax;
+mod processed_items;
+mod q_line_up;
+mod region;
+
 use crate::app_state::MutableAppState;
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::auth::get_key;
-use crate::web_api_routes::back_blast_data::ao_back_blast_stats::get_back_blast_stats_by_ao;
-use crate::web_api_routes::back_blast_data::ao_monthly_leaderboard::ao_monthly_leaderboard_route;
-use crate::web_api_routes::back_blast_data::back_blast_single::get_single_back_blast_data;
-use crate::web_api_routes::back_blast_data::csv_download_all::{
-    back_blasts_csv_html, download_back_blasts_csv_route,
-};
-use crate::web_api_routes::back_blast_data::pax_leaderboard_graph::pax_leaderboard_route;
-use crate::web_api_routes::back_blast_data::remind_missing_back_blasts::remind_missing_back_blasts;
-use crate::web_api_routes::back_blast_data::yearly_stats::get_yearly_stats_route;
-use crate::web_api_routes::back_blast_data::{
-    get_all_back_blasts_route, get_all_double_downs_route, get_double_down_stats_route,
-    get_missing_back_blasts, get_top_pax_data_route,
-};
 use crate::web_api_routes::interactive_events::interactive_events;
-use crate::web_api_routes::pax_data::get_pax_tree::{
-    download_pax_relationship_csv_route, get_pax_tree,
-};
-use crate::web_api_routes::pax_data::pax_leaderboards::post_pax_leaderboards;
-use crate::web_api_routes::pax_data::set_pax_parent::set_pax_parent_tree_route;
-use crate::web_api_routes::pax_data::stats::pax_stats_route;
-use crate::web_api_routes::pax_data::{
-    get_bad_data, get_pax_back_blasts, get_pax_double_downs, get_pax_info, get_users,
-};
-use crate::web_api_routes::q_line_up::q_line_up_route;
-use crate::web_api_routes::region_data::ao_meta_data::ao_list_meta_data_route;
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::slash_commands::slack_slash_commands_route;
-use crate::web_api_routes::sync::db_sync::{
-    sync_processed_items, sync_prod_back_blasts, sync_prod_pax_parents, sync_q_line_up_db,
-    sync_users_db,
-};
-use crate::web_api_routes::sync::{
-    download_processed_items_csv, download_q_line_up_csv, sync_data_route, sync_old_data_route,
-    sync_q_line_up, users_db_csv_download,
-};
+use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route, sync_q_line_up};
 use crate::web_api_routes::sync_user_img::sync_user_imgs_route;
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
@@ -140,75 +116,12 @@ pub fn run(
                 "/slash-commands",
                 web::post().to(slack_slash_commands_route),
             )
-            .route("/region-stats", web::get().to(get_yearly_stats_route))
-            .service(
-                web::scope("/pax")
-                    .route("/info", web::get().to(get_pax_info))
-                    .route("/back_blasts", web::get().to(get_pax_back_blasts))
-                    .route("/double_downs", web::get().to(get_pax_double_downs))
-                    .route("/all", web::get().to(get_users))
-                    .route("/bad-data", web::get().to(get_bad_data))
-                    .route("/post-leaderboard", web::get().to(post_pax_leaderboards))
-                    .route("/download_users_csv", web::get().to(users_db_csv_download))
-                    .route("/sync-users-via-url", web::get().to(sync_users_db))
-                    .route("/set-pax-parent", web::post().to(set_pax_parent_tree_route))
-                    .route("/tree", web::get().to(get_pax_tree))
-                    .route(
-                        "/sync-pax-parent-via-url",
-                        web::get().to(sync_prod_pax_parents),
-                    )
-                    .route(
-                        "/download-parent-pax-csv",
-                        web::get().to(download_pax_relationship_csv_route),
-                    )
-                    .route("/stats/{name}", web::get().to(pax_stats_route)),
-            )
-            .service(
-                web::scope("/back_blasts")
-                    .route("/all", web::get().to(get_all_back_blasts_route))
-                    .route("/missing", web::get().to(get_missing_back_blasts))
-                    .route("/top-pax", web::get().to(get_top_pax_data_route))
-                    .route(
-                        "/remind-missing-bb",
-                        web::get().to(remind_missing_back_blasts),
-                    )
-                    .route(
-                        "/monthly-leaderboard",
-                        web::get().to(ao_monthly_leaderboard_route),
-                    )
-                    .route(
-                        "/pax-leaderboard-graph",
-                        web::get().to(pax_leaderboard_route),
-                    )
-                    // .route("/test-png", web::get().to(test_png_route))
-                    .route("/download", web::get().to(back_blasts_csv_html))
-                    .route(
-                        "/download-csv",
-                        web::get().to(download_back_blasts_csv_route),
-                    )
-                    .route("/sync-via-url", web::get().to(sync_prod_back_blasts))
-                    .route("/single/{id}", web::get().to(get_single_back_blast_data))
-                    .route("/{ao_name}", web::get().to(get_back_blast_stats_by_ao)),
-            )
-            .service(
-                web::scope("/double_downs")
-                    .route("/all", web::get().to(get_all_double_downs_route))
-                    .route("/stats", web::get().to(get_double_down_stats_route)),
-            )
-            .service(
-                web::scope("/q_line_up")
-                    .route("/list", web::get().to(q_line_up_route))
-                    .route("/download-csv", web::get().to(download_q_line_up_csv))
-                    .route("/sync-items-via-url", web::get().to(sync_q_line_up_db)),
-            )
-            .service(
-                web::scope("/region").route("/workouts", web::get().to(ao_list_meta_data_route)),
-            )
-            .service(
-                web::scope("/processed_items")
-                    .route("/download_csv", web::get().to(download_processed_items_csv))
-                    .route("/sync-items-via-url", web::get().to(sync_processed_items)),
-            )
+            .service(pax::service())
+            .service(back_blasts::service())
+            .service(double_downs::service())
+            .service(q_line_up::service())
+            .service(region::service())
+            .service(processed_items::service())
             .app_data(web_app_data.clone())
             .app_data(app_state_data.clone())
             .app_data(db_pool.clone())
