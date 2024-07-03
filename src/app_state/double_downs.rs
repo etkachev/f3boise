@@ -6,6 +6,7 @@ use std::ops::Range;
 pub enum DoubleDownProgram {
     WolfPax,
     KnightForge,
+    General,
 }
 
 impl DoubleDownProgram {
@@ -18,6 +19,7 @@ impl DoubleDownProgram {
                 NaiveDate::from_ymd_opt(2023, 7, 9).unwrap()
                     ..NaiveDate::from_ymd_opt(2024, 7, 5).unwrap()
             }
+            DoubleDownProgram::General => NaiveDate::MIN..NaiveDate::MAX,
         }
     }
 }
@@ -27,14 +29,18 @@ impl Display for DoubleDownProgram {
         let str = match self {
             DoubleDownProgram::WolfPax => "WolfPax",
             DoubleDownProgram::KnightForge => "KnightForge",
+            DoubleDownProgram::General => "General",
         }
         .to_string();
         write!(f, "{}", str)
     }
 }
 
-const PROGRAM_LIST: [DoubleDownProgram; 2] =
-    [DoubleDownProgram::KnightForge, DoubleDownProgram::WolfPax];
+const PROGRAM_LIST: [DoubleDownProgram; 3] = [
+    DoubleDownProgram::KnightForge,
+    DoubleDownProgram::WolfPax,
+    DoubleDownProgram::General,
+];
 
 impl From<&NaiveDate> for DoubleDownProgram {
     fn from(value: &NaiveDate) -> Self {
@@ -45,7 +51,7 @@ impl From<&NaiveDate> for DoubleDownProgram {
         }
 
         // default
-        DoubleDownProgram::WolfPax
+        DoubleDownProgram::General
     }
 }
 
@@ -61,5 +67,12 @@ mod tests {
         let end = NaiveDate::from_ymd_opt(2024, 7, 4).unwrap();
         let program = DoubleDownProgram::from(&end);
         assert_eq!(program, DoubleDownProgram::KnightForge);
+    }
+
+    #[test]
+    fn test_general() {
+        let date = NaiveDate::from_ymd_opt(2024, 7, 6).unwrap();
+        let program = DoubleDownProgram::from(&date);
+        assert_eq!(program, DoubleDownProgram::General);
     }
 }
