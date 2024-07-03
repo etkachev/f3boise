@@ -3,7 +3,7 @@ use crate::db::pax_parent_tree::{F3Parent, ParentPaxRelation};
 use crate::db::queries::processed_items;
 use crate::db::save_back_blast;
 use crate::db::save_q_line_up;
-use crate::db::save_user::{upsert_user, DbUser};
+use crate::db::save_user::{sync_user, DbUser};
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::pax_data::get_pax_tree::ParentPaxCSVItem;
 use crate::web_api_routes::sync::extract_back_blasts;
@@ -12,7 +12,7 @@ use crate::web_api_routes::sync::q_line_up_download_db::QLineUpCSVItem;
 use crate::web_api_routes::sync::users_db_download::UserCSVItem;
 use actix_web::web::Bytes;
 use actix_web::{web, HttpResponse, Responder};
-use chrono::NaiveDate;
+use chrono::{NaiveDate, NaiveDateTime};
 use csv::Reader;
 use serde::Deserialize;
 use sqlx::PgPool;
@@ -158,7 +158,7 @@ async fn fetch_and_sync_users_db(url: &str, db: &PgPool) -> Result<(), AppError>
     let results = extract_users_from_csv(rdr)?;
     let mut transaction = db.begin().await.expect("Failed to begin transaction");
     for user in results.iter() {
-        upsert_user(&mut transaction, user).await?;
+        sync_user(&mut transaction, user).await?;
     }
     transaction
         .commit()
@@ -186,6 +186,8 @@ impl From<UserCSVItem> for DbUser {
             slack_id: value.slack_id.to_string(),
             img_url: value.img_url.clone(),
             parent: None,
+            create_date: NaiveDateTime::parse_from_str(&value.create_date, "%Y-%m-%d %H:%M:%S%.f")
+                .unwrap_or_default(),
         }
     }
 }

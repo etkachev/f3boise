@@ -36,6 +36,7 @@ pub struct UserCSVItem {
     pub email: String,
     pub img_url: Option<String>,
     pub parent: Option<String>,
+    pub create_date: String,
 }
 
 impl From<DbUser> for UserCSVItem {
@@ -46,6 +47,7 @@ impl From<DbUser> for UserCSVItem {
             email: value.email.to_string(),
             img_url: value.img_url.clone(),
             parent: value.parent.map(|p| p.to_string()),
+            create_date: value.create_date.to_string(),
         }
     }
 }

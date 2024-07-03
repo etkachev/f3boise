@@ -71,6 +71,7 @@ impl From<DbUser> for F3User {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::NaiveDateTime;
     use serde_json::json;
 
     #[test]
@@ -85,6 +86,7 @@ mod tests {
                 "name": "Canuck",
                 "slackId": "U040AL30FA8"
             })),
+            create_date: NaiveDateTime::default(),
         };
 
         let f3_user = F3User::from(db_user);

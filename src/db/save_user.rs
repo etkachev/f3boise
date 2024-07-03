@@ -1,5 +1,6 @@
 use crate::shared::common_errors::AppError;
 use crate::users::f3_user::F3User;
+use chrono::NaiveDateTime;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
@@ -11,6 +12,7 @@ pub struct DbUser {
     pub email: String,
     pub img_url: Option<String>,
     pub parent: Option<serde_json::Value>,
+    pub create_date: NaiveDateTime,
 }
 
 impl From<&F3User> for DbUser {
@@ -26,6 +28,7 @@ impl From<&F3User> for DbUser {
             email: user.email.to_string(),
             img_url: user.img_url.clone(),
             parent: None,
+            create_date: NaiveDateTime::default(),
         }
     }
 }
@@ -50,6 +53,35 @@ pub async fn upsert_user(
         user.name,
         user.email,
         user.img_url
+    )
+    .execute(&mut **transaction)
+    .await?;
+
+    Ok(())
+}
+
+/// Sync user to db from other db if slack_id doesn't exist already
+pub async fn sync_user(
+    transaction: &mut Transaction<'_, Postgres>,
+    user: &DbUser,
+) -> Result<(), AppError> {
+    let id = Uuid::new_v4();
+    sqlx::query!(
+        r#"
+    INSERT INTO users (id, slack_id, name, email, img_url)
+    VALUES($1,$2,$3,$4,$5)
+    ON CONFLICT (slack_id)
+        DO UPDATE
+        SET name = EXCLUDED.name,
+            img_url = EXCLUDED.img_url,
+            create_date = $6;
+    "#,
+        id,
+        user.slack_id,
+        user.name,
+        user.email,
+        user.img_url,
+        user.create_date
     )
     .execute(&mut **transaction)
     .await?;

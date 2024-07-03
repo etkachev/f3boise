@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    INSERT INTO users (id, slack_id, name, email, img_url)\n    VALUES($1,$2,$3,$4,$5)\n    ON CONFLICT (slack_id)\n        DO UPDATE\n        SET name = EXCLUDED.name,\n            img_url = EXCLUDED.img_url,\n            create_date = $6;\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Timestamp"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7b7a0512144956b9c3b633ca5772aee183601cb263b4aaafd9e9f65c994cf03c"
+}

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT u.slack_id, u.name, u.email, u.img_url, COALESCE(ppr.parent, 'null') as parent\n        FROM users u\n        LEFT JOIN parent_pax_relationships ppr ON lower(u.name) = lower(ppr.pax_name);\n    ",
+  "query": "\n        SELECT u.slack_id, u.name, u.email, u.img_url, COALESCE(ppr.parent, 'null') as parent, u.create_date\n        FROM users u\n        LEFT JOIN parent_pax_relationships ppr ON lower(u.name) = lower(ppr.pax_name);\n    ",
   "describe": {
     "columns": [
       {
@@ -27,6 +27,11 @@
         "ordinal": 4,
         "name": "parent",
         "type_info": "Json"
+      },
+      {
+        "ordinal": 5,
+        "name": "create_date",
+        "type_info": "Timestamp"
       }
     ],
     "parameters": {
@@ -37,8 +42,9 @@
       false,
       false,
       true,
-      null
+      null,
+      false
     ]
   },
-  "hash": "0c3e4101bff9c15fe8b64bbf5bf95161f63060fd6e7c65156e595835f0fb5979"
+  "hash": "e86bf1b5619e14b6d94f40222c04faf0d88fe85b2e2061c473707bc77e265d9e"
 }
