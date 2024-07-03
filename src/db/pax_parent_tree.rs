@@ -20,7 +20,7 @@ pub async fn upsert_pax_parent_relationship(
             parent = EXCLUDED.parent;
     "#,
         id,
-        relationship.pax_name,
+        relationship.pax_name.to_lowercase(),
         relationship.slack_id,
         parent_json,
     )
