@@ -13,7 +13,9 @@ use crate::web_api_routes::auth::get_key;
 use crate::web_api_routes::interactive_events::interactive_events;
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::slash_commands::slack_slash_commands_route;
-use crate::web_api_routes::sync::{sync_data_route, sync_data_to_state, sync_old_data_route, sync_q_line_up};
+use crate::web_api_routes::sync::{
+    sync_data_route, sync_data_to_state, sync_old_data_route, sync_q_line_up,
+};
 use crate::web_api_routes::sync_user_img::sync_user_imgs_route;
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
@@ -85,6 +87,7 @@ pub fn init_web_state() -> MutableWebState {
     let auth_token = env::var("BOT_OAUTH_TOKEN").expect("No auth token set in env");
     let signing_secret = env::var("SLACK_SIGNING_SECRET").expect("No Signing secret set in env");
     let verify_token = env::var("DEPRECATED_VERIFY_TOKEN").expect("No Verify token set in env");
+    let boise_key = env::var("BOISE_KEY").expect("No Boise key set in env");
     let client = get_oauth_client();
     let base_api_url = format!("https://{}/api/", SLACK_SERVER);
     MutableWebState {
@@ -93,6 +96,7 @@ pub fn init_web_state() -> MutableWebState {
         oauth: client,
         signing_secret,
         verify_token,
+        boise_key,
     }
 }
 
