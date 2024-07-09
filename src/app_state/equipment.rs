@@ -12,6 +12,7 @@ pub enum AoEquipment {
     RunningShoes,
     Headlamp,
     HeartRateMonitor,
+    StopWatch,
     Other(String),
 }
 
@@ -44,6 +45,9 @@ impl From<&AoEquipment> for OptionElement {
             AoEquipment::WeightVest => {
                 OptionElement::new(&format!("{} 🦺", AoEquipment::WeightVest), "weight_vest")
             }
+            AoEquipment::StopWatch => {
+                OptionElement::new(&format!("{} ⏱️", AoEquipment::StopWatch), "stop_watch")
+            }
             AoEquipment::Other(other) => OptionElement::new(other, other),
         }
     }
@@ -65,6 +69,7 @@ impl FromStr for AoEquipment {
                 AoEquipment::HeartRateMonitor
             }
             "headlamp" | "head lamp" | "head_lamp" => AoEquipment::Headlamp,
+            "stopwatch" | "stop_watch" => AoEquipment::StopWatch,
             other => AoEquipment::Other(other.to_string()),
         };
 
@@ -82,6 +87,7 @@ impl Display for AoEquipment {
             AoEquipment::RunningShoes => String::from("Running Shoes"),
             AoEquipment::Headlamp => String::from("Headlamp"),
             AoEquipment::HeartRateMonitor => String::from("HR Monitor"),
+            AoEquipment::StopWatch => String::from("Stopwatch"),
             AoEquipment::Other(other) => other.to_string(),
         };
         write!(f, "{}", str)
