@@ -125,6 +125,7 @@ pub fn run(
                 CookieSessionStore::default(),
                 get_key(),
             ))
+            .wrap(cors::get_cors_config())
             .route("/", web::get().to(index))
             .route("/health_check", web::get().to(health_check))
             .route("/events", web::post().to(slack_events))
@@ -151,4 +152,14 @@ pub fn run(
     .run();
 
     Ok(server)
+}
+
+mod cors {
+    use actix_cors::Cors;
+
+    pub fn get_cors_config() -> Cors {
+        Cors::default()
+            .allowed_origin("http://localhost:8100")
+            .allowed_origin("https://f3boise.com")
+    }
 }
