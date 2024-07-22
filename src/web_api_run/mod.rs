@@ -161,5 +161,6 @@ mod cors {
         Cors::default()
             .allowed_origin("http://localhost:8100")
             .allowed_origin("https://f3boise.com")
+            .allowed_origin("https://f3-boise.web.app")
     }
 }
