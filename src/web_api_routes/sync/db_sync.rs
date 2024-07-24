@@ -1,6 +1,7 @@
+use crate::app_state::backblast_data::BackBlastData;
 use crate::db::pax_parent_tree;
 use crate::db::pax_parent_tree::{F3Parent, ParentPaxRelation};
-use crate::db::queries::processed_items;
+use crate::db::queries::{all_back_blasts, processed_items};
 use crate::db::save_back_blast;
 use crate::db::save_q_line_up;
 use crate::db::save_user::{sync_user, DbUser};
@@ -37,8 +38,43 @@ pub async fn sync_prod_back_blasts(
 async fn fetch_and_sync_back_blasts(url: &str, db: &PgPool) -> Result<(), AppError> {
     let rdr = get_data_bytes_to_reader(url).await?;
     let results = extract_back_blasts(rdr)?;
+    let to_delete = get_to_delete_back_blasts(db, &results).await?;
+    println!("ids to delete: {:?}", to_delete);
     save_back_blast::sync_multiple(db, &results).await?;
     Ok(())
+}
+
+async fn get_to_delete_back_blasts(
+    db: &PgPool,
+    to_sync: &[BackBlastData],
+) -> Result<Vec<String>, AppError> {
+    let existing = all_back_blasts::get_full_db_back_blasts(db).await?;
+    let existing = existing
+        .iter()
+        .map(BackBlastData::from)
+        .collect::<Vec<BackBlastData>>();
+    let results = existing
+        .iter()
+        .filter_map(|existing_bb| {
+            if let Some(id) = &existing_bb.id {
+                // loop through old db and find same bb as existing db.
+                let exists_in_old_db = to_sync.iter().any(|old_item| {
+                    old_item.ao == existing_bb.ao
+                        && old_item.date == existing_bb.date
+                        && old_item.bb_type == existing_bb.bb_type
+                });
+
+                if !exists_in_old_db {
+                    Some(id.to_string())
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<String>>();
+    Ok(results)
 }
 
 /// sync prod table for pax_parents_relationships
