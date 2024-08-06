@@ -159,6 +159,7 @@ mod cors {
 
     pub fn get_cors_config() -> Cors {
         Cors::default()
+            .allow_any_method()
             .allowed_origin("http://localhost:8100")
             .allowed_origin("https://f3boise.com")
             .allowed_origin("https://f3-boise.web.app")
