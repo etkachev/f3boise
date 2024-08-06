@@ -1,6 +1,7 @@
 use crate::app_state::backblast_data::BackBlastData;
 use crate::app_state::MutableAppState;
 use crate::db::queries::users::get_slack_id_map;
+use crate::shared::admin::admin_users;
 use crate::shared::common_errors::AppError;
 use crate::shared::constants;
 use crate::slack_api::channels::public_channels::PublicChannels;
@@ -111,7 +112,9 @@ fn user_allowed_to_edit(
     bb: &BackBlastData,
     user_edit: &BackBlastUsersEdit,
 ) -> bool {
-    let slack_ids = user_edit.convert_to_slack_ids(&bb.qs);
+    let mut slack_ids = user_edit.convert_to_slack_ids(&bb.qs);
+    let admins = admin_users();
+    slack_ids.extend(admins);
     slack_ids.iter().any(|id| &user.id == id)
 }
 

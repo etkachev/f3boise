@@ -22,7 +22,7 @@ pub async fn post_pax_leaderboards(
     web_state: web::Data<MutableWebState>,
     req: HttpRequest,
 ) -> impl Responder {
-    if internal_auth::valid_internal_request(&req).is_ok() {
+    if internal_auth::valid_internal_request(&req, &web_state.boise_key).is_ok() {
         let pax_data = get_pax_data(&db_pool).await;
         let item_ids = pax_data.get_item_ids();
         let existing_processed = filter_processed_items(&db_pool, &item_ids, &pax_data).await;

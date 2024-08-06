@@ -1,3 +1,4 @@
+pub mod admin;
 pub mod common_errors;
 pub mod constants;
 pub mod processed_type;

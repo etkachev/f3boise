@@ -22,6 +22,7 @@ RUN cargo chef cook --release --recipe-path recipe.json
 # all layers should be cached.
 COPY . .
 ENV SQLX_OFFLINE true
+
 # Let's build our binary!
 # We'll use the release profile to make it faaaast
 RUN cargo build --release --bin f3webapi
@@ -44,6 +45,8 @@ COPY --from=builder /app/target/release/f3webapi f3webapi
 COPY configuration configuration
 # We will need migration files as well for syncing old
 COPY migration_files migration_files
+# We will need migration scripts themselves
+COPY --from=builder /app/migrations migrations
 # Copy assets like fonts to be used
 COPY assets assets
 ENV APP_ENVIRONMENT production

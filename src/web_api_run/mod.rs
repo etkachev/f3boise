@@ -13,7 +13,9 @@ use crate::web_api_routes::auth::get_key;
 use crate::web_api_routes::interactive_events::interactive_events;
 use crate::web_api_routes::slack_events::slack_events;
 use crate::web_api_routes::slash_commands::slack_slash_commands_route;
-use crate::web_api_routes::sync::{sync_data_route, sync_old_data_route, sync_q_line_up};
+use crate::web_api_routes::sync::{
+    sync_data_route, sync_data_to_state, sync_old_data_route, sync_q_line_up,
+};
 use crate::web_api_routes::sync_user_img::sync_user_imgs_route;
 use crate::web_api_state::{MutableWebState, SLACK_SERVER};
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
@@ -31,6 +33,7 @@ pub struct Application {
 
 impl Application {
     pub async fn build(configuration: Settings) -> Result<Self, AppError> {
+        println!("starting state for app....");
         let connection_pool = get_connection_pool(&configuration.database);
 
         // TODO update
@@ -43,6 +46,22 @@ impl Application {
         );
         let listener = TcpListener::bind(address)?;
         let port = listener.local_addr().unwrap().port();
+
+        let start = std::time::Instant::now();
+        let migration_path = std::path::Path::new("migrations");
+        let migrator = sqlx::migrate::Migrator::new(migration_path)
+            .await
+            .expect("Couldn't read custom migration folder");
+
+        migrator.run(&connection_pool).await?;
+        let duration = start.elapsed();
+        // sqlx::migrate!().run(&connection_pool).await?;
+        println!("Migrations successfully applied! - {:?}", duration);
+
+        let start = std::time::Instant::now();
+        sync_data_to_state(&connection_pool, &web_state, &app_state).await?;
+        let duration = start.elapsed();
+        println!("Finished sync - {:?}", duration);
 
         let server = run(web_state, app_state, listener, connection_pool)?;
         Ok(Self { port, server })
@@ -60,7 +79,7 @@ impl Application {
 pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
     PgPoolOptions::new()
         .min_connections(1)
-        .acquire_timeout(std::time::Duration::from_secs(2))
+        .acquire_timeout(std::time::Duration::from_secs(10))
         .connect_lazy_with(configuration.with_db())
 }
 
@@ -68,6 +87,7 @@ pub fn init_web_state() -> MutableWebState {
     let auth_token = env::var("BOT_OAUTH_TOKEN").expect("No auth token set in env");
     let signing_secret = env::var("SLACK_SIGNING_SECRET").expect("No Signing secret set in env");
     let verify_token = env::var("DEPRECATED_VERIFY_TOKEN").expect("No Verify token set in env");
+    let boise_key = env::var("BOISE_KEY").expect("No Boise key set in env");
     let client = get_oauth_client();
     let base_api_url = format!("https://{}/api/", SLACK_SERVER);
     MutableWebState {
@@ -76,6 +96,7 @@ pub fn init_web_state() -> MutableWebState {
         oauth: client,
         signing_secret,
         verify_token,
+        boise_key,
     }
 }
 
@@ -104,6 +125,7 @@ pub fn run(
                 CookieSessionStore::default(),
                 get_key(),
             ))
+            .wrap(cors::get_cors_config())
             .route("/", web::get().to(index))
             .route("/health_check", web::get().to(health_check))
             .route("/events", web::post().to(slack_events))
@@ -130,4 +152,16 @@ pub fn run(
     .run();
 
     Ok(server)
+}
+
+mod cors {
+    use actix_cors::Cors;
+
+    pub fn get_cors_config() -> Cors {
+        Cors::default()
+            .allow_any_method()
+            .allowed_origin("http://localhost:8100")
+            .allowed_origin("https://f3boise.com")
+            .allowed_origin("https://f3-boise.web.app")
+    }
 }

@@ -14,6 +14,7 @@ pub enum AppError {
     Usvg(resvg::usvg::Error),
     Reqwest(reqwest::Error),
     Uuid(uuid::Error),
+    SqlxMigrate(sqlx::migrate::MigrateError),
     General(String),
 }
 
@@ -82,5 +83,11 @@ impl From<reqwest::Error> for AppError {
 impl From<uuid::Error> for AppError {
     fn from(err: uuid::Error) -> Self {
         AppError::Uuid(err)
+    }
+}
+
+impl From<sqlx::migrate::MigrateError> for AppError {
+    fn from(err: sqlx::migrate::MigrateError) -> Self {
+        AppError::SqlxMigrate(err)
     }
 }
