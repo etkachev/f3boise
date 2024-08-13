@@ -28,6 +28,7 @@ pub enum AO {
     DarkStride,
     BernieFisher,
     WestCanyonElementary,
+    EmmettCityPark,
     FirstF,
     DR,
     Unknown(String),
@@ -114,6 +115,7 @@ impl AO {
             AO::DarkStride => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::BernieFisher => HashSet::from([Weekday::Mon, Weekday::Thu]),
             AO::WestCanyonElementary => HashSet::from([Weekday::Wed]),
+            AO::EmmettCityPark => HashSet::from([Weekday::Thu]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
@@ -141,6 +143,7 @@ impl AO {
             AO::DarkStride => "Dark Stride",
             AO::BernieFisher => "Bernie Fisher Park",
             AO::WestCanyonElementary => "West Canyon Elementary",
+            AO::EmmettCityPark => "Emmett City Park",
             AO::DR => "DR",
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -201,6 +204,7 @@ impl AO {
                 _ => None,
             },
             Weekday::Thu => match self {
+                AO::EmmettCityPark => Some(six),
                 ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
@@ -239,6 +243,7 @@ impl AO {
             AO::DarkStride => AoType::Running,
             AO::BernieFisher => AoType::Bootcamp,
             AO::WestCanyonElementary => AoType::Bootcamp,
+            AO::EmmettCityPark => AoType::Bootcamp,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
         }
@@ -272,6 +277,7 @@ impl AO {
             AO::DarkStride => const_names::DARK_STRIDE_CHANNEL_ID,
             AO::BernieFisher => const_names::BERNIE_FISHER_PARK_CHANNEL_ID,
             AO::WestCanyonElementary => const_names::WEST_CANYON_ELEMENTARY_CHANNEL_ID,
+            AO::EmmettCityPark => const_names::EMMETT_CITY_PARK_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -296,6 +302,7 @@ impl AO {
             AO::DarkStride => Some("2887 W Tubac Dr, Meridian, ID  83646"),
             AO::BernieFisher => Some("201 W Main St, Kuna, ID 83634"),
             AO::WestCanyonElementary => Some("19548 Ustick Rd, Caldwell, ID 83607"),
+            AO::EmmettCityPark => Some("E Main St, Emmett, ID 83617"),
             AO::RuckershipEast
             | AO::RuckershipWest
             | AO::BlackOps
@@ -325,6 +332,7 @@ impl AO {
             AO::DarkStride => Some(const_names::DARK_STRIDE_GOOGLE_MAPS),
             AO::BernieFisher => Some(const_names::BERNIE_FISHER_PARK_GOOGLE_MAPS),
             AO::WestCanyonElementary => Some(const_names::WEST_CANYON_ELEMENTARY_GOOGLE_MAPS),
+            AO::EmmettCityPark => Some(const_names::EMMETT_CITY_PARK_GOOGLE_MAPS),
             AO::RuckershipWest | AO::RuckershipEast => None,
             AO::DR | AO::BlackOps | AO::FirstF => None,
             AO::Unknown(_) => None,
@@ -364,6 +372,7 @@ impl AO {
             const_names::DARK_STRIDE_CHANNEL_ID => AO::DarkStride,
             const_names::BERNIE_FISHER_PARK_CHANNEL_ID => AO::BernieFisher,
             const_names::WEST_CANYON_ELEMENTARY_CHANNEL_ID => AO::WestCanyonElementary,
+            const_names::EMMETT_CITY_PARK_CHANNEL_ID => AO::EmmettCityPark,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
         }
@@ -395,6 +404,7 @@ impl Clone for AO {
             AO::DarkStride => AO::DarkStride,
             AO::BernieFisher => AO::BernieFisher,
             AO::WestCanyonElementary => AO::WestCanyonElementary,
+            AO::EmmettCityPark => AO::EmmettCityPark,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
     }
@@ -424,6 +434,7 @@ impl Display for AO {
             AO::DarkStride => const_names::DARK_STRIDE,
             AO::BernieFisher => const_names::BERNIE_FISHER_PARK,
             AO::WestCanyonElementary => const_names::WEST_CANYON_ELEMENTARY,
+            AO::EmmettCityPark => const_names::EMMETT_CITY_PARK,
             AO::DR => "",
             AO::Unknown(_) => "",
         };
@@ -467,6 +478,7 @@ impl From<String> for AO {
             const_names::DARK_STRIDE => AO::DarkStride,
             const_names::BERNIE_FISHER_PARK => AO::BernieFisher,
             const_names::WEST_CANYON_ELEMENTARY => AO::WestCanyonElementary,
+            const_names::EMMETT_CITY_PARK => AO::EmmettCityPark,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
         }
@@ -509,6 +521,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::DarkStride => AO::DarkStride,
         PublicChannels::BernieFisher => AO::BernieFisher,
         PublicChannels::WestCanyonElementary => AO::WestCanyonElementary,
+        PublicChannels::EmmettCityPark => AO::EmmettCityPark,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
@@ -609,24 +622,29 @@ pub mod const_names {
     pub const WEST_CANYON_ELEMENTARY_GOOGLE_MAPS: &str =
         "https://maps.app.goo.gl/4vsNLgCh2RRuFjUe8";
 
+    pub const EMMETT_CITY_PARK: &str = "otb-emmett-city-park";
+    pub const EMMETT_CITY_PARK_CHANNEL_ID: &str = "C07H4CVU5LH";
+    pub const EMMETT_CITY_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/nWQgtsxqEQ7wEoiZ9";
+
     /// full list of active aos
-    pub const AO_LIST: [AO; 21] = [
+    pub const AO_LIST: [AO; 22] = [
         AO::Backyard,
         AO::Bellagio,
         AO::BernieFisher,
         AO::BlackDiamond,
         AO::BlackOps,
-        AO::FirstF,
         AO::Bleach,
         AO::CamelsBack,
+        AO::DarkStride,
+        AO::EmmettCityPark,
+        AO::FirstF,
         AO::Gem,
+        AO::GooseDynasty,
         AO::IronMountain,
         AO::OldGlory,
         AO::Rebel,
         AO::ReidMerrill,
-        AO::DarkStride,
         AO::Rise,
-        AO::GooseDynasty,
         AO::RuckershipEast,
         AO::RuckershipWest,
         AO::Tower,
