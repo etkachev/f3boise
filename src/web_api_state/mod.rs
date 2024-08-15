@@ -44,6 +44,8 @@ pub struct MutableWebState {
     pub signing_secret: String,
     /// Deprecated verify token
     pub verify_token: String,
+    /// secret key for handling internal calls
+    pub boise_key: String,
 }
 
 impl MutableWebState {
@@ -333,6 +335,7 @@ impl Default for MutableWebState {
             oauth: get_oauth_client(),
             signing_secret: String::new(),
             verify_token: String::new(),
+            boise_key: String::new(),
         }
     }
 }

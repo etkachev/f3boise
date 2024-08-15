@@ -1,5 +1,4 @@
 use crate::shared::common_errors::AppError;
-use crate::web_api_routes::auth::internal_auth::BOISE_KEY;
 use url::Url;
 
 pub async fn trigger_remind_missing_bb(base_url: &str) -> Result<(), AppError> {
@@ -29,7 +28,7 @@ fn build_client() -> Result<reqwest::Client, AppError> {
     let mut headers = reqwest::header::HeaderMap::new();
     headers.insert(
         "X-F3Boise-Key",
-        reqwest::header::HeaderValue::from_static(BOISE_KEY),
+        reqwest::header::HeaderValue::from_static("DEPRECATED_BOISE_KEY"),
     );
     let client = reqwest::Client::builder()
         .default_headers(headers)
