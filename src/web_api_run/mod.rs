@@ -148,8 +148,8 @@ pub fn run(
             .app_data(app_state_data.clone())
             .app_data(db_pool.clone())
     })
-    .listen(tcp_listener)?
-    .run();
+        .listen(tcp_listener)?
+        .run();
 
     Ok(server)
 }
@@ -159,6 +159,7 @@ mod cors {
 
     pub fn get_cors_config() -> Cors {
         Cors::default()
+            .allow_any_header()
             .allow_any_method()
             .allowed_origin("http://localhost:8100")
             .allowed_origin("https://f3boise.com")
