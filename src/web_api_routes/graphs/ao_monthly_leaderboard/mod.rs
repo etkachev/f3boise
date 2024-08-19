@@ -2,7 +2,7 @@ use crate::app_state::ao_data::const_names::AO_LIST;
 use crate::db::queries::all_back_blasts::{get_all_within_date_range, BackBlastJsonData};
 use crate::shared::common_errors::AppError;
 use crate::shared::time::local_boise_time;
-use crate::slack_api::files::request::FileUploadRequest;
+use crate::slack_api::files::request::FileUpload;
 use crate::web_api_routes::graphs::{graph_generator, GraphWrapper};
 use crate::web_api_state::MutableWebState;
 use charts::BarLabelPosition;
@@ -24,16 +24,17 @@ pub async fn get_ao_monthly_stats_graph(
     let ao_monthly_stats = AoMonthlyStatsGraph::new(bb_list, start_date);
     let file = graph_generator(ao_monthly_stats)?;
 
-    let file_request = FileUploadRequest::new(
-        vec![channel_id],
-        file,
-        "monthly-leaderboard.png",
-        start_date
-            .format("Here are some stats for our AOs. Showing avg posts per BD for month of %b %Y")
-            .to_string()
-            .as_str(),
-    );
     let start = Instant::now();
+
+    let file_request = FileUpload::new(&channel_id, file, "monthly-leaderboard.png", "image/png")
+        .with_title(
+            start_date
+                .format(
+                    "Here are some stats for our AOs. Showing avg posts per BD for month of %b %Y",
+                )
+                .to_string()
+                .as_str(),
+        );
     // std::fs::write("ao.png", file).unwrap();
     web_state.upload_file(file_request).await?;
     println!("upload file done: {:?}", start.elapsed());

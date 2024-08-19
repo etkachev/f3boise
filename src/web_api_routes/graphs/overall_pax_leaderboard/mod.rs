@@ -4,7 +4,7 @@ use crate::db::queries::all_back_blasts::{
 };
 use crate::shared::common_errors::AppError;
 use crate::shared::string_utils::resolve_date_range;
-use crate::slack_api::files::request::FileUploadRequest;
+use crate::slack_api::files::request::FileUpload;
 use crate::web_api_routes::graphs::{graph_generator, GraphWrapper};
 use crate::web_api_state::MutableWebState;
 use charts::BarLabelPosition;
@@ -29,12 +29,10 @@ pub async fn post_overall_pax_leaderboard_graph(
         "Here are top 10 PAX overall. From {} to {}",
         start_formatted, end_formatted
     );
-    let file_request = FileUploadRequest::new(
-        vec![channel_id],
-        png,
-        "top-10-pax-overall.png",
-        text.as_str(),
-    );
+
+    let file_request =
+        FileUpload::new(&channel_id, png, "top-10-pax-overall.png", "image/png").with_title(&text);
+
     web_state.upload_file(file_request).await?;
     Ok(())
 }
@@ -56,14 +54,12 @@ pub async fn post_overall_pax_dd_leaderboard_graph(
         start_formatted, end_formatted
     );
 
-    // std::fs::write("dd.png", png)?;
-    let file_request = FileUploadRequest::new(
-        vec![channel_id],
-        png,
-        "top-10-dd-pax-overall.png",
-        text.as_str(),
-    );
+    let file_request = FileUpload::new(&channel_id, png, "top-10-dd-pax-overall.png", "image/png")
+        .with_title(&text);
+
     web_state.upload_file(file_request).await?;
+
+    // std::fs::write("dd.png", png)?;
     Ok(())
 }
 

@@ -4,7 +4,7 @@ use crate::db::queries::all_back_blasts::back_blasts_by_ao::back_blasts_by_chann
 use crate::db::queries::all_back_blasts::BackBlastJsonData;
 use crate::shared::common_errors::AppError;
 use crate::shared::time::local_boise_time;
-use crate::slack_api::files::request::FileUploadRequest;
+use crate::slack_api::files::request::FileUpload;
 use crate::web_api_routes::graphs::{graph_generator, GraphWrapper};
 use crate::web_api_state::MutableWebState;
 use charts::BarLabelPosition;
@@ -37,8 +37,10 @@ pub async fn post_ao_pax_leaderboard_graph(
         "Here are top 10 PAX for {}. From {} to {}",
         ao_name, thirty_days_ago, now
     );
+
     let file_request =
-        FileUploadRequest::new(vec![channel_id], png, "top-10-pax.png", text.as_str());
+        FileUpload::new(&channel_id, png, "top-10-pax.png", "image/png").with_title(&text);
+
     web_state.upload_file(file_request).await?;
     // std::fs::write("pax.png", png)?;
     Ok(())

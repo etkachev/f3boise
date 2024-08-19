@@ -6,6 +6,7 @@ use crate::web_api_routes::back_blast_data::csv_download_all::{
 };
 use crate::web_api_routes::back_blast_data::pax_leaderboard_graph::pax_leaderboard_route;
 use crate::web_api_routes::back_blast_data::remind_missing_back_blasts::remind_missing_back_blasts;
+use crate::web_api_routes::back_blast_data::test_png::test_png_route;
 use crate::web_api_routes::back_blast_data::{
     get_all_back_blasts_route, get_missing_back_blasts, get_top_pax_data_route,
 };
@@ -30,7 +31,7 @@ pub fn service() -> Scope {
             "/pax-leaderboard-graph",
             web::get().to(pax_leaderboard_route),
         )
-        // .route("/test-png", web::get().to(test_png_route))
+        .route("/test-png", web::get().to(test_png_route))
         .route("/download", web::get().to(back_blasts_csv_html))
         .route(
             "/download-csv",

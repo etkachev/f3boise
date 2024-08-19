@@ -17,10 +17,12 @@ use crate::slack_api::chat::post_message::request::PostMessageRequest;
 use crate::slack_api::chat::post_message::response::PostMessageResponse;
 use crate::slack_api::chat::update_message::request::UpdateMessageRequest;
 use crate::slack_api::chat::update_message::response::UpdateMessageResponse;
+use crate::slack_api::files::complete_upload_url_external;
+use crate::slack_api::files::get_upload_url_external::request::GetUploadUrlExternalRequest;
+use crate::slack_api::files::get_upload_url_external::response::GetUploadUrlExternalResponse;
 use crate::slack_api::files::remote_share::request::FileRemoteShareRequest;
 use crate::slack_api::files::remote_share::response::FileRemoteShareResponse;
-use crate::slack_api::files::request::FileUploadRequest;
-use crate::slack_api::files::response::FileUploadResponse;
+use crate::slack_api::files::request::FileUpload;
 use crate::slack_api::url_requests::SlackUrlRequest;
 use crate::slack_api::users::users_list::request::UsersListRequest;
 use crate::slack_api::users::users_list::response::UsersListResponse;
@@ -157,16 +159,44 @@ impl MutableWebState {
         }
     }
 
-    /// upload file to slack channel(s)
-    pub async fn upload_file(&self, request: FileUploadRequest) -> Result<(), AppError> {
-        let url = request.get_plain_url_request(&self.base_api_url);
-        let response = self.make_form_post(url, request.get_form_request()).await;
+    pub async fn upload_file(&self, request: FileUpload) -> Result<(), AppError> {
+        let step_1 = GetUploadUrlExternalRequest::new(&request.filename, request.file.len());
+        let url = step_1.get_url_request(&self.base_api_url);
+        let response = self.make_get_url_request(url).await;
         let bytes = response.bytes().await?;
-        let response: FileUploadResponse = serde_json::from_slice(&bytes)?;
-        if let Some(err) = response.error {
-            Err(AppError::General(err))
-        } else {
-            Ok(())
+        let response: GetUploadUrlExternalResponse = serde_json::from_slice(&bytes)?;
+
+        match response {
+            GetUploadUrlExternalResponse {
+                error: Some(err), ..
+            } => Err(AppError::General(err)),
+            GetUploadUrlExternalResponse {
+                error: None,
+                upload_url: Some(upload_url),
+                file_id: Some(file_id),
+                ..
+            } => {
+                let url = url::Url::parse(&upload_url)?;
+                let response = self.make_form_post(url, request.get_form_request()).await;
+                if response.status().is_success() {
+                    let step_3 = complete_upload_url_external::request::CompleteUploadUrlExternalRequest::new_single(&file_id, request.title.clone()).for_channel(&request.channel_id);
+                    let url = step_3.get_plain_url_request(&self.base_api_url);
+                    let body = serde_json::to_vec(&step_3)?;
+                    let response = self.make_post_request(url, body).await;
+                    let bytes = response.bytes().await?;
+                    let response: complete_upload_url_external::response::CompleteUploadUrlExternalResponse = serde_json::from_slice(&bytes)?;
+                    if let Some(err) = response.error {
+                        Err(AppError::General(err))
+                    } else {
+                        Ok(())
+                    }
+                } else {
+                    Err(AppError::General("Error uploading file".to_string()))
+                }
+            }
+            _ => Err(AppError::General(
+                "Missing file id or upload url".to_string(),
+            )),
         }
     }
 

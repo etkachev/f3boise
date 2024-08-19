@@ -15,6 +15,7 @@ pub enum AppError {
     Reqwest(reqwest::Error),
     Uuid(uuid::Error),
     SqlxMigrate(sqlx::migrate::MigrateError),
+    ParseError(url::ParseError),
     General(String),
 }
 
@@ -89,5 +90,11 @@ impl From<uuid::Error> for AppError {
 impl From<sqlx::migrate::MigrateError> for AppError {
     fn from(err: sqlx::migrate::MigrateError) -> Self {
         AppError::SqlxMigrate(err)
+    }
+}
+
+impl From<url::ParseError> for AppError {
+    fn from(err: url::ParseError) -> Self {
+        AppError::ParseError(err)
     }
 }
