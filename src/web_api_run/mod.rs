@@ -148,8 +148,8 @@ pub fn run(
             .app_data(app_state_data.clone())
             .app_data(db_pool.clone())
     })
-        .listen(tcp_listener)?
-        .run();
+    .listen(tcp_listener)?
+    .run();
 
     Ok(server)
 }
