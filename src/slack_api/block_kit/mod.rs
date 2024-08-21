@@ -153,16 +153,27 @@ impl BlockBuilder {
         ));
     }
 
-    pub fn file_input(mut self, label: &str, action_id: &str, file_types: Vec<&str>) -> Self {
-        self.add_file_input(label, action_id, file_types);
+    pub fn file_input(
+        mut self,
+        label: &str,
+        action_id: &str,
+        file_types: Vec<&str>,
+        optional: bool,
+    ) -> Self {
+        self.add_file_input(label, action_id, file_types, optional);
         self
     }
 
-    pub fn add_file_input(&mut self, label: &str, action_id: &str, file_types: Vec<&str>) {
-        self.blocks
-            .push(BlockType::Input(InputBlock::new_file_input(
-                label, action_id, file_types,
-            )));
+    pub fn add_file_input(
+        &mut self,
+        label: &str,
+        action_id: &str,
+        file_types: Vec<&str>,
+        optional: bool,
+    ) {
+        self.blocks.push(BlockType::Input(
+            InputBlock::new_file_input(label, action_id, file_types).optional(optional),
+        ));
     }
 
     pub fn text_box(
