@@ -89,7 +89,7 @@ pub async fn slack_slash_commands_route(
                                 form.channel_id.as_str(),
                                 &web_state,
                             )
-                                .await
+                            .await
                             {
                                 Ok(_) => HttpResponse::Ok().body("Posting Q Line up"),
                                 Err(_) => HttpResponse::BadRequest().body("Invalid command"),
@@ -102,7 +102,7 @@ pub async fn slack_slash_commands_route(
                                 form.channel_id.as_str(),
                                 &web_state,
                             )
-                                .await
+                            .await
                             {
                                 Ok(_) => HttpResponse::Ok().body("Posting Q Line up"),
                                 Err(_) => HttpResponse::BadRequest().body("Invalid command"),
@@ -142,7 +142,7 @@ pub async fn slack_slash_commands_route(
                     form.channel_id.as_str(),
                     &web_state,
                 )
-                    .await
+                .await
                 {
                     Ok(_) => HttpResponse::Ok().body("Posting Q Line Up"),
                     Err(_) => HttpResponse::BadRequest().body("Invalid command"),
@@ -173,7 +173,7 @@ pub async fn slack_slash_commands_route(
                 &web_state,
                 form.channel_id.to_string(),
             )
-                .await
+            .await
             {
                 Ok(_) => HttpResponse::Ok().body("Posting Monthly Stats"),
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
@@ -194,7 +194,7 @@ pub async fn slack_slash_commands_route(
                 form.channel_id.to_string(),
                 form.text.as_str(),
             )
-                .await
+            .await
             {
                 Ok(_) => HttpResponse::Ok().body("Posting Top pax overall"),
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
@@ -207,7 +207,7 @@ pub async fn slack_slash_commands_route(
                 form.channel_id.to_string(),
                 form.text.as_str(),
             )
-                .await
+            .await
             {
                 Ok(_) => HttpResponse::Ok().body("Posting Top DD pax overall"),
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
@@ -220,7 +220,7 @@ pub async fn slack_slash_commands_route(
                 &form.channel_id,
                 &form.user_id,
             )
-                .await
+            .await
             {
                 Ok(_) => HttpResponse::Ok().body("Opening Preblast modal"),
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
@@ -233,7 +233,7 @@ pub async fn slack_slash_commands_route(
                 &form.channel_id,
                 &form.user_id,
             )
-                .await
+            .await
             {
                 Ok(_) => HttpResponse::Ok().body("Opening Preblast modal"),
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
@@ -253,7 +253,7 @@ pub async fn slack_slash_commands_route(
                 &form.user_id,
                 back_blast_type,
             )
-                .await
+            .await
             {
                 Ok(_) => HttpResponse::Ok().body("Opening Backblast modal"),
                 Err(err) => HttpResponse::Ok().body(err.to_string()),
@@ -264,7 +264,7 @@ pub async fn slack_slash_commands_route(
             &web_state,
             &form.channel_id,
         )
-            .await
+        .await
         {
             Ok(_) => HttpResponse::Ok().body("Opening Black Diamond rating modal"),
             Err(err) => HttpResponse::Ok().body(err.to_string()),
