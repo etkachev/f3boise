@@ -18,15 +18,14 @@ pub async fn generate_modal(
     web_app: &MutableWebState,
     channel_id: &str,
     user_id: &str,
-    trial_img: bool,
 ) -> Result<(), AppError> {
-    let modal = create_pre_blast_modal(channel_id, user_id, trial_img);
+    let modal = create_pre_blast_modal(channel_id, user_id);
     let request = ViewsOpenRequest::new(trigger_id, ViewPayload::Modal(modal));
     web_app.open_view(request).await?;
     Ok(())
 }
 
-fn create_pre_blast_modal(channel_id: &str, user_id: &str, trial_img: bool) -> ViewModal {
+fn create_pre_blast_modal(channel_id: &str, user_id: &str) -> ViewModal {
     let ao = AO::from_channel_id(channel_id);
     let next_date = get_next_ao_date(&ao);
     let default_time = ao
@@ -113,7 +112,6 @@ fn create_pre_blast_modal(channel_id: &str, user_id: &str, trial_img: bool) -> V
             "Upload Image",
             pre_blast_post::pre_blast_action_ids::FILE,
             vec!["jpg", "jpeg", "png", "gif"],
-            trial_img,
         )
         .select(
             "Choose where to post this",
