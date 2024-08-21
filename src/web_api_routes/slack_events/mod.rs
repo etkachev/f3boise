@@ -6,9 +6,9 @@ use sha2::Sha256;
 use sqlx::PgPool;
 
 pub mod channel_message;
+pub mod emoji_reactions;
 pub mod event_times;
 pub mod event_wrapper;
-pub mod reaction_added;
 pub mod slack_challenge;
 pub mod team_join;
 
@@ -81,7 +81,10 @@ pub async fn slack_events(
                 team_join::handle_new_user(&db_pool, &join_data.user, &app_state, &data).await;
             }
             event_wrapper::EventTypes::ReactionAdded(reaction_data) => {
-                reaction_added::handle_reaction_item(reaction_data, &app_state);
+                emoji_reactions::handle_reaction_add(reaction_data, &app_state).await;
+            }
+            event_wrapper::EventTypes::ReactionRemoved(reaction_data) => {
+                emoji_reactions::handle_reaction_remove(reaction_data, &app_state).await;
             }
             _ => (),
         }

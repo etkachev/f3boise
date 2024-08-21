@@ -66,8 +66,10 @@ impl BlockElementType {
         )
     }
 
-    pub fn new_file_input(action_id: &str) -> Self {
-        BlockElementType::FileInput(FileInputBlock::new(action_id.to_string()))
+    pub fn new_file_input(action_id: &str, file_types: Vec<&str>) -> Self {
+        BlockElementType::FileInput(
+            FileInputBlock::new(action_id.to_string()).with_file_types(file_types),
+        )
     }
 
     pub fn new_text_box(

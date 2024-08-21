@@ -69,9 +69,25 @@ impl BlockBuilder {
         }
     }
 
+    pub fn add_img_id(&mut self, img_id: &str, alt_text: &str) {
+        if !img_id.is_empty() {
+            self.blocks
+                .push(BlockType::Image(ImageBlock::new_slack_file(
+                    img_id, alt_text,
+                )));
+        }
+    }
+
     pub fn imgs(mut self, imgs: Vec<String>, alt_text: &str) -> Self {
         for img in imgs {
             self.add_img(&img, alt_text);
+        }
+        self
+    }
+
+    pub fn img_ids(mut self, img_ids: Vec<String>, alt_text: &str) -> Self {
+        for img_id in img_ids {
+            self.add_img_id(&img_id, alt_text);
         }
         self
     }
@@ -137,17 +153,23 @@ impl BlockBuilder {
         ));
     }
 
-    pub fn file_input(mut self, label: &str, action_id: &str, trial_img: bool) -> Self {
+    pub fn file_input(
+        mut self,
+        label: &str,
+        action_id: &str,
+        file_types: Vec<&str>,
+        trial_img: bool,
+    ) -> Self {
         if trial_img {
-            self.add_file_input(label, action_id);
+            self.add_file_input(label, action_id, file_types);
         }
         self
     }
 
-    pub fn add_file_input(&mut self, label: &str, action_id: &str) {
+    pub fn add_file_input(&mut self, label: &str, action_id: &str, file_types: Vec<&str>) {
         self.blocks
             .push(BlockType::Input(InputBlock::new_file_input(
-                label, action_id,
+                label, action_id, file_types,
             )));
     }
 
@@ -401,10 +423,10 @@ impl InputBlock {
         }
     }
 
-    pub fn new_file_input(label: &str, action_id: &str) -> Self {
+    pub fn new_file_input(label: &str, action_id: &str, file_types: Vec<&str>) -> Self {
         InputBlock {
             label: TextObject::new_text(label),
-            element: BlockElementType::new_file_input(action_id),
+            element: BlockElementType::new_file_input(action_id, file_types),
             ..Default::default()
         }
     }
@@ -649,23 +671,60 @@ impl HeaderBlock {
     }
 }
 
+/// Supported file types include png, jpg, jpeg, and gif
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ImageBlock {
     /// The URL of the image to be displayed. Maximum length for this field is 3000 characters
-    pub image_url: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub image_url: Option<String>,
     /// A plain-text summary of the image. This should not contain any markup. Maximum length for this field is 2000 characters
     pub alt_text: String,
     /// An optional title for the image in the form of a text object that can only be of type: plain_text. Maximum length for the text in this field is 2000 characters.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<TextObject>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub slack_file: Option<SlackImgBlock>,
+}
+
+/// This file must be an image and you must provide either the URL or ID.
+/// In addition, the user posting these blocks must have access to this file.
+/// If both are provided then the payload will be rejected.
+/// Currently only png, jpg, jpeg, and gif Slack image files are supported
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SlackImgBlock {
+    /// This URL can be the url_private or the permalink of the Slack file
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    /// Slack ID of the file
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+impl SlackImgBlock {
+    pub fn with_id(file_id: &str) -> Self {
+        SlackImgBlock {
+            url: None,
+            id: Some(file_id.to_string()),
+        }
+    }
 }
 
 impl ImageBlock {
     pub fn new(image_url: &str, alt_text: &str) -> Self {
         ImageBlock {
-            image_url: image_url.to_string(),
+            image_url: Some(image_url.to_string()),
             alt_text: alt_text.to_string(),
             title: None,
+            slack_file: None,
+        }
+    }
+
+    pub fn new_slack_file(file_id: &str, alt_text: &str) -> Self {
+        ImageBlock {
+            alt_text: alt_text.to_string(),
+            title: None,
+            slack_file: Some(SlackImgBlock::with_id(file_id)),
+            image_url: None,
         }
     }
 }

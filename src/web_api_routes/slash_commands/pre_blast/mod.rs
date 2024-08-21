@@ -112,6 +112,7 @@ fn create_pre_blast_modal(channel_id: &str, user_id: &str, trial_img: bool) -> V
         .file_input(
             "Upload Image",
             pre_blast_post::pre_blast_action_ids::FILE,
+            vec!["jpg", "jpeg", "png", "gif"],
             trial_img,
         )
         .select(

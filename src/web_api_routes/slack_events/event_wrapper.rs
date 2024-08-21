@@ -1,5 +1,5 @@
 use super::channel_message::ChannelMessageEvent;
-use crate::web_api_routes::slack_events::reaction_added::ReactionAddedData;
+use crate::web_api_routes::slack_events::emoji_reactions::ReactionData;
 use crate::web_api_routes::slack_events::team_join::TeamJoinData;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -25,7 +25,8 @@ pub struct EventWrapper {
 pub enum EventTypes {
     Message(ChannelMessageEvent),
     TeamJoin(TeamJoinData),
-    ReactionAdded(ReactionAddedData),
+    ReactionAdded(ReactionData),
+    ReactionRemoved(ReactionData),
     Unknown,
 }
 

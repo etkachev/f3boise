@@ -22,7 +22,7 @@ pub struct PreBlastPost {
     pub fng_message: Option<String>,
     pub mole_skin: Option<String>,
     pub post_where: BlastWhere,
-    pub img_urls: HashSet<String>,
+    pub img_ids: HashSet<String>,
 }
 
 impl PreBlastPost {
@@ -56,8 +56,8 @@ impl PreBlastPost {
             .map(|q| q.to_string())
     }
 
-    pub fn img_urls(&self) -> Vec<String> {
-        self.img_urls.iter().map(|url| url.to_string()).collect()
+    pub fn img_ids(&self) -> Vec<String> {
+        self.img_ids.iter().map(|url| url.to_string()).collect()
     }
 }
 
@@ -73,7 +73,7 @@ impl From<HashMap<String, BasicValue>> for PreBlastPost {
             .map(value_utils::get_single_string)
             .unwrap_or_else(|| String::from("Title"));
 
-        let img_urls = value
+        let img_ids = value
             .get(pre_blast_action_ids::FILE)
             .map(value_utils::get_hash_set_strings_from_multi)
             .unwrap_or_default();
@@ -145,7 +145,7 @@ impl From<HashMap<String, BasicValue>> for PreBlastPost {
             fng_message,
             mole_skin,
             post_where,
-            img_urls,
+            img_ids,
         }
     }
 }
@@ -177,7 +177,7 @@ pub async fn convert_to_message(db_pool: &PgPool, post: PreBlastPost) -> PostMes
         None
     };
 
-    let img_urls = post.img_urls();
+    let img_ids = post.img_ids();
 
     let block_builder = BlockBuilder::new()
         .section_markdown(&format!("*Preblast: {}*", post.title))
@@ -194,7 +194,7 @@ pub async fn convert_to_message(db_pool: &PgPool, post: PreBlastPost) -> PostMes
             post.mole_skin.unwrap_or_default()
         ))
         .divider()
-        .imgs(img_urls, "Pre-blast");
+        .img_ids(img_ids, "Pre-blast");
 
     if let Some(f3_user) = user {
         PostMessageRequest::new_as_user(&channel_id, block_builder.blocks, f3_user)
