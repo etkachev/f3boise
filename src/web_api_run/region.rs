@@ -1,4 +1,5 @@
 use crate::web_api_routes::back_blast_data::yearly_stats::get_yearly_stats_route;
+use crate::web_api_routes::files::get_files_test;
 use crate::web_api_routes::region_data::ao_meta_data::ao_list_meta_data_route;
 use actix_web::{web, Scope};
 
@@ -7,4 +8,5 @@ pub fn service() -> Scope {
     web::scope("/region")
         .route("/workouts", web::get().to(ao_list_meta_data_route))
         .route("/stats", web::get().to(get_yearly_stats_route))
+        .route("/test-files", web::get().to(get_files_test))
 }

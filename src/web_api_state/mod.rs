@@ -18,10 +18,10 @@ use crate::slack_api::chat::post_message::response::PostMessageResponse;
 use crate::slack_api::chat::update_message::request::UpdateMessageRequest;
 use crate::slack_api::chat::update_message::response::UpdateMessageResponse;
 use crate::slack_api::files::complete_upload_url_external;
+use crate::slack_api::files::files_list::request::FilesListRequest;
+use crate::slack_api::files::files_list::response::{FilesListItem, FilesListResponse};
 use crate::slack_api::files::get_upload_url_external::request::GetUploadUrlExternalRequest;
 use crate::slack_api::files::get_upload_url_external::response::GetUploadUrlExternalResponse;
-use crate::slack_api::files::remote_share::request::FileRemoteShareRequest;
-use crate::slack_api::files::remote_share::response::FileRemoteShareResponse;
 use crate::slack_api::files::request::FileUpload;
 use crate::slack_api::url_requests::SlackUrlRequest;
 use crate::slack_api::users::users_list::request::UsersListRequest;
@@ -159,6 +159,28 @@ impl MutableWebState {
         }
     }
 
+    /// get files from slack workspace
+    pub async fn get_files(
+        &self,
+        request: FilesListRequest,
+    ) -> Result<Vec<FilesListItem>, AppError> {
+        let url = request.get_url_request(&self.base_api_url);
+        let response = self.make_get_url_request(url).await;
+        let bytes = response.bytes().await?;
+        let response: FilesListResponse = serde_json::from_slice(&bytes)?;
+        match response {
+            FilesListResponse {
+                error: Some(err), ..
+            } => Err(AppError::General(err)),
+            FilesListResponse {
+                files: Some(files), ..
+            } => Ok(files),
+            _ => Err(AppError::General(
+                "Missing data from get files response".to_string(),
+            )),
+        }
+    }
+
     pub async fn upload_file(&self, request: FileUpload) -> Result<(), AppError> {
         let step_1 = GetUploadUrlExternalRequest::new(&request.filename, request.file.len());
         let url = step_1.get_url_request(&self.base_api_url);
@@ -198,28 +220,6 @@ impl MutableWebState {
                 "Missing file id or upload url".to_string(),
             )),
         }
-    }
-
-    /// shared multiple remote files to channel
-    pub async fn remote_share_files(
-        &self,
-        channel: &str,
-        file_ids: Vec<String>,
-    ) -> Result<(), AppError> {
-        let requests: Vec<FileRemoteShareRequest> = file_ids
-            .iter()
-            .map(|file_id| FileRemoteShareRequest::new(vec![channel.to_string()], file_id))
-            .collect();
-        for request in requests {
-            let url = request.get_url_request(&self.base_api_url);
-            let response = self.make_get_url_request(url).await;
-            let bytes = response.bytes().await?;
-            let response: FileRemoteShareResponse = serde_json::from_slice(&bytes)?;
-            if let Some(err) = response.error {
-                return Err(AppError::General(err));
-            }
-        }
-        Ok(())
     }
 
     /// update message that exists in slack. returns ts

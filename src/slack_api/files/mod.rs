@@ -1,6 +1,6 @@
 pub mod complete_upload_url_external;
+pub mod files_list;
 pub mod get_upload_url_external;
-pub mod remote_share;
 
 /// request structs and methods for uploading file to slack channel(s)
 pub mod request {

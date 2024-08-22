@@ -1,5 +1,6 @@
 pub mod auth;
 pub mod back_blast_data;
+pub mod files;
 pub mod graphs;
 pub mod interactive_events;
 pub mod pax_data;
