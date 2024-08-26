@@ -1,4 +1,5 @@
 use crate::app_state::backblast_data::BackBlastData;
+use crate::app_state::pre_blast_data::PreBlastData;
 use crate::app_state::MutableAppState;
 use crate::db::queries::users::get_slack_id_map;
 use crate::shared::admin::admin_users;
@@ -7,9 +8,8 @@ use crate::shared::constants;
 use crate::slack_api::channels::public_channels::PublicChannels;
 use crate::slack_api::views::payload::ViewPayload;
 use crate::slack_api::views::request::ViewsOpenRequest;
-use crate::web_api_routes::interactive_events::edit_backblast::{
-    create_edit_modal, get_back_blast, get_user_data, BackBlastUsersEdit,
-};
+use crate::web_api_routes::interactive_events::edit_backblast;
+use crate::web_api_routes::interactive_events::edit_pre_blast;
 use crate::web_api_routes::interactive_events::interaction_payload::{
     ActionChannel, ActionType, ActionUser, BlockAction, ButtonAction, InteractionMessageTypes,
     OverflowAction,
@@ -70,6 +70,17 @@ pub async fn handle_block_actions(
                     )
                     .await?
                 }
+                InteractionTypes::EditPreBlast(id) => {
+                    handle_edit_pre_blast(
+                        db_pool,
+                        web_state,
+                        id,
+                        &action_channel,
+                        trigger_id.as_str(),
+                        &user,
+                    )
+                    .await?
+                }
                 InteractionTypes::Unknown => {
                     println!("Unknown interaction");
                 }
@@ -88,31 +99,68 @@ async fn handle_edit_back_blast(
     trigger_id: &str,
     user: &ActionUser,
 ) -> Result<(), AppError> {
-    let bb = get_back_blast(db_pool, id).await?;
+    let bb = edit_backblast::get_back_blast(db_pool, id).await?;
     let channel = action_channel.as_ref().map(|c| c.id.to_string());
     if channel.is_none() {
         return Err(AppError::from("Missing channel id"));
     }
 
     let channel = channel.unwrap();
-    let users = get_user_data(db_pool, &bb).await?;
+    let users = edit_backblast::get_user_data(db_pool, &bb).await?;
     // only Q's can edit backblast
-    if !user_allowed_to_edit(user, &bb, &users) {
+    if !user_allowed_to_edit_back_blast(user, &bb, &users) {
         return Ok(());
     }
-    let modal = create_edit_modal(channel.as_str(), &bb, users, id);
+    let modal = edit_backblast::create_edit_modal(channel.as_str(), &bb, users, id);
+    let view = ViewsOpenRequest::new(trigger_id, ViewPayload::Modal(modal));
+    web_state.open_view(view).await?;
+    Ok(())
+}
+
+async fn handle_edit_pre_blast(
+    db_pool: &PgPool,
+    web_state: &MutableWebState,
+    id: &str,
+    action_channel: &Option<ActionChannel>,
+    trigger_id: &str,
+    user: &ActionUser,
+) -> Result<(), AppError> {
+    let pb = edit_pre_blast::get_pre_blast_data(db_pool, id).await?;
+    let channel = action_channel.as_ref().map(|c| c.id.to_string());
+    if channel.is_none() {
+        return Err(AppError::from("Missing channel id"));
+    }
+
+    let channel = channel.unwrap();
+    let users = edit_pre_blast::get_pre_blast_user_data(db_pool, &pb).await?;
+    if !user_allowed_to_edit_pre_blast(user, &pb, &users) {
+        return Ok(());
+    }
+    let modal = edit_pre_blast::create_edit_modal(channel.as_str(), &pb, users, id);
     let view = ViewsOpenRequest::new(trigger_id, ViewPayload::Modal(modal));
     web_state.open_view(view).await?;
     Ok(())
 }
 
 /// only qs can edit back blast
-fn user_allowed_to_edit(
+fn user_allowed_to_edit_back_blast(
     user: &ActionUser,
     bb: &BackBlastData,
-    user_edit: &BackBlastUsersEdit,
+    user_edit: &edit_backblast::BackBlastUsersEdit,
 ) -> bool {
     let mut slack_ids = user_edit.convert_to_slack_ids(&bb.qs);
+    let admins = admin_users();
+    slack_ids.extend(admins);
+    slack_ids.iter().any(|id| &user.id == id)
+}
+
+/// on qs and admin can edit preblast
+fn user_allowed_to_edit_pre_blast(
+    user: &ActionUser,
+    pb: &PreBlastData,
+    user_edit: &edit_pre_blast::PreBlastUsersEdit,
+) -> bool {
+    let mut slack_ids = user_edit.convert_to_slack_ids(&pb.qs);
     let admins = admin_users();
     slack_ids.extend(admins);
     slack_ids.iter().any(|id| &user.id == id)
@@ -254,18 +302,18 @@ mod tests {
             HashSet::from(["stinger".to_string()]),
             NaiveDate::from_ymd_opt(2023, 1, 1).unwrap(),
         );
-        let edit_data = BackBlastUsersEdit::new(
+        let edit_data = edit_backblast::BackBlastUsersEdit::new(
             vec![mock_user("123", "stinger"), mock_user("22", "backslash")],
             vec![],
         );
-        let allowed = user_allowed_to_edit(&action_user, &bb, &edit_data);
+        let allowed = user_allowed_to_edit_back_blast(&action_user, &bb, &edit_data);
         assert_eq!(allowed, false);
         let action_user = ActionUser {
             id: "22".to_string(),
             name: "backslash".to_string(),
             username: "backslash".to_string(),
         };
-        let allowed = user_allowed_to_edit(&action_user, &bb, &edit_data);
+        let allowed = user_allowed_to_edit_back_blast(&action_user, &bb, &edit_data);
         assert_eq!(allowed, true);
     }
 }

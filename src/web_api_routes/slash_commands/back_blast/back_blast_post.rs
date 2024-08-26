@@ -261,17 +261,16 @@ pub async fn convert_to_message(
     db_pool: &PgPool,
     is_valid: bool,
     id: Option<String>,
+    action_user_id: &str,
 ) -> PostMessageRequest {
     let channel_id = match &post.blast_where {
         BlastWhere::AoChannel => post.ao.channel_id().to_string(),
         BlastWhere::CurrentChannel(id) => id.to_string(),
     };
 
-    let user = if let Some(id) = post.get_first_q() {
-        get_user_by_slack_id(db_pool, &id).await.unwrap_or_default()
-    } else {
-        None
-    };
+    let user = get_user_by_slack_id(db_pool, action_user_id)
+        .await
+        .unwrap_or_default();
 
     let block_builder = get_block_builder(post, id, is_valid);
 

@@ -141,7 +141,7 @@ fn get_next_ao_date(ao: &AO) -> NaiveDate {
     now + Duration::days(1)
 }
 
-fn equipment_list() -> Vec<OptionElement> {
+pub fn equipment_list() -> Vec<OptionElement> {
     vec![
         OptionElement::from(AoEquipment::Coupons),
         OptionElement::from(AoEquipment::Sandbag),

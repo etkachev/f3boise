@@ -8,6 +8,7 @@ use sqlx::PgPool;
 
 pub mod block_actions;
 pub mod edit_backblast;
+pub mod edit_pre_blast;
 pub mod interaction_payload;
 pub mod interaction_types;
 pub mod message_utils;

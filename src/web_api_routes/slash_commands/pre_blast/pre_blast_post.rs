@@ -4,7 +4,9 @@ use crate::db::queries::users::get_user_by_slack_id;
 use crate::slack_api::block_kit::block_elements::OptionElement;
 use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
+use crate::slack_api::chat::update_message::request::UpdateMessageRequest;
 use crate::web_api_routes::interactive_events::interaction_payload::BasicValue;
+use crate::web_api_routes::interactive_events::interaction_types::InteractionTypes;
 use crate::web_api_routes::slash_commands::modal_utils::{value_utils, BlastWhere};
 use chrono::{NaiveDate, NaiveTime};
 use sqlx::PgPool;
@@ -165,21 +167,34 @@ pub mod pre_blast_action_ids {
     pub const FILE: &str = "file.input";
 }
 
-pub async fn convert_to_message(db_pool: &PgPool, post: PreBlastPost) -> PostMessageRequest {
+pub async fn convert_to_message(
+    db_pool: &PgPool,
+    post: PreBlastPost,
+    id: &str,
+    action_user_id: &str,
+) -> PostMessageRequest {
     let channel_id = match &post.post_where {
         BlastWhere::AoChannel => post.ao.channel_id().to_string(),
         BlastWhere::CurrentChannel(id) => id.to_string(),
     };
 
-    let user = if let Some(id) = post.get_first_q() {
-        get_user_by_slack_id(db_pool, &id).await.unwrap_or_default()
+    // get user info on user doing the action.
+    let user = get_user_by_slack_id(db_pool, action_user_id)
+        .await
+        .unwrap_or_default();
+
+    let block_builder = get_block_builder(post, id);
+
+    if let Some(f3_user) = user {
+        PostMessageRequest::new_as_user(&channel_id, block_builder.blocks, f3_user)
     } else {
-        None
-    };
+        PostMessageRequest::new(&channel_id, block_builder.blocks)
+    }
+}
 
+fn get_block_builder(post: PreBlastPost, id: &str) -> BlockBuilder {
     let img_ids = post.img_ids();
-
-    let block_builder = BlockBuilder::new()
+    let mut block_builder = BlockBuilder::new()
         .section_markdown(&format!("*Preblast: {}*", post.title))
         .section_markdown(&format!("*Date*: {}", post.date))
         .section_markdown(&format!("*Time*: {}", post.start_time.format("%H:%M")))
@@ -196,9 +211,30 @@ pub async fn convert_to_message(db_pool: &PgPool, post: PreBlastPost) -> PostMes
         .divider()
         .img_ids(img_ids, "Pre-blast");
 
-    if let Some(f3_user) = user {
-        PostMessageRequest::new_as_user(&channel_id, block_builder.blocks, f3_user)
-    } else {
-        PostMessageRequest::new(&channel_id, block_builder.blocks)
+    if !id.is_empty() {
+        let interaction_btn = InteractionTypes::new_edit_pre_blast(id);
+        block_builder.add_btn(
+            "Edit Preblast",
+            interaction_btn.to_string().as_str(),
+            "edit-preblast",
+        );
+        block_builder.add_context("Saved Preblast");
     }
+
+    block_builder
+}
+
+pub fn convert_to_update_message(
+    post: PreBlastPost,
+    id: Option<String>,
+    ts: &str,
+) -> UpdateMessageRequest {
+    let channel_id = match &post.post_where {
+        BlastWhere::AoChannel => post.ao.channel_id().to_string(),
+        BlastWhere::CurrentChannel(id) => id.to_string(),
+    };
+
+    let block_builder = get_block_builder(post, &id.unwrap_or_default());
+
+    UpdateMessageRequest::new(&channel_id, ts, block_builder.blocks)
 }

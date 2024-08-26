@@ -3,7 +3,7 @@ use crate::slack_api::block_kit::block_elements::OptionElement;
 use std::fmt::Display;
 use std::str::FromStr;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub enum AoEquipment {
     Coupons,
     Sandbag,

@@ -7,6 +7,7 @@ use std::str::FromStr;
 pub enum InteractionTypes {
     QLineUp(QSheetActionComboData),
     EditBackBlast(String),
+    EditPreBlast(String),
     Unknown,
 }
 
@@ -19,6 +20,11 @@ impl InteractionTypes {
     pub fn new_edit_back_blast(id: &str) -> Self {
         InteractionTypes::EditBackBlast(id.to_string())
     }
+
+    /// pas in id of saved preblast for editing
+    pub fn new_edit_pre_blast(id: &str) -> Self {
+        InteractionTypes::EditPreBlast(id.to_string())
+    }
 }
 
 impl From<&str> for InteractionTypes {
@@ -27,6 +33,7 @@ impl From<&str> for InteractionTypes {
         match first_type {
             Q_LINE_UP => InteractionTypes::QLineUp(QSheetActionComboData::from(rest)),
             EDIT_BACK_BLAST => InteractionTypes::EditBackBlast(rest.to_string()),
+            EDIT_PRE_BLAST => InteractionTypes::EditPreBlast(rest.to_string()),
             _ => InteractionTypes::Unknown,
         }
     }
@@ -35,8 +42,9 @@ impl From<&str> for InteractionTypes {
 impl Display for InteractionTypes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            InteractionTypes::QLineUp(data) => format!("{Q_LINE_UP}::{}", data),
-            InteractionTypes::EditBackBlast(id) => format!("{EDIT_BACK_BLAST}::{}", id),
+            InteractionTypes::QLineUp(data) => format!("{Q_LINE_UP}::{data}"),
+            InteractionTypes::EditBackBlast(id) => format!("{EDIT_BACK_BLAST}::{id}"),
+            InteractionTypes::EditPreBlast(id) => format!("{EDIT_PRE_BLAST}::{id}"),
             InteractionTypes::Unknown => "unknown".to_string(),
         };
         write!(f, "{}", str)
@@ -45,6 +53,7 @@ impl Display for InteractionTypes {
 
 const Q_LINE_UP: &str = "q_line_up";
 const EDIT_BACK_BLAST: &str = "edit_back_blast";
+const EDIT_PRE_BLAST: &str = "edit_pre_blast";
 
 #[derive(Debug, PartialEq)]
 pub struct QSheetActionComboData {
