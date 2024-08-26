@@ -81,10 +81,10 @@ pub async fn slack_events(
                 team_join::handle_new_user(&db_pool, &join_data.user, &app_state, &data).await;
             }
             event_wrapper::EventTypes::ReactionAdded(reaction_data) => {
-                emoji_reactions::handle_reaction_add(reaction_data, &app_state).await;
+                emoji_reactions::handle_reaction_add(&db_pool, reaction_data, &app_state).await;
             }
             event_wrapper::EventTypes::ReactionRemoved(reaction_data) => {
-                emoji_reactions::handle_reaction_remove(reaction_data, &app_state).await;
+                emoji_reactions::handle_reaction_remove(&db_pool, reaction_data, &app_state).await;
             }
             _ => (),
         }
