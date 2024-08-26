@@ -132,7 +132,7 @@ pub async fn update_pre_blast(
          equipment = $9,
          fng_message = $10,
          mole_skin = $11,
-         img_ids = $12
+         img_ids = COALESCE($12, img_ids)
      WHERE id = $1
      "#,
         uuid,
