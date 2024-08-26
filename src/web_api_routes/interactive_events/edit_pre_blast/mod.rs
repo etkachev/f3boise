@@ -107,7 +107,7 @@ pub fn create_edit_modal(
         .time_picker(
             "Workout Time",
             pre_blast_post::pre_blast_action_ids::TIME_SELECT,
-            Some(pre_blast.start_time.to_string()),
+            Some(pre_blast.start_time.format("%H:%M").to_string()),
             false,
         )
         .multi_users_select(
@@ -152,10 +152,6 @@ pub fn create_edit_modal(
             None,
             pre_blast.mole_skin.clone(),
             true,
-        )
-        .img_ids(
-            pre_blast.img_ids.iter().map(|id| id.to_string()).collect(),
-            "Current Images",
         )
         .file_input(
             "Re-Upload Image",

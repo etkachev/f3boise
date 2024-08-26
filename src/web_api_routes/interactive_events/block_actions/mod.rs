@@ -136,7 +136,9 @@ async fn handle_edit_pre_blast(
     if !user_allowed_to_edit_pre_blast(user, &pb, &users) {
         return Ok(());
     }
+    println!("creating preblast modal");
     let modal = edit_pre_blast::create_edit_modal(channel.as_str(), &pb, users, id);
+    println!("creating view");
     let view = ViewsOpenRequest::new(trigger_id, ViewPayload::Modal(modal));
     web_state.open_view(view).await?;
     Ok(())
