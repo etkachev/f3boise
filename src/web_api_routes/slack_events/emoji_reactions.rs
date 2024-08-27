@@ -1,6 +1,6 @@
 use crate::app_state::MutableAppState;
 use crate::db::queries::match_reaction_items::{get_items_by_ts_and_channel, ReactionRelatedItem};
-use crate::db::queries::pre_blasts::get_pre_blast_by_id;
+use crate::db::save_reaction_log::{save_reaction_item, ReactionLogDbItem};
 use crate::shared::common_errors::AppError;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
@@ -78,15 +78,9 @@ async fn get_related_entity(
         if let Some(data) = data {
             match data {
                 ReactionRelatedItem::PreBlast(id) => {
-                    let matching_pre_blast = get_pre_blast_by_id(db, &id).await?;
-                    if let Some(pb) = matching_pre_blast {
-                        let prefix = if adding {
-                            "added reaction"
-                        } else {
-                            "removed reaction"
-                        };
-                        println!("{prefix} for matching preblast for: {}", pb.title);
-                    }
+                    let reaction_log_item =
+                        ReactionLogDbItem::new(reaction, &id, adding).for_pre_blast();
+                    save_reaction_item(db, reaction_log_item).await?;
                 }
             }
         }

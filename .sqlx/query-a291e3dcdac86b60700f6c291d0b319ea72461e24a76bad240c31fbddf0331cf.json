@@ -1,0 +1,56 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id,\n               entity_type,\n               entity_id,\n               reaction,\n               slack_user,\n               reaction_added,\n               reaction_timestamp\n        FROM reactions_log\n        ORDER BY reaction_timestamp DESC;\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "entity_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "entity_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "reaction",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "slack_user",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "reaction_added",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "reaction_timestamp",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a291e3dcdac86b60700f6c291d0b319ea72461e24a76bad240c31fbddf0331cf"
+}

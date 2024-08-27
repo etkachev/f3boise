@@ -1,0 +1,92 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    WITH list_view AS (\n        SELECT\n            pb.id as id,\n            al.name as ao,\n            pb.channel_id,\n            pb.title,\n            string_to_array(lower(qs), ',') as qs,\n            date,\n            pb.start_time,\n            pb.why,\n            string_to_array(COALESCE(pb.equipment, ''), ',') as equipment,\n            pb.fng_message,\n            pb.mole_skin,\n            string_to_array(COALESCE(pb.img_ids, ''), ',') as img_ids,\n            pb.ts\n        FROM pre_blasts pb\n        INNER JOIN ao_list al on pb.channel_id = al.channel_id\n    )\n\n    SELECT\n        id,\n        ao,\n        channel_id,\n        title,\n        qs as \"qs!\",\n        date,\n        start_time,\n        why,\n        equipment as \"equipment!\",\n        fng_message,\n        mole_skin,\n        img_ids as \"img_ids!\",\n        ts\n    FROM list_view\n    ORDER BY date DESC;\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "ao",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "channel_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "qs!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 5,
+        "name": "date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
+        "name": "start_time",
+        "type_info": "Time"
+      },
+      {
+        "ordinal": 7,
+        "name": "why",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "equipment!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 9,
+        "name": "fng_message",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 10,
+        "name": "mole_skin",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 11,
+        "name": "img_ids!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 12,
+        "name": "ts",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      false,
+      null,
+      true,
+      true,
+      null,
+      true
+    ]
+  },
+  "hash": "b8ca443b8c344ed271abfa69d9d42093b66438ef58b4ca0a55ad5189caec7466"
+}

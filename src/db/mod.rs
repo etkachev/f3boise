@@ -8,4 +8,5 @@ pub mod queries;
 pub mod save_back_blast;
 pub mod save_pre_blast;
 pub mod save_q_line_up;
+pub mod save_reaction_log;
 pub mod save_user;

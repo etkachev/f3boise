@@ -1,8 +1,10 @@
 mod back_blasts;
 mod double_downs;
 mod pax;
+mod pre_blasts;
 mod processed_items;
 mod q_line_up;
+mod reactions_log;
 mod region;
 
 use crate::app_state::MutableAppState;
@@ -140,6 +142,8 @@ pub fn run(
             )
             .service(pax::service())
             .service(back_blasts::service())
+            .service(pre_blasts::service())
+            .service(reactions_log::service())
             .service(double_downs::service())
             .service(q_line_up::service())
             .service(region::service())
