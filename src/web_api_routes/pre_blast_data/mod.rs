@@ -2,10 +2,10 @@ use crate::db::queries::pre_blasts;
 use crate::db::queries::pre_blasts::PreBlastJsonFullData;
 use actix_web::{web, HttpResponse, Responder};
 use chrono::{NaiveDate, NaiveTime};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct PreBlastRow {
     pub id: String,
     pub ao: String,

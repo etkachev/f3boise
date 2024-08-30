@@ -3,10 +3,14 @@ use crate::db::pax_parent_tree;
 use crate::db::pax_parent_tree::{F3Parent, ParentPaxRelation};
 use crate::db::queries::{all_back_blasts, processed_items};
 use crate::db::save_back_blast;
+use crate::db::save_pre_blast;
 use crate::db::save_q_line_up;
+use crate::db::save_reaction_log;
 use crate::db::save_user::{sync_user, DbUser};
 use crate::shared::common_errors::AppError;
 use crate::web_api_routes::pax_data::get_pax_tree::ParentPaxCSVItem;
+use crate::web_api_routes::pre_blast_data::PreBlastRow;
+use crate::web_api_routes::reactions_log_data::ReactionLogRow;
 use crate::web_api_routes::sync::extract_back_blasts;
 use crate::web_api_routes::sync::processed_items_db_download::ProcessedCSVItem;
 use crate::web_api_routes::sync::q_line_up_download_db::QLineUpCSVItem;
@@ -101,6 +105,58 @@ fn extract_pax_parents<R: Read>(mut rdr: Reader<R>) -> Result<Vec<ParentPaxRelat
         let record: ParentPaxCSVItem = record?;
         let relation = ParentPaxRelation::try_from(record)?;
         results.push(relation);
+    }
+    Ok(results)
+}
+
+pub async fn sync_prod_pre_blasts(
+    db: web::Data<PgPool>,
+    req: web::Query<SyncProdReq>,
+) -> impl Responder {
+    match fetch_and_sync_pre_blasts(&req.url, &db).await {
+        Ok(_) => HttpResponse::Ok().body("Success"),
+        Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+    }
+}
+
+async fn fetch_and_sync_pre_blasts(url: &str, db: &PgPool) -> Result<(), AppError> {
+    let rdr = get_data_bytes_to_reader(url).await?;
+    let results = extract_pre_blasts(rdr)?;
+    save_pre_blast::save_from_csv_rows(db, &results).await?;
+    Ok(())
+}
+
+fn extract_pre_blasts<R: Read>(mut rdr: Reader<R>) -> Result<Vec<PreBlastRow>, AppError> {
+    let mut results: Vec<PreBlastRow> = vec![];
+    for record in rdr.deserialize() {
+        let record: PreBlastRow = record?;
+        results.push(record);
+    }
+    Ok(results)
+}
+
+pub async fn sync_prod_reactions_log(
+    db: web::Data<PgPool>,
+    req: web::Query<SyncProdReq>,
+) -> impl Responder {
+    match fetch_and_sync_reactions_log(&req.url, &db).await {
+        Ok(_) => HttpResponse::Ok().body("Success"),
+        Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+    }
+}
+
+async fn fetch_and_sync_reactions_log(url: &str, db: &PgPool) -> Result<(), AppError> {
+    let rdr = get_data_bytes_to_reader(url).await?;
+    let results = extract_reactions_log(rdr)?;
+    save_reaction_log::sync_prod_from_rows(db, &results).await?;
+    Ok(())
+}
+
+fn extract_reactions_log<R: Read>(mut rdr: Reader<R>) -> Result<Vec<ReactionLogRow>, AppError> {
+    let mut results: Vec<ReactionLogRow> = vec![];
+    for record in rdr.deserialize() {
+        let record: ReactionLogRow = record?;
+        results.push(record);
     }
     Ok(results)
 }

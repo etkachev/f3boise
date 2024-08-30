@@ -1,5 +1,7 @@
+use crate::app_state::ao_data::AO;
 use crate::app_state::pre_blast_data::PreBlastData;
 use crate::shared::common_errors::AppError;
+use crate::web_api_routes::pre_blast_data::PreBlastRow;
 use chrono::{NaiveDate, NaiveTime};
 use sqlx::{PgPool, Postgres, Transaction};
 use std::str::FromStr;
@@ -71,6 +73,47 @@ impl From<&PreBlastData> for PreBlastDbEntry {
     }
 }
 
+impl From<&PreBlastRow> for PreBlastDbEntry {
+    fn from(value: &PreBlastRow) -> Self {
+        let ao = AO::from(value.ao.to_string());
+        PreBlastDbEntry {
+            id: Uuid::from_str(value.id.as_str()).unwrap(),
+            ao: ao.to_string(),
+            channel_id: ao.channel_id().to_string(),
+            title: value.title.to_string(),
+            qs: value.qs.to_string(),
+            date: value.date,
+            start_time: value.start_time,
+            why: value.why.to_string(),
+            equipment: if value.equipment.is_empty() {
+                None
+            } else {
+                Some(value.equipment.to_string())
+            },
+            fng_message: if value.fng_message.is_empty() {
+                None
+            } else {
+                Some(value.fng_message.to_string())
+            },
+            mole_skin: if value.mole_skin.is_empty() {
+                None
+            } else {
+                Some(value.mole_skin.to_string())
+            },
+            img_ids: if value.img_ids.is_empty() {
+                None
+            } else {
+                Some(value.img_ids.to_string())
+            },
+            ts: if value.ts.is_empty() {
+                None
+            } else {
+                Some(value.ts.to_string())
+            },
+        }
+    }
+}
+
 pub async fn save_single(db_pool: &PgPool, data: &PreBlastData) -> Result<String, AppError> {
     let db_pb = PreBlastDbEntry::from(data);
     let id = db_pb.id.to_string();
@@ -84,6 +127,22 @@ pub async fn save_single(db_pool: &PgPool, data: &PreBlastData) -> Result<String
         .await
         .expect("Could not commit transaction");
     Ok(id)
+}
+
+pub async fn save_from_csv_rows(db: &PgPool, list: &[PreBlastRow]) -> Result<(), AppError> {
+    let mut transaction = db.begin().await.expect("Failed to begin transaction");
+    for item in list.iter() {
+        let entry = PreBlastDbEntry::from(item);
+
+        save_pre_blast(&mut transaction, &entry).await?;
+    }
+
+    transaction
+        .commit()
+        .await
+        .expect("Could not commit transaction");
+
+    Ok(())
 }
 
 /// update timestamp for pre-blast, to be able to edit most recent message post.
@@ -162,6 +221,8 @@ async fn save_pre_blast(
         r#"
         INSERT INTO pre_blasts (id, ao, channel_id, title, qs, date, start_time, why, equipment, fng_message, mole_skin, img_ids)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        ON CONFLICT (id)
+            DO NOTHING;
         "#,
         entry.id,
         entry.ao,
