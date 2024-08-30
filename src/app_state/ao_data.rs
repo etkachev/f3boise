@@ -23,7 +23,7 @@ pub enum AO {
     BlackDiamond,
     BlackOps,
     CamelsBack,
-    ReidMerrill,
+    Coop,
     GooseDynasty,
     DarkStride,
     BernieFisher,
@@ -110,7 +110,7 @@ impl AO {
             AO::BlackOps => HashSet::new(),
             AO::FirstF => HashSet::new(),
             AO::CamelsBack => HashSet::from([Weekday::Wed, Weekday::Fri]),
-            AO::ReidMerrill => HashSet::from([Weekday::Mon, Weekday::Fri]),
+            AO::Coop => HashSet::from([Weekday::Mon, Weekday::Fri]),
             AO::GooseDynasty => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
             AO::DarkStride => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::BernieFisher => HashSet::from([Weekday::Mon, Weekday::Thu]),
@@ -138,7 +138,7 @@ impl AO {
             AO::BlackOps => "Black Ops",
             AO::FirstF => "1st F",
             AO::CamelsBack => "Camel's Back",
-            AO::ReidMerrill => "Reid Merrill",
+            AO::Coop => "Coop",
             AO::GooseDynasty => "Goose Dynasty",
             AO::DarkStride => "Dark Stride",
             AO::BernieFisher => "Bernie Fisher Park",
@@ -238,7 +238,7 @@ impl AO {
             AO::BlackOps => AoType::Bootcamp,
             AO::FirstF => AoType::Bootcamp,
             AO::CamelsBack => AoType::Bootcamp,
-            AO::ReidMerrill => AoType::Bootcamp,
+            AO::Coop => AoType::Bootcamp,
             AO::GooseDynasty => AoType::Bootcamp,
             AO::DarkStride => AoType::Running,
             AO::BernieFisher => AoType::Bootcamp,
@@ -272,7 +272,7 @@ impl AO {
             AO::BlackOps => const_names::BLACK_OPS_CHANNEL_ID,
             AO::FirstF => const_names::FIRST_F_CHANNEL_ID,
             AO::CamelsBack => const_names::CAMELS_BACK_CHANNEL_ID,
-            AO::ReidMerrill => const_names::REID_MERRILL_CHANNEL_ID,
+            AO::Coop => const_names::COOP_CHANNEL_ID,
             AO::GooseDynasty => const_names::GOOSE_DYNASTY_CHANNEL_ID,
             AO::DarkStride => const_names::DARK_STRIDE_CHANNEL_ID,
             AO::BernieFisher => const_names::BERNIE_FISHER_PARK_CHANNEL_ID,
@@ -297,7 +297,7 @@ impl AO {
             AO::Rebel => Some("3801 E Hill Park Street, Meridian, ID 83642"),
             AO::Tower => Some("2121 E Lake Hazel Rd, Meridian, ID 83642"),
             AO::CamelsBack => Some("1200 Heron St, Boise, ID 83702"),
-            AO::ReidMerrill => Some("637 E Shore Dr, Eagle, ID 83616"),
+            AO::Coop => Some("637 E Shore Dr, Eagle, ID 83616"),
             AO::GooseDynasty => Some("2815 S Maple Grove Rd, Boise, ID 83709"),
             AO::DarkStride => Some("2887 W Tubac Dr, Meridian, ID  83646"),
             AO::BernieFisher => Some("201 W Main St, Kuna, ID 83634"),
@@ -327,7 +327,7 @@ impl AO {
             AO::Tower => Some(const_names::THE_TOWER_GOOGLE_MAPS),
             AO::BlackDiamond => Some(const_names::BLACK_DIAMOND_GOOGLE_MAPS),
             AO::CamelsBack => Some(const_names::CAMELS_BACK_GOOGLE_MAPS),
-            AO::ReidMerrill => Some(const_names::REID_MERRILL_GOOGLE_MAPS),
+            AO::Coop => Some(const_names::COOP_GOOGLE_MAPS),
             AO::GooseDynasty => Some(const_names::GOOSE_DYNASTY_GOOGLE_MAPS),
             AO::DarkStride => Some(const_names::DARK_STRIDE_GOOGLE_MAPS),
             AO::BernieFisher => Some(const_names::BERNIE_FISHER_PARK_GOOGLE_MAPS),
@@ -367,7 +367,7 @@ impl AO {
             const_names::BLACK_OPS_CHANNEL_ID => AO::BlackOps,
             const_names::FIRST_F_CHANNEL_ID => AO::FirstF,
             const_names::CAMELS_BACK_CHANNEL_ID => AO::CamelsBack,
-            const_names::REID_MERRILL_CHANNEL_ID => AO::ReidMerrill,
+            const_names::COOP_CHANNEL_ID => AO::Coop,
             const_names::GOOSE_DYNASTY_CHANNEL_ID => AO::GooseDynasty,
             const_names::DARK_STRIDE_CHANNEL_ID => AO::DarkStride,
             const_names::BERNIE_FISHER_PARK_CHANNEL_ID => AO::BernieFisher,
@@ -399,7 +399,7 @@ impl Clone for AO {
             AO::BlackOps => AO::BlackOps,
             AO::FirstF => AO::FirstF,
             AO::CamelsBack => AO::CamelsBack,
-            AO::ReidMerrill => AO::ReidMerrill,
+            AO::Coop => AO::Coop,
             AO::GooseDynasty => AO::GooseDynasty,
             AO::DarkStride => AO::DarkStride,
             AO::BernieFisher => AO::BernieFisher,
@@ -429,7 +429,7 @@ impl Display for AO {
             AO::BlackOps => const_names::BLACK_OPS,
             AO::FirstF => const_names::FIRST_F,
             AO::CamelsBack => const_names::CAMELS_BACK,
-            AO::ReidMerrill => const_names::REID_MERRILL,
+            AO::Coop => const_names::COOP,
             AO::GooseDynasty => const_names::GOOSE_DYNASTY,
             AO::DarkStride => const_names::DARK_STRIDE,
             AO::BernieFisher => const_names::BERNIE_FISHER_PARK,
@@ -473,7 +473,7 @@ impl From<String> for AO {
             const_names::BLACK_OPS => AO::BlackOps,
             const_names::FIRST_F => AO::FirstF,
             const_names::CAMELS_BACK => AO::CamelsBack,
-            const_names::REID_MERRILL | "otb-reid-merrill-park" => AO::ReidMerrill,
+            const_names::COOP => AO::Coop,
             const_names::GOOSE_DYNASTY | "otb-goose-dynasty" => AO::GooseDynasty,
             const_names::DARK_STRIDE => AO::DarkStride,
             const_names::BERNIE_FISHER_PARK => AO::BernieFisher,
@@ -516,7 +516,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::BlackOps => AO::BlackOps,
         PublicChannels::FirstF => AO::FirstF,
         PublicChannels::CamelsBack => AO::CamelsBack,
-        PublicChannels::ReidMerrill => AO::ReidMerrill,
+        PublicChannels::Coop => AO::Coop,
         PublicChannels::GooseDynasty => AO::GooseDynasty,
         PublicChannels::DarkStride => AO::DarkStride,
         PublicChannels::BernieFisher => AO::BernieFisher,
@@ -605,9 +605,9 @@ pub mod const_names {
     pub const CAMELS_BACK: &str = "camels-back";
     pub const CAMELS_BACK_CHANNEL_ID: &str = "C05AJDFUBM4";
     pub const CAMELS_BACK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/28RexfPU7yd7z2Zg8";
-    pub const REID_MERRILL: &str = "reid-merrill-park";
-    pub const REID_MERRILL_CHANNEL_ID: &str = "C05UUDKULGY";
-    pub const REID_MERRILL_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/mycHr8xipwwqhhSu6";
+    pub const COOP: &str = "coop";
+    pub const COOP_CHANNEL_ID: &str = "C05UUDKULGY";
+    pub const COOP_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/mycHr8xipwwqhhSu6";
     pub const GOOSE_DYNASTY: &str = "goose-dynasty";
     pub const GOOSE_DYNASTY_CHANNEL_ID: &str = "C06DP3D5VTK";
     pub const GOOSE_DYNASTY_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/B6xDeMgoV9LMbuke9";
@@ -643,7 +643,7 @@ pub mod const_names {
         AO::IronMountain,
         AO::OldGlory,
         AO::Rebel,
-        AO::ReidMerrill,
+        AO::Coop,
         AO::Rise,
         AO::RuckershipEast,
         AO::RuckershipWest,

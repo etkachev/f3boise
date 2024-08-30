@@ -235,7 +235,7 @@ pub async fn pre_blast_reaction_data_route(
         req.date,
         vec!["hc".to_string(), "sc".to_string()],
     )
-        .await
+    .await
     {
         Ok(results) => {
             let related_back_blasts: Vec<BackBlastData> =

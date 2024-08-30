@@ -18,7 +18,7 @@ pub enum PublicChannels {
     BlackDiamond,
     BlackOps,
     CamelsBack,
-    ReidMerrill,
+    Coop,
     GooseDynasty,
     DarkStride,
     BernieFisher,
@@ -56,7 +56,7 @@ impl From<&AO> for PublicChannels {
             AO::BlackOps => PublicChannels::BlackOps,
             AO::FirstF => PublicChannels::FirstF,
             AO::CamelsBack => PublicChannels::CamelsBack,
-            AO::ReidMerrill => PublicChannels::ReidMerrill,
+            AO::Coop => PublicChannels::Coop,
             AO::GooseDynasty => PublicChannels::GooseDynasty,
             AO::DarkStride => PublicChannels::DarkStride,
             AO::BernieFisher => PublicChannels::BernieFisher,
@@ -112,7 +112,7 @@ mod tests {
         test_channel_name("ao-black-ops", PublicChannels::BlackOps);
         test_channel_name("black-ops", PublicChannels::BlackOps);
         test_channel_name("camels-back", PublicChannels::CamelsBack);
-        test_channel_name("ao-reid-merrill-park", PublicChannels::ReidMerrill);
+        test_channel_name("ao-coop", PublicChannels::Coop);
         test_channel_name("otb-goose-dynasty", PublicChannels::GooseDynasty);
         test_channel_name("goose-dynasty", PublicChannels::GooseDynasty);
         test_channel_name("ao-dark-stride", PublicChannels::DarkStride);
