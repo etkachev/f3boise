@@ -1,6 +1,8 @@
 use super::channel_message::ChannelMessageEvent;
+use crate::web_api_routes::slack_events::app_rate_limited::AppRateLimitedData;
 use crate::web_api_routes::slack_events::emoji_reactions::ReactionData;
 use crate::web_api_routes::slack_events::team_join::TeamJoinData;
+use crate::web_api_routes::slack_events::user_profile_changed::UserProfileChangedData;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_with::{formats::Flexible, TimestampSeconds};
@@ -23,10 +25,12 @@ pub struct EventWrapper {
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum EventTypes {
+    AppRateLimited(AppRateLimitedData),
     Message(ChannelMessageEvent),
     TeamJoin(TeamJoinData),
     ReactionAdded(ReactionData),
     ReactionRemoved(ReactionData),
+    UserProfileChanged(UserProfileChangedData),
     Unknown,
 }
 

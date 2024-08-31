@@ -1,7 +1,7 @@
 use crate::shared::common_errors::AppError;
 use crate::users::f3_user::F3User;
 use chrono::NaiveDateTime;
-use sqlx::{Postgres, Transaction};
+use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
 /// user represented in db.
@@ -57,6 +57,23 @@ pub async fn upsert_user(
     .execute(&mut **transaction)
     .await?;
 
+    Ok(())
+}
+
+/// update only username once in case they forget to set their display name when they first join
+pub async fn update_user_name(db: &PgPool, slack_id: &str, name: &str) -> Result<(), AppError> {
+    sqlx::query!(
+        r#"
+    UPDATE users
+    SET name = CASE WHEN locked_name_update THEN name ELSE $2 END,
+        locked_name_update = TRUE
+    WHERE slack_id = $1 AND NOT locked_name_update;
+    "#,
+        slack_id,
+        name,
+    )
+    .execute(db)
+    .await?;
     Ok(())
 }
 

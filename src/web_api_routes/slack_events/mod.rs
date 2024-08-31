@@ -5,12 +5,14 @@ use hmac::{Hmac, Mac};
 use sha2::Sha256;
 use sqlx::PgPool;
 
+mod app_rate_limited;
 pub mod channel_message;
 pub mod emoji_reactions;
 pub mod event_times;
 pub mod event_wrapper;
 pub mod slack_challenge;
 pub mod team_join;
+mod user_profile_changed;
 
 type HmacSha256 = Hmac<Sha256>;
 
@@ -56,7 +58,7 @@ fn verify_events_request(
 const DIVIDER: &str = "\n\n========\n\n";
 
 pub async fn slack_events(
-    data: web::Data<MutableWebState>,
+    web_state: web::Data<MutableWebState>,
     app_state: web::Data<MutableAppState>,
     db_pool: web::Data<PgPool>,
     req: HttpRequest,
@@ -64,7 +66,7 @@ pub async fn slack_events(
 ) -> impl Responder {
     println!("Event incoming!");
     // TODO refactor
-    let valid_request = verify_events_request(&data, &req, &body);
+    let valid_request = verify_events_request(&web_state, &req, &body);
     if !valid_request {
         return HttpResponse::Unauthorized().body("Event not allowed");
     }
@@ -74,17 +76,28 @@ pub async fn slack_events(
     if let Some(event) = &body.event {
         match event {
             event_wrapper::EventTypes::Message(message_data) => {
-                channel_message::handle_channel_message(message_data, &data, &app_state, &db_pool)
-                    .await;
+                channel_message::handle_channel_message(
+                    message_data,
+                    &web_state,
+                    &app_state,
+                    &db_pool,
+                )
+                .await;
             }
             event_wrapper::EventTypes::TeamJoin(join_data) => {
-                team_join::handle_new_user(&db_pool, &join_data.user, &app_state, &data).await;
+                team_join::handle_new_user(&db_pool, &join_data.user, &app_state, &web_state).await;
             }
             event_wrapper::EventTypes::ReactionAdded(reaction_data) => {
                 emoji_reactions::handle_reaction_add(&db_pool, reaction_data, &app_state).await;
             }
             event_wrapper::EventTypes::ReactionRemoved(reaction_data) => {
                 emoji_reactions::handle_reaction_remove(&db_pool, reaction_data, &app_state).await;
+            }
+            event_wrapper::EventTypes::AppRateLimited(rate_data) => {
+                app_rate_limited::handle_app_rate_limited(&web_state, rate_data).await;
+            }
+            event_wrapper::EventTypes::UserProfileChanged(user_data) => {
+                user_profile_changed::handle_user_profile_changed(&db_pool, user_data).await;
             }
             _ => (),
         }
