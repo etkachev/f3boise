@@ -41,8 +41,8 @@ pub async fn upsert_user(
     let id = Uuid::new_v4();
     sqlx::query!(
         r#"
-    INSERT INTO users (id, slack_id, name, email, img_url)
-    VALUES($1,$2,$3,$4,$5)
+    INSERT INTO users (id, slack_id, name, email, img_url, locked_name_update)
+    VALUES($1,$2,$3,$4,$5, false)
     ON CONFLICT (slack_id)
         DO UPDATE
         SET name = EXCLUDED.name,
@@ -85,8 +85,8 @@ pub async fn sync_user(
     let id = Uuid::new_v4();
     sqlx::query!(
         r#"
-    INSERT INTO users (id, slack_id, name, email, img_url)
-    VALUES($1,$2,$3,$4,$5)
+    INSERT INTO users (id, slack_id, name, email, img_url, locked_name_update)
+    VALUES($1,$2,$3,$4,$5, false)
     ON CONFLICT (slack_id)
         DO UPDATE
         SET name = EXCLUDED.name,
@@ -114,8 +114,8 @@ pub async fn update_user_profile_img(
     let id = Uuid::new_v4();
     sqlx::query!(
         r#"
-    INSERT INTO users (id, slack_id, name, email, img_url)
-    VALUES($1,$2,$3,$4,$5)
+    INSERT INTO users (id, slack_id, name, email, img_url, locked_name_update)
+    VALUES($1,$2,$3,$4,$5,false)
     ON CONFLICT (slack_id)
         DO UPDATE
         SET img_url = EXCLUDED.img_url;

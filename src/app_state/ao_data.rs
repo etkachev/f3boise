@@ -82,6 +82,10 @@ mod ao_times {
         NaiveTime::from_hms_opt(5, 15, 0).unwrap()
     }
 
+    pub fn five_thirty() -> NaiveTime {
+        NaiveTime::from_hms_opt(5, 30, 0).unwrap()
+    }
+
     pub fn six() -> NaiveTime {
         NaiveTime::from_hms_opt(6, 0, 0).unwrap()
     }
@@ -115,7 +119,7 @@ impl AO {
             AO::DarkStride => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::BernieFisher => HashSet::from([Weekday::Mon, Weekday::Thu]),
             AO::WestCanyonElementary => HashSet::from([Weekday::Wed]),
-            AO::EmmettCityPark => HashSet::from([Weekday::Thu]),
+            AO::EmmettCityPark => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
@@ -185,6 +189,7 @@ impl AO {
         let five = ao_times::five();
         let five_fifteen = ao_times::five_fifteen();
         let six = ao_times::six();
+        let five_thirty = ao_times::five_thirty();
 
         match week_day {
             Weekday::Mon => match self {
@@ -194,6 +199,7 @@ impl AO {
                 _ => None,
             },
             Weekday::Tue => match self {
+                AO::EmmettCityPark => Some(five_thirty),
                 ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
@@ -204,7 +210,7 @@ impl AO {
                 _ => None,
             },
             Weekday::Thu => match self {
-                AO::EmmettCityPark => Some(six),
+                AO::EmmettCityPark => Some(five_thirty),
                 ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },

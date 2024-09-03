@@ -1,6 +1,7 @@
 use crate::bot_data::{BotUser, UserBotCombo};
 use crate::oauth_client::get_oauth_client;
 use crate::shared::common_errors::AppError;
+use crate::slack_api::block_kit::BlockBuilder;
 use crate::slack_api::channels::history::request::ChannelHistoryRequest;
 use crate::slack_api::channels::history::response::ChannelsHistoryResponse;
 use crate::slack_api::channels::invite::request::InviteToConvoRequest;
@@ -11,6 +12,8 @@ use crate::slack_api::channels::list::request::ConversationListRequest;
 use crate::slack_api::channels::list::response::{ChannelData, ChannelsListResponse};
 use crate::slack_api::channels::members::request::ConversationMembersRequest;
 use crate::slack_api::channels::members::response::ConversationMembersResponse;
+use crate::slack_api::channels::open::request::OpenConversationRequest;
+use crate::slack_api::channels::open::response::OpenConversationResponse;
 use crate::slack_api::channels::public_channels::PublicChannels;
 use crate::slack_api::channels::types::ChannelTypes;
 use crate::slack_api::chat::post_message::request::PostMessageRequest;
@@ -140,6 +143,41 @@ impl MutableWebState {
         } else {
             Ok(response.ts)
         }
+    }
+
+    pub async fn send_direct_message(
+        &self,
+        user: &str,
+        message: BlockBuilder,
+    ) -> Result<(), AppError> {
+        let users = vec![user.to_string()];
+        self.send_direct_messages(&users, message).await?;
+        Ok(())
+    }
+
+    pub async fn send_direct_messages(
+        &self,
+        users: &[String],
+        message: BlockBuilder,
+    ) -> Result<(), AppError> {
+        let request = OpenConversationRequest::new(users);
+        let url = request.get_plain_url_request(&self.base_api_url);
+        let body = serde_json::to_vec(&request)?;
+        let response = self.make_post_request(url, body).await;
+        let bytes = response.bytes().await?;
+        let response: OpenConversationResponse = serde_json::from_slice(&bytes)?;
+        let channel_id = response.channel.map(|c| c.id);
+        match (channel_id, response.error) {
+            (_, Some(err)) => {
+                println!("Error opening conversation: {}", err);
+            }
+            (Some(channel_id), _) => {
+                let post_message_req = PostMessageRequest::new(&channel_id, message.blocks);
+                self.post_message(post_message_req).await?;
+            }
+            _ => (),
+        }
+        Ok(())
     }
 
     /// Open view like modal or home view
