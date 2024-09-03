@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    UPDATE users\n    SET name = CASE WHEN locked_name_update THEN name ELSE $2 END,\n        locked_name_update = CASE WHEN name = $2 THEN locked_name_update ELSE TRUE END\n    WHERE slack_id = $1 AND NOT locked_name_update;\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "75d505aaa2f7d2d73a89d4182e449a91977a81df36f3b26f808842b0b2ca28d3"
+}

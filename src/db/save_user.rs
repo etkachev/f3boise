@@ -66,7 +66,7 @@ pub async fn update_user_name(db: &PgPool, slack_id: &str, name: &str) -> Result
         r#"
     UPDATE users
     SET name = CASE WHEN locked_name_update THEN name ELSE $2 END,
-        locked_name_update = TRUE
+        locked_name_update = CASE WHEN name = $2 THEN locked_name_update ELSE TRUE END
     WHERE slack_id = $1 AND NOT locked_name_update;
     "#,
         slack_id,
