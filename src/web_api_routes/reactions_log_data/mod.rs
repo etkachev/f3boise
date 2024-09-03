@@ -115,7 +115,7 @@ impl PreBlastPaxReactionData {
                     if !attended_bd {
                         summary.push_str("DID NOT ATTEND BD.... Fart-sack!\n\n");
                     }
-                } else {
+                } else if !user_data.bb_posted {
                     summary.push_str("BD backblast has not been posted yet.\n\n");
                 }
 
@@ -156,6 +156,7 @@ pub struct PaxReactionLogData {
     pax_name: String,
     reactions: Vec<PaxReactionLogItem>,
     attended_bd: Option<bool>,
+    bb_posted: bool,
 }
 
 impl From<&PreBlastReactionLogItem> for PaxReactionLogData {
@@ -164,14 +165,16 @@ impl From<&PreBlastReactionLogItem> for PaxReactionLogData {
             pax_name: value.name.to_string(),
             reactions: vec![PaxReactionLogItem::from(value)],
             attended_bd: None,
+            bb_posted: false,
         }
     }
 }
 
 impl PaxReactionLogData {
     pub fn with_bb_data(&mut self, ao: &AO, bb_list: &[BackBlastData]) {
+        let matching_bb = bb_list.iter().find(|item| &item.ao == ao);
+        self.bb_posted = matching_bb.is_some();
         if self.did_hc() {
-            let matching_bb = bb_list.iter().find(|item| &item.ao == ao);
             if let Some(bb) = matching_bb {
                 let attended = bb
                     .get_pax()
