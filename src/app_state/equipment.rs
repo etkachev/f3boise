@@ -26,7 +26,7 @@ impl From<&AoEquipment> for OptionElement {
     fn from(value: &AoEquipment) -> Self {
         match value {
             AoEquipment::Coupons => {
-                OptionElement::new_mkd(&format!("{} :coupon:", AoEquipment::Coupons), "coupon")
+                OptionElement::new(&format!("{} 🧱", AoEquipment::Coupons), "coupon")
             }
             AoEquipment::Sandbag => {
                 OptionElement::new(&format!("{} 👝", AoEquipment::Sandbag), "sandbag")

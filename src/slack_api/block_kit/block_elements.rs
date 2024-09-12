@@ -646,15 +646,6 @@ impl OptionElement {
             url: None,
         }
     }
-
-    pub fn new_mkd(text: &str, value: &str) -> Self {
-        OptionElement {
-            text: TextObject::new_markdown(text),
-            value: value.to_string(),
-            description: None,
-            url: None,
-        }
-    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
