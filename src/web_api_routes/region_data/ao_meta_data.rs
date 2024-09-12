@@ -22,7 +22,7 @@ pub async fn ao_list_meta_data_route(db: web::Data<PgPool>) -> impl Responder {
 }
 
 /// fetches general ao data along with tomorrow's q and avg pax info.
-async fn ao_list_data(db: &PgPool) -> Result<[AoMetaData; 22], AppError> {
+async fn ao_list_data(db: &PgPool) -> Result<[AoMetaData; 23], AppError> {
     let recent = get_recent_back_blasts(db).await?;
     let now = local_boise_time().date_naive();
     let two_days_later = now + Duration::days(2);
