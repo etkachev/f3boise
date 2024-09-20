@@ -24,6 +24,7 @@ pub enum PublicChannels {
     BernieFisher,
     WestCanyonElementary,
     EmmettCityPark,
+    Capitol,
     FirstF,
     DR,
     Welcome,
@@ -62,6 +63,7 @@ impl From<&AO> for PublicChannels {
             AO::BernieFisher => PublicChannels::BernieFisher,
             AO::WestCanyonElementary => PublicChannels::WestCanyonElementary,
             AO::EmmettCityPark => PublicChannels::EmmettCityPark,
+            AO::Capitol => PublicChannels::Capitol,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }
