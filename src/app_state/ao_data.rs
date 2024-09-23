@@ -314,7 +314,7 @@ impl AO {
             AO::BernieFisher => Some("201 W Main St, Kuna, ID 83634"),
             AO::WestCanyonElementary => Some("19548 Ustick Rd, Caldwell, ID 83607"),
             AO::EmmettCityPark => Some("E Main St, Emmett, ID 83617"),
-            AO::Capitol => Some("601 W Jefferson St, Boise, ID 83702"),
+            AO::Capitol => Some("700 W Jefferson St, Boise, ID 83720"),
             AO::RuckershipEast
             | AO::RuckershipWest
             | AO::BlackOps
@@ -645,7 +645,7 @@ pub mod const_names {
     pub const EMMETT_CITY_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/nWQgtsxqEQ7wEoiZ9";
     pub const CAPITOL_PARK: &str = "otb-capitol";
     pub const CAPITOL_PARK_CHANNEL_ID: &str = "C07LQPM4X37";
-    pub const CAPITOL_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/hP2THp5vaggKu3EV8";
+    pub const CAPITOL_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/UsWagimUy1huJdsPA";
 
     /// full list of active aos
     pub const AO_LIST: [AO; 23] = [
