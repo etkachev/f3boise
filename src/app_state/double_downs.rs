@@ -6,6 +6,7 @@ use std::ops::Range;
 pub enum DoubleDownProgram {
     WolfPax,
     KnightForge,
+    ChainLinks,
     General,
 }
 
@@ -19,6 +20,10 @@ impl DoubleDownProgram {
                 NaiveDate::from_ymd_opt(2023, 7, 9).unwrap()
                     ..NaiveDate::from_ymd_opt(2024, 7, 5).unwrap()
             }
+            DoubleDownProgram::ChainLinks => {
+                NaiveDate::from_ymd_opt(2024, 10, 3).unwrap()
+                    ..NaiveDate::from_ymd_opt(2025, 10, 3).unwrap()
+            }
             DoubleDownProgram::General => NaiveDate::MIN..NaiveDate::MAX,
         }
     }
@@ -29,6 +34,7 @@ impl Display for DoubleDownProgram {
         let str = match self {
             DoubleDownProgram::WolfPax => "WolfPax",
             DoubleDownProgram::KnightForge => "KnightForge",
+            DoubleDownProgram::ChainLinks => "ChainLinks",
             DoubleDownProgram::General => "General",
         }
         .to_string();
@@ -36,7 +42,8 @@ impl Display for DoubleDownProgram {
     }
 }
 
-const PROGRAM_LIST: [DoubleDownProgram; 3] = [
+const PROGRAM_LIST: [DoubleDownProgram; 4] = [
+    DoubleDownProgram::ChainLinks,
     DoubleDownProgram::KnightForge,
     DoubleDownProgram::WolfPax,
     DoubleDownProgram::General,
@@ -74,5 +81,12 @@ mod tests {
         let date = NaiveDate::from_ymd_opt(2024, 7, 6).unwrap();
         let program = DoubleDownProgram::from(&date);
         assert_eq!(program, DoubleDownProgram::General);
+    }
+
+    #[test]
+    fn test_chain_links() {
+        let date = NaiveDate::from_ymd_opt(2024, 10, 3).unwrap();
+        let program = DoubleDownProgram::from(&date);
+        assert_eq!(program, DoubleDownProgram::ChainLinks);
     }
 }
