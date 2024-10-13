@@ -648,7 +648,7 @@ pub mod const_names {
     pub const CAPITOL_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/UsWagimUy1huJdsPA";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 22] = [
+    pub const AO_LIST: [AO; 21] = [
         AO::Backyard,
         AO::Bellagio,
         AO::BernieFisher,
@@ -667,7 +667,6 @@ pub mod const_names {
         AO::Rebel,
         AO::Coop,
         AO::Rise,
-        AO::RuckershipEast,
         AO::Tower,
         AO::WarHorse,
         AO::WestCanyonElementary,
