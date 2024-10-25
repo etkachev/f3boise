@@ -1,8 +1,9 @@
 use chrono::NaiveDate;
+use serde::Serialize;
 use std::fmt::Display;
 use std::ops::Range;
 
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Debug, Clone, Serialize)]
 pub enum DoubleDownProgram {
     WolfPax,
     KnightForge,
