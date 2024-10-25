@@ -2,7 +2,7 @@ use chrono::NaiveDate;
 use std::fmt::Display;
 use std::ops::Range;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum DoubleDownProgram {
     WolfPax,
     KnightForge,
@@ -42,7 +42,7 @@ impl Display for DoubleDownProgram {
     }
 }
 
-const PROGRAM_LIST: [DoubleDownProgram; 4] = [
+pub const PROGRAM_LIST: [DoubleDownProgram; 4] = [
     DoubleDownProgram::ChainLinks,
     DoubleDownProgram::KnightForge,
     DoubleDownProgram::WolfPax,

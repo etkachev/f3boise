@@ -50,6 +50,22 @@ pub async fn get_double_down_stats_route(db_pool: web::Data<PgPool>) -> impl Res
     }
 }
 
+/// route to get double down info
+pub async fn get_general_double_down_info_route() -> impl Responder {
+    match double_downs::get_general_info().await {
+        Ok(info) => HttpResponse::Ok().json(info),
+        Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+    }
+}
+
+/// route for combined double down stats
+pub async fn get_combined_double_downs_route(db: web::Data<PgPool>) -> impl Responder {
+    match double_downs::get_combined_stats(&db).await {
+        Ok(stats) => HttpResponse::Ok().json(stats),
+        Err(err) => HttpResponse::BadRequest().body(err.to_string()),
+    }
+}
+
 /// get response on top pax per ao
 pub async fn get_top_pax_data_route(db_pool: web::Data<PgPool>) -> impl Responder {
     match get_top_pax_per_ao(&db_pool, None).await {
