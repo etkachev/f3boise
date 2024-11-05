@@ -94,6 +94,10 @@ mod ao_times {
     pub fn five() -> NaiveTime {
         NaiveTime::from_hms_opt(5, 0, 0).unwrap()
     }
+
+    pub fn five_forty_five() -> NaiveTime {
+        NaiveTime::from_hms_opt(5, 45, 0).unwrap()
+    }
 }
 
 impl AO {
@@ -101,7 +105,7 @@ impl AO {
         match self {
             AO::Bleach => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Sat]),
             AO::Gem => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
-            AO::OldGlory => HashSet::from([Weekday::Mon, Weekday::Wed]),
+            AO::OldGlory => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
             AO::Rebel => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::IronMountain => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::RuckershipWest => HashSet::from([Weekday::Fri]),
@@ -171,6 +175,7 @@ impl AO {
             Weekday::Fri => match self {
                 AO::Backyard => Some(45),
                 AO::RuckershipWest | AO::RuckershipEast => Some(60),
+                AO::OldGlory => Some(60),
                 _ => Some(45),
             },
             Weekday::Sat => Some(60),
@@ -193,6 +198,7 @@ impl AO {
         let five_fifteen = ao_times::five_fifteen();
         let six = ao_times::six();
         let five_thirty = ao_times::five_thirty();
+        let five_forty_five = ao_times::five_forty_five();
 
         match week_day {
             Weekday::Mon => match self {
@@ -219,6 +225,7 @@ impl AO {
             },
             Weekday::Fri => match self {
                 AO::RuckershipWest => Some(five_fifteen),
+                AO::OldGlory => Some(five_forty_five),
                 ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
             },
