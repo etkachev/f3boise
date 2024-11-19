@@ -45,6 +45,7 @@ pub enum AoType {
     HighIntensity,
     Running,
     Rucking,
+    WildCard,
 }
 
 impl Display for AoType {
@@ -55,6 +56,7 @@ impl Display for AoType {
             AoType::Heavy => String::from("Ruck/Sandbag"),
             AoType::Running => String::from("Running"),
             AoType::Rucking => String::from("Ruck/Hike"),
+            AoType::WildCard => String::from("Wild Card"),
         };
         write!(f, "{}", str)
     }
@@ -72,7 +74,7 @@ impl AoType {
             AoType::Heavy => HashSet::from([AoEquipment::Ruck, AoEquipment::Sandbag]),
             AoType::Running => HashSet::from([AoEquipment::RunningShoes]),
             AoType::Rucking => HashSet::from([AoEquipment::Ruck, AoEquipment::Headlamp]),
-            AoType::NoEquipment => HashSet::from([]),
+            AoType::WildCard => HashSet::from([]),
         }
     }
 }
@@ -261,7 +263,7 @@ impl AO {
             AO::BernieFisher => AoType::Bootcamp,
             AO::WestCanyonElementary => AoType::Bootcamp,
             AO::EmmettCityPark => AoType::Bootcamp,
-            AO::Capitol => AoType::NoEquipment,
+            AO::Capitol => AoType::WildCard,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
         }
