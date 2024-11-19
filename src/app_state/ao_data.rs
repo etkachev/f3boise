@@ -72,6 +72,7 @@ impl AoType {
             AoType::Heavy => HashSet::from([AoEquipment::Ruck, AoEquipment::Sandbag]),
             AoType::Running => HashSet::from([AoEquipment::RunningShoes]),
             AoType::Rucking => HashSet::from([AoEquipment::Ruck, AoEquipment::Headlamp]),
+            AoType::NoEquipment => HashSet::from([]),
         }
     }
 }
@@ -260,7 +261,7 @@ impl AO {
             AO::BernieFisher => AoType::Bootcamp,
             AO::WestCanyonElementary => AoType::Bootcamp,
             AO::EmmettCityPark => AoType::Bootcamp,
-            AO::Capitol => AoType::Bootcamp,
+            AO::Capitol => AoType::NoEquipment,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
         }
