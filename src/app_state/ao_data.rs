@@ -51,12 +51,11 @@ pub enum AoType {
 impl Display for AoType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            AoType::Bootcamp => String::from("Bootcamp"),
+            AoType::Bootcamp | AoType::WildCard => String::from("Bootcamp"),
             AoType::HighIntensity => String::from("High Intensity"),
             AoType::Heavy => String::from("Ruck/Sandbag"),
             AoType::Running => String::from("Running"),
             AoType::Rucking => String::from("Ruck/Hike"),
-            AoType::WildCard => String::from("Wild Card"),
         };
         write!(f, "{}", str)
     }
