@@ -45,12 +45,13 @@ pub enum AoType {
     HighIntensity,
     Running,
     Rucking,
+    WildCard,
 }
 
 impl Display for AoType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            AoType::Bootcamp => String::from("Bootcamp"),
+            AoType::Bootcamp | AoType::WildCard => String::from("Bootcamp"),
             AoType::HighIntensity => String::from("High Intensity"),
             AoType::Heavy => String::from("Ruck/Sandbag"),
             AoType::Running => String::from("Running"),
@@ -72,6 +73,7 @@ impl AoType {
             AoType::Heavy => HashSet::from([AoEquipment::Ruck, AoEquipment::Sandbag]),
             AoType::Running => HashSet::from([AoEquipment::RunningShoes]),
             AoType::Rucking => HashSet::from([AoEquipment::Ruck, AoEquipment::Headlamp]),
+            AoType::WildCard => HashSet::from([]),
         }
     }
 }
@@ -260,7 +262,7 @@ impl AO {
             AO::BernieFisher => AoType::Bootcamp,
             AO::WestCanyonElementary => AoType::Bootcamp,
             AO::EmmettCityPark => AoType::Bootcamp,
-            AO::Capitol => AoType::Bootcamp,
+            AO::Capitol => AoType::WildCard,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
         }
