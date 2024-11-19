@@ -38,6 +38,12 @@ fn create_pre_blast_modal(channel_id: &str, user_id: &str) -> ViewModal {
         .map(OptionElement::from)
         .collect::<Vec<OptionElement>>();
 
+    let ao_equipment = if ao_equipment.is_empty() {
+        None
+    } else {
+        Some(ao_equipment)
+    };
+
     // build blocks
     let block_builder = BlockBuilder::new()
         .plain_input(
@@ -83,7 +89,7 @@ fn create_pre_blast_modal(channel_id: &str, user_id: &str) -> ViewModal {
             "Equipment",
             pre_blast_post::pre_blast_action_ids::EQUIPMENT,
             equipment_list(),
-            Some(ao_equipment),
+            ao_equipment,
             true,
         )
         .plain_input(
