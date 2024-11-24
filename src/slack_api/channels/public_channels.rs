@@ -23,7 +23,7 @@ pub enum PublicChannels {
     DarkStride,
     BernieFisher,
     WestCanyonElementary,
-    EmmettCityPark,
+    BlackCanyon,
     Capitol,
     FirstF,
     DR,
@@ -62,7 +62,7 @@ impl From<&AO> for PublicChannels {
             AO::DarkStride => PublicChannels::DarkStride,
             AO::BernieFisher => PublicChannels::BernieFisher,
             AO::WestCanyonElementary => PublicChannels::WestCanyonElementary,
-            AO::EmmettCityPark => PublicChannels::EmmettCityPark,
+            AO::BlackCanyon => PublicChannels::BlackCanyon,
             AO::Capitol => PublicChannels::Capitol,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
@@ -122,7 +122,7 @@ mod tests {
             "otb-west-canyon-elementary",
             PublicChannels::WestCanyonElementary,
         );
-        test_channel_name("otb-emmett-city-park", PublicChannels::EmmettCityPark);
+        test_channel_name("ao-black-canyon", PublicChannels::BlackCanyon);
         test_channel_name("1st-f", PublicChannels::FirstF);
     }
 
