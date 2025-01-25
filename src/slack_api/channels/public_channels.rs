@@ -28,13 +28,19 @@ pub enum PublicChannels {
     FirstF,
     DR,
     Welcome,
+    HelpDesk,
     Unknown(String),
 }
 
 impl PublicChannels {
     pub fn channel_id(&self) -> String {
         let ao = AO::from(self);
-        ao.channel_id().to_string()
+        match self {
+            PublicChannels::HelpDesk => "C03T2ND0YF7",
+            PublicChannels::Welcome => "C03T2Q7U337",
+            _ => ao.channel_id(),
+        }
+        .to_string()
     }
 }
 

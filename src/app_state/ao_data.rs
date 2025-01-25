@@ -552,6 +552,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
+        PublicChannels::HelpDesk => AO::Unknown("Helpdesk".to_string()),
         PublicChannels::Unknown(unknown) => AO::Unknown(unknown.to_string()),
     }
 }

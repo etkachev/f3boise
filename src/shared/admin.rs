@@ -2,12 +2,20 @@
 pub fn admin_users() -> Vec<String> {
     vec![
         // backslash
-        String::from("U03SR452HL7"),
+        backslash_id(),
         // stinger
-        String::from("U03T87KHRFE"),
+        stinger_id(),
         // guac
         String::from("U04SS5FQXQ9"),
         // deepdish
         String::from("U05CWQ1FSV8"),
     ]
+}
+
+pub fn backslash_id() -> String {
+    String::from("U03SR452HL7")
+}
+
+pub fn stinger_id() -> String {
+    String::from("U03T87KHRFE")
 }
