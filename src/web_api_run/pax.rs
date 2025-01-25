@@ -1,4 +1,6 @@
-use crate::web_api_routes::pax_data::direct_message::send_direct_message_route;
+use crate::web_api_routes::pax_data::direct_message::{
+    send_direct_message_route, test_welcome_direct_message,
+};
 use crate::web_api_routes::pax_data::get_pax_tree::{
     download_pax_relationship_csv_route, get_pax_tree,
 };
@@ -26,6 +28,10 @@ pub fn service() -> Scope {
         .route("/set-pax-parent", web::post().to(set_pax_parent_tree_route))
         .route("/tree", web::get().to(get_pax_tree))
         .route("/dm", web::post().to(send_direct_message_route))
+        .route(
+            "/test-welcome-dm",
+            web::post().to(test_welcome_direct_message),
+        )
         .route(
             "/sync-pax-parent-via-url",
             web::get().to(sync_prod_pax_parents),
