@@ -21,7 +21,7 @@ pub enum PublicChannels {
     Coop,
     GooseDynasty,
     DarkStride,
-    BernieFisher,
+    Interceptor,
     WestCanyonElementary,
     BlackCanyon,
     Capitol,
@@ -29,6 +29,7 @@ pub enum PublicChannels {
     DR,
     Welcome,
     HelpDesk,
+    MumbleChatter,
     Unknown(String),
 }
 
@@ -36,8 +37,10 @@ impl PublicChannels {
     pub fn channel_id(&self) -> String {
         let ao = AO::from(self);
         match self {
+            PublicChannels::MumbleChatter => "C03SZ3J3SB0",
             PublicChannels::HelpDesk => "C03T2ND0YF7",
             PublicChannels::Welcome => "C03T2Q7U337",
+
             _ => ao.channel_id(),
         }
         .to_string()
@@ -66,7 +69,7 @@ impl From<&AO> for PublicChannels {
             AO::Coop => PublicChannels::Coop,
             AO::GooseDynasty => PublicChannels::GooseDynasty,
             AO::DarkStride => PublicChannels::DarkStride,
-            AO::BernieFisher => PublicChannels::BernieFisher,
+            AO::Interceptor => PublicChannels::Interceptor,
             AO::WestCanyonElementary => PublicChannels::WestCanyonElementary,
             AO::BlackCanyon => PublicChannels::BlackCanyon,
             AO::Capitol => PublicChannels::Capitol,
