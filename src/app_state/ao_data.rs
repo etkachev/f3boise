@@ -27,7 +27,7 @@ pub enum AO {
     GooseDynasty,
     DarkStride,
     Interceptor,
-    WestCanyonElementary,
+    MallardPark,
     BlackCanyon,
     Capitol,
     FirstF,
@@ -113,7 +113,7 @@ impl AO {
             AO::RuckershipWest => HashSet::from([Weekday::Fri]),
             AO::RuckershipEast => HashSet::from([Weekday::Sat]),
             AO::Backyard => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
-            AO::Rise => HashSet::from([Weekday::Mon, Weekday::Wed]),
+            AO::Rise => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Sat]),
             AO::WarHorse => HashSet::from([Weekday::Mon, Weekday::Thu]),
             AO::Bellagio => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Tower => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
@@ -125,7 +125,7 @@ impl AO {
             AO::GooseDynasty => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
             AO::DarkStride => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::Interceptor => HashSet::from([Weekday::Mon, Weekday::Thu]),
-            AO::WestCanyonElementary => HashSet::from([Weekday::Wed]),
+            AO::MallardPark => HashSet::from([Weekday::Wed]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Capitol => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
@@ -154,7 +154,7 @@ impl AO {
             AO::GooseDynasty => "Goose Dynasty",
             AO::DarkStride => "Dark Stride",
             AO::Interceptor => "Interceptor",
-            AO::WestCanyonElementary => "West Canyon Elementary",
+            AO::MallardPark => "Mallard Park",
             AO::BlackCanyon => "Black Canyon",
             AO::Capitol => "Capitol",
             AO::DR => "DR",
@@ -260,7 +260,7 @@ impl AO {
             AO::GooseDynasty => AoType::Bootcamp,
             AO::DarkStride => AoType::Running,
             AO::Interceptor => AoType::Bootcamp,
-            AO::WestCanyonElementary => AoType::Bootcamp,
+            AO::MallardPark => AoType::Bootcamp,
             AO::BlackCanyon => AoType::Bootcamp,
             AO::Capitol => AoType::WildCard,
             AO::DR => AoType::Bootcamp,
@@ -295,7 +295,7 @@ impl AO {
             AO::GooseDynasty => const_names::GOOSE_DYNASTY_CHANNEL_ID,
             AO::DarkStride => const_names::DARK_STRIDE_CHANNEL_ID,
             AO::Interceptor => const_names::INTERCEPTOR_CHANNEL_ID,
-            AO::WestCanyonElementary => const_names::WEST_CANYON_ELEMENTARY_CHANNEL_ID,
+            AO::MallardPark => const_names::MALLARD_CHANNEL_ID,
             AO::BlackCanyon => const_names::BLACK_CANYON_CHANNEL_ID,
             AO::Capitol => const_names::CAPITOL_PARK_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
@@ -321,7 +321,7 @@ impl AO {
             AO::GooseDynasty => Some("2815 S Maple Grove Rd, Boise, ID 83709"),
             AO::DarkStride => Some("2887 W Tubac Dr, Meridian, ID  83646"),
             AO::Interceptor => Some("201 W Main St, Kuna, ID 83634"),
-            AO::WestCanyonElementary => Some("19548 Ustick Rd, Caldwell, ID 83607"),
+            AO::MallardPark => Some("15200 S 10th Ave, Caldwell, ID 83607"),
             AO::BlackCanyon => Some("E Main St, Emmett, ID 83617"),
             AO::Capitol => Some("700 W Jefferson St, Boise, ID 83720"),
             AO::RuckershipEast
@@ -352,7 +352,7 @@ impl AO {
             AO::GooseDynasty => Some(const_names::GOOSE_DYNASTY_GOOGLE_MAPS),
             AO::DarkStride => Some(const_names::DARK_STRIDE_GOOGLE_MAPS),
             AO::Interceptor => Some(const_names::INTERCEPTOR_GOOGLE_MAPS),
-            AO::WestCanyonElementary => Some(const_names::WEST_CANYON_ELEMENTARY_GOOGLE_MAPS),
+            AO::MallardPark => Some(const_names::MALLARD_PARK_GOOGLE_MAPS),
             AO::BlackCanyon => Some(const_names::BLACK_CANYON_GOOGLE_MAPS),
             AO::Capitol => Some(const_names::CAPITOL_PARK_GOOGLE_MAPS),
             AO::RuckershipWest | AO::RuckershipEast => None,
@@ -393,7 +393,7 @@ impl AO {
             const_names::GOOSE_DYNASTY_CHANNEL_ID => AO::GooseDynasty,
             const_names::DARK_STRIDE_CHANNEL_ID => AO::DarkStride,
             const_names::INTERCEPTOR_CHANNEL_ID => AO::Interceptor,
-            const_names::WEST_CANYON_ELEMENTARY_CHANNEL_ID => AO::WestCanyonElementary,
+            const_names::MALLARD_CHANNEL_ID => AO::MallardPark,
             const_names::BLACK_CANYON_CHANNEL_ID => AO::BlackCanyon,
             const_names::CAPITOL_PARK_CHANNEL_ID => AO::Capitol,
             const_names::DR_CHANNEL_ID => AO::DR,
@@ -426,7 +426,7 @@ impl Clone for AO {
             AO::GooseDynasty => AO::GooseDynasty,
             AO::DarkStride => AO::DarkStride,
             AO::Interceptor => AO::Interceptor,
-            AO::WestCanyonElementary => AO::WestCanyonElementary,
+            AO::MallardPark => AO::MallardPark,
             AO::BlackCanyon => AO::BlackCanyon,
             AO::Capitol => AO::Capitol,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
@@ -457,7 +457,7 @@ impl Display for AO {
             AO::GooseDynasty => const_names::GOOSE_DYNASTY,
             AO::DarkStride => const_names::DARK_STRIDE,
             AO::Interceptor => const_names::INTERCEPTOR,
-            AO::WestCanyonElementary => const_names::WEST_CANYON_ELEMENTARY,
+            AO::MallardPark => const_names::MALLARD_PARK,
             AO::BlackCanyon => const_names::BLACK_CANYON,
             AO::Capitol => const_names::CAPITOL_PARK,
             AO::DR => "",
@@ -502,7 +502,7 @@ impl From<String> for AO {
             const_names::GOOSE_DYNASTY | "otb-goose-dynasty" => AO::GooseDynasty,
             const_names::DARK_STRIDE => AO::DarkStride,
             const_names::INTERCEPTOR => AO::Interceptor,
-            const_names::WEST_CANYON_ELEMENTARY => AO::WestCanyonElementary,
+            const_names::MALLARD_PARK => AO::MallardPark,
             const_names::BLACK_CANYON => AO::BlackCanyon,
             const_names::CAPITOL_PARK => AO::Capitol,
             const_names::DR => AO::DR,
@@ -546,7 +546,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::GooseDynasty => AO::GooseDynasty,
         PublicChannels::DarkStride => AO::DarkStride,
         PublicChannels::Interceptor => AO::Interceptor,
-        PublicChannels::WestCanyonElementary => AO::WestCanyonElementary,
+        PublicChannels::MallardPark => AO::MallardPark,
         PublicChannels::BlackCanyon => AO::BlackCanyon,
         PublicChannels::Capitol => AO::Capitol,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
@@ -646,10 +646,9 @@ pub mod const_names {
     pub const INTERCEPTOR: &str = "interceptor";
     pub const INTERCEPTOR_CHANNEL_ID: &str = "C077KEU5RQF";
     pub const INTERCEPTOR_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/iYeFcADGnE3hJU3f9";
-    pub const WEST_CANYON_ELEMENTARY: &str = "otb-west-canyon-elementary";
-    pub const WEST_CANYON_ELEMENTARY_CHANNEL_ID: &str = "C07A9KYGG9X";
-    pub const WEST_CANYON_ELEMENTARY_GOOGLE_MAPS: &str =
-        "https://maps.app.goo.gl/4vsNLgCh2RRuFjUe8";
+    pub const MALLARD_PARK: &str = "otb-mallard-park";
+    pub const MALLARD_CHANNEL_ID: &str = "C07A9KYGG9X";
+    pub const MALLARD_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/2P7oDYGVA6yWo4Gj7";
 
     pub const BLACK_CANYON: &str = "black-canyon";
     pub const BLACK_CANYON_CHANNEL_ID: &str = "C07H4CVU5LH";
@@ -680,7 +679,7 @@ pub mod const_names {
         AO::Rise,
         AO::Tower,
         AO::WarHorse,
-        AO::WestCanyonElementary,
+        AO::MallardPark,
     ];
 }
 

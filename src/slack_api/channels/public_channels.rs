@@ -22,7 +22,7 @@ pub enum PublicChannels {
     GooseDynasty,
     DarkStride,
     Interceptor,
-    WestCanyonElementary,
+    MallardPark,
     BlackCanyon,
     Capitol,
     FirstF,
@@ -70,7 +70,7 @@ impl From<&AO> for PublicChannels {
             AO::GooseDynasty => PublicChannels::GooseDynasty,
             AO::DarkStride => PublicChannels::DarkStride,
             AO::Interceptor => PublicChannels::Interceptor,
-            AO::WestCanyonElementary => PublicChannels::WestCanyonElementary,
+            AO::MallardPark => PublicChannels::MallardPark,
             AO::BlackCanyon => PublicChannels::BlackCanyon,
             AO::Capitol => PublicChannels::Capitol,
             AO::DR => PublicChannels::DR,
@@ -127,10 +127,7 @@ mod tests {
         test_channel_name("otb-goose-dynasty", PublicChannels::GooseDynasty);
         test_channel_name("goose-dynasty", PublicChannels::GooseDynasty);
         test_channel_name("ao-dark-stride", PublicChannels::DarkStride);
-        test_channel_name(
-            "otb-west-canyon-elementary",
-            PublicChannels::WestCanyonElementary,
-        );
+        test_channel_name("otb-mallard-park", PublicChannels::MallardPark);
         test_channel_name("ao-black-canyon", PublicChannels::BlackCanyon);
         test_channel_name("1st-f", PublicChannels::FirstF);
     }

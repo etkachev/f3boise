@@ -114,7 +114,7 @@ async fn send_welcome_direct_message(user_id: &str, web_state: &MutableWebState)
         ).as_str())
         .section_markdown("Thanks!");
 
-    if let Err(err) = web_state.send_direct_message(&user_id, block_builder).await {
+    if let Err(err) = web_state.send_direct_message(user_id, block_builder).await {
         println!("Err: {:?}", err);
     }
 }
