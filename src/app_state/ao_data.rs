@@ -29,7 +29,7 @@ pub enum AO {
     Interceptor,
     MallardPark,
     BlackCanyon,
-    Capitol,
+    Liberty,
     FirstF,
     DR,
     Unknown(String),
@@ -127,7 +127,7 @@ impl AO {
             AO::Interceptor => HashSet::from([Weekday::Mon, Weekday::Thu]),
             AO::MallardPark => HashSet::from([Weekday::Wed]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
-            AO::Capitol => HashSet::from([Weekday::Tue, Weekday::Thu]),
+            AO::Liberty => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
@@ -156,7 +156,7 @@ impl AO {
             AO::Interceptor => "Interceptor",
             AO::MallardPark => "Mallard Park",
             AO::BlackCanyon => "Black Canyon",
-            AO::Capitol => "Capitol",
+            AO::Liberty => "Liberty",
             AO::DR => "DR",
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -262,7 +262,7 @@ impl AO {
             AO::Interceptor => AoType::Bootcamp,
             AO::MallardPark => AoType::Bootcamp,
             AO::BlackCanyon => AoType::Bootcamp,
-            AO::Capitol => AoType::WildCard,
+            AO::Liberty => AoType::WildCard,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
         }
@@ -297,7 +297,7 @@ impl AO {
             AO::Interceptor => const_names::INTERCEPTOR_CHANNEL_ID,
             AO::MallardPark => const_names::MALLARD_CHANNEL_ID,
             AO::BlackCanyon => const_names::BLACK_CANYON_CHANNEL_ID,
-            AO::Capitol => const_names::CAPITOL_PARK_CHANNEL_ID,
+            AO::Liberty => const_names::LIBERTY_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -323,7 +323,7 @@ impl AO {
             AO::Interceptor => Some("201 W Main St, Kuna, ID 83634"),
             AO::MallardPark => Some("15200 S 10th Ave, Caldwell, ID 83607"),
             AO::BlackCanyon => Some("E Main St, Emmett, ID 83617"),
-            AO::Capitol => Some("700 W Jefferson St, Boise, ID 83720"),
+            AO::Liberty => Some("700 W Jefferson St, Boise, ID 83720"),
             AO::RuckershipEast
             | AO::RuckershipWest
             | AO::BlackOps
@@ -354,7 +354,7 @@ impl AO {
             AO::Interceptor => Some(const_names::INTERCEPTOR_GOOGLE_MAPS),
             AO::MallardPark => Some(const_names::MALLARD_PARK_GOOGLE_MAPS),
             AO::BlackCanyon => Some(const_names::BLACK_CANYON_GOOGLE_MAPS),
-            AO::Capitol => Some(const_names::CAPITOL_PARK_GOOGLE_MAPS),
+            AO::Liberty => Some(const_names::LIBERTY_GOOGLE_MAPS),
             AO::RuckershipWest | AO::RuckershipEast => None,
             AO::DR | AO::BlackOps | AO::FirstF => None,
             AO::Unknown(_) => None,
@@ -395,7 +395,7 @@ impl AO {
             const_names::INTERCEPTOR_CHANNEL_ID => AO::Interceptor,
             const_names::MALLARD_CHANNEL_ID => AO::MallardPark,
             const_names::BLACK_CANYON_CHANNEL_ID => AO::BlackCanyon,
-            const_names::CAPITOL_PARK_CHANNEL_ID => AO::Capitol,
+            const_names::LIBERTY_CHANNEL_ID => AO::Liberty,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
         }
@@ -428,7 +428,7 @@ impl Clone for AO {
             AO::Interceptor => AO::Interceptor,
             AO::MallardPark => AO::MallardPark,
             AO::BlackCanyon => AO::BlackCanyon,
-            AO::Capitol => AO::Capitol,
+            AO::Liberty => AO::Liberty,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
     }
@@ -459,7 +459,7 @@ impl Display for AO {
             AO::Interceptor => const_names::INTERCEPTOR,
             AO::MallardPark => const_names::MALLARD_PARK,
             AO::BlackCanyon => const_names::BLACK_CANYON,
-            AO::Capitol => const_names::CAPITOL_PARK,
+            AO::Liberty => const_names::LIBERTY,
             AO::DR => "",
             AO::Unknown(_) => "",
         };
@@ -504,7 +504,7 @@ impl From<String> for AO {
             const_names::INTERCEPTOR => AO::Interceptor,
             const_names::MALLARD_PARK => AO::MallardPark,
             const_names::BLACK_CANYON => AO::BlackCanyon,
-            const_names::CAPITOL_PARK => AO::Capitol,
+            const_names::LIBERTY => AO::Liberty,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
         }
@@ -548,7 +548,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::Interceptor => AO::Interceptor,
         PublicChannels::MallardPark => AO::MallardPark,
         PublicChannels::BlackCanyon => AO::BlackCanyon,
-        PublicChannels::Capitol => AO::Capitol,
+        PublicChannels::Liberty => AO::Liberty,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
@@ -653,9 +653,9 @@ pub mod const_names {
     pub const BLACK_CANYON: &str = "black-canyon";
     pub const BLACK_CANYON_CHANNEL_ID: &str = "C07H4CVU5LH";
     pub const BLACK_CANYON_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/nWQgtsxqEQ7wEoiZ9";
-    pub const CAPITOL_PARK: &str = "otb-capitol";
-    pub const CAPITOL_PARK_CHANNEL_ID: &str = "C07LQPM4X37";
-    pub const CAPITOL_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/UsWagimUy1huJdsPA";
+    pub const LIBERTY: &str = "liberty";
+    pub const LIBERTY_CHANNEL_ID: &str = "C07LQPM4X37";
+    pub const LIBERTY_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/UsWagimUy1huJdsPA";
 
     /// full list of active aos
     pub const AO_LIST: [AO; 21] = [
@@ -667,7 +667,7 @@ pub mod const_names {
         AO::BlackOps,
         AO::Bleach,
         AO::CamelsBack,
-        AO::Capitol,
+        AO::Liberty,
         AO::DarkStride,
         AO::FirstF,
         AO::Gem,

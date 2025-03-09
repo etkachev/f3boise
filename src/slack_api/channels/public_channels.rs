@@ -24,7 +24,7 @@ pub enum PublicChannels {
     Interceptor,
     MallardPark,
     BlackCanyon,
-    Capitol,
+    Liberty,
     FirstF,
     DR,
     Welcome,
@@ -72,7 +72,7 @@ impl From<&AO> for PublicChannels {
             AO::Interceptor => PublicChannels::Interceptor,
             AO::MallardPark => PublicChannels::MallardPark,
             AO::BlackCanyon => PublicChannels::BlackCanyon,
-            AO::Capitol => PublicChannels::Capitol,
+            AO::Liberty => PublicChannels::Liberty,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }
