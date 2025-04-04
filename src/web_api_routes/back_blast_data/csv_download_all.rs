@@ -7,6 +7,7 @@ use sqlx::PgPool;
 
 #[derive(Serialize, Debug)]
 pub struct BackBlastRow {
+    pub id: String,
     pub ao: String,
     /// flat comma separated list
     pub q: String,
@@ -23,6 +24,7 @@ pub struct BackBlastRow {
 impl From<BackBlastFullJsonData> for BackBlastRow {
     fn from(row: BackBlastFullJsonData) -> Self {
         BackBlastRow {
+            id: row.id.to_string(),
             ao: row.ao,
             q: row.q.join(","),
             pax: row.pax.join(","),
