@@ -28,6 +28,7 @@ pub enum AO {
     DarkStride,
     Interceptor,
     MallardPark,
+    FreedomPark,
     BlackCanyon,
     Liberty,
     FirstF,
@@ -126,6 +127,7 @@ impl AO {
             AO::DarkStride => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::Interceptor => HashSet::from([Weekday::Mon, Weekday::Thu]),
             AO::MallardPark => HashSet::from([Weekday::Wed]),
+            AO::FreedomPark => HashSet::from([Weekday::Wed]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Liberty => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
@@ -155,6 +157,7 @@ impl AO {
             AO::DarkStride => "Dark Stride",
             AO::Interceptor => "Interceptor",
             AO::MallardPark => "Mallard Park",
+            AO::FreedomPark => "Freedom Park",
             AO::BlackCanyon => "Black Canyon",
             AO::Liberty => "Liberty",
             AO::DR => "DR",
@@ -260,6 +263,7 @@ impl AO {
             AO::GooseDynasty => AoType::Bootcamp,
             AO::DarkStride => AoType::Running,
             AO::Interceptor => AoType::Bootcamp,
+            AO::FreedomPark => AoType::Bootcamp,
             AO::MallardPark => AoType::Bootcamp,
             AO::BlackCanyon => AoType::Bootcamp,
             AO::Liberty => AoType::WildCard,
@@ -295,6 +299,7 @@ impl AO {
             AO::GooseDynasty => const_names::GOOSE_DYNASTY_CHANNEL_ID,
             AO::DarkStride => const_names::DARK_STRIDE_CHANNEL_ID,
             AO::Interceptor => const_names::INTERCEPTOR_CHANNEL_ID,
+            AO::FreedomPark => const_names::FREEDOM_PARK_CHANNEL_ID,
             AO::MallardPark => const_names::MALLARD_CHANNEL_ID,
             AO::BlackCanyon => const_names::BLACK_CANYON_CHANNEL_ID,
             AO::Liberty => const_names::LIBERTY_CHANNEL_ID,
@@ -321,6 +326,7 @@ impl AO {
             AO::GooseDynasty => Some("2815 S Maple Grove Rd, Boise, ID 83709"),
             AO::DarkStride => Some("2887 W Tubac Dr, Meridian, ID  83646"),
             AO::Interceptor => Some("201 W Main St, Kuna, ID 83634"),
+            AO::FreedomPark => Some("MGM7+F7, Star, ID 83669"),
             AO::MallardPark => Some("15200 S 10th Ave, Caldwell, ID 83607"),
             AO::BlackCanyon => Some("E Main St, Emmett, ID 83617"),
             AO::Liberty => Some("700 W Jefferson St, Boise, ID 83720"),
@@ -352,6 +358,7 @@ impl AO {
             AO::GooseDynasty => Some(const_names::GOOSE_DYNASTY_GOOGLE_MAPS),
             AO::DarkStride => Some(const_names::DARK_STRIDE_GOOGLE_MAPS),
             AO::Interceptor => Some(const_names::INTERCEPTOR_GOOGLE_MAPS),
+            AO::FreedomPark => Some(const_names::FREEDOM_PARK_GOOGLE_MAPS),
             AO::MallardPark => Some(const_names::MALLARD_PARK_GOOGLE_MAPS),
             AO::BlackCanyon => Some(const_names::BLACK_CANYON_GOOGLE_MAPS),
             AO::Liberty => Some(const_names::LIBERTY_GOOGLE_MAPS),
@@ -393,6 +400,7 @@ impl AO {
             const_names::GOOSE_DYNASTY_CHANNEL_ID => AO::GooseDynasty,
             const_names::DARK_STRIDE_CHANNEL_ID => AO::DarkStride,
             const_names::INTERCEPTOR_CHANNEL_ID => AO::Interceptor,
+            const_names::FREEDOM_PARK_CHANNEL_ID => AO::FreedomPark,
             const_names::MALLARD_CHANNEL_ID => AO::MallardPark,
             const_names::BLACK_CANYON_CHANNEL_ID => AO::BlackCanyon,
             const_names::LIBERTY_CHANNEL_ID => AO::Liberty,
@@ -426,6 +434,7 @@ impl Clone for AO {
             AO::GooseDynasty => AO::GooseDynasty,
             AO::DarkStride => AO::DarkStride,
             AO::Interceptor => AO::Interceptor,
+            AO::FreedomPark => AO::FreedomPark,
             AO::MallardPark => AO::MallardPark,
             AO::BlackCanyon => AO::BlackCanyon,
             AO::Liberty => AO::Liberty,
@@ -457,6 +466,7 @@ impl Display for AO {
             AO::GooseDynasty => const_names::GOOSE_DYNASTY,
             AO::DarkStride => const_names::DARK_STRIDE,
             AO::Interceptor => const_names::INTERCEPTOR,
+            AO::FreedomPark => const_names::FREEDOM_PARK,
             AO::MallardPark => const_names::MALLARD_PARK,
             AO::BlackCanyon => const_names::BLACK_CANYON,
             AO::Liberty => const_names::LIBERTY,
@@ -502,6 +512,7 @@ impl From<String> for AO {
             const_names::GOOSE_DYNASTY | "otb-goose-dynasty" => AO::GooseDynasty,
             const_names::DARK_STRIDE => AO::DarkStride,
             const_names::INTERCEPTOR => AO::Interceptor,
+            const_names::FREEDOM_PARK => AO::FreedomPark,
             const_names::MALLARD_PARK => AO::MallardPark,
             const_names::BLACK_CANYON => AO::BlackCanyon,
             const_names::LIBERTY => AO::Liberty,
@@ -546,6 +557,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::GooseDynasty => AO::GooseDynasty,
         PublicChannels::DarkStride => AO::DarkStride,
         PublicChannels::Interceptor => AO::Interceptor,
+        PublicChannels::FreedomPark => AO::FreedomPark,
         PublicChannels::MallardPark => AO::MallardPark,
         PublicChannels::BlackCanyon => AO::BlackCanyon,
         PublicChannels::Liberty => AO::Liberty,
@@ -646,6 +658,11 @@ pub mod const_names {
     pub const INTERCEPTOR: &str = "interceptor";
     pub const INTERCEPTOR_CHANNEL_ID: &str = "C077KEU5RQF";
     pub const INTERCEPTOR_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/iYeFcADGnE3hJU3f9";
+
+    pub const FREEDOM_PARK: &str = "otb-freedom-park";
+    pub const FREEDOM_PARK_CHANNEL_ID: &str = "C08QR6U5W2V";
+    pub const FREEDOM_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/vsHikgE7J5Qk6hgE7";
+
     pub const MALLARD_PARK: &str = "otb-mallard-park";
     pub const MALLARD_CHANNEL_ID: &str = "C07A9KYGG9X";
     pub const MALLARD_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/2P7oDYGVA6yWo4Gj7";
@@ -658,7 +675,7 @@ pub mod const_names {
     pub const LIBERTY_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/UsWagimUy1huJdsPA";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 21] = [
+    pub const AO_LIST: [AO; 22] = [
         AO::Backyard,
         AO::Bellagio,
         AO::Interceptor,
@@ -680,6 +697,7 @@ pub mod const_names {
         AO::Tower,
         AO::WarHorse,
         AO::MallardPark,
+        AO::FreedomPark,
     ];
 }
 
