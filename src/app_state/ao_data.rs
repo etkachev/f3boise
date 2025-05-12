@@ -126,7 +126,7 @@ impl AO {
             AO::GooseDynasty => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
             AO::DarkStride => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::Interceptor => HashSet::from([Weekday::Mon, Weekday::Thu]),
-            AO::MallardPark => HashSet::from([Weekday::Wed]),
+            AO::MallardPark => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::FreedomPark => HashSet::from([Weekday::Wed]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Liberty => HashSet::from([Weekday::Tue, Weekday::Thu]),
