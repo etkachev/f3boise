@@ -27,7 +27,7 @@ pub enum AO {
     GooseDynasty,
     DarkStride,
     Interceptor,
-    MallardPark,
+    DuckHunt,
     FreedomPark,
     BlackCanyon,
     Liberty,
@@ -126,7 +126,7 @@ impl AO {
             AO::GooseDynasty => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
             AO::DarkStride => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::Interceptor => HashSet::from([Weekday::Mon, Weekday::Thu]),
-            AO::MallardPark => HashSet::from([Weekday::Wed, Weekday::Fri]),
+            AO::DuckHunt => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::FreedomPark => HashSet::from([Weekday::Wed]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Liberty => HashSet::from([Weekday::Tue, Weekday::Thu]),
@@ -156,7 +156,7 @@ impl AO {
             AO::GooseDynasty => "Goose Dynasty",
             AO::DarkStride => "Dark Stride",
             AO::Interceptor => "Interceptor",
-            AO::MallardPark => "Mallard Park",
+            AO::DuckHunt => "Duck Hunt",
             AO::FreedomPark => "Freedom Park",
             AO::BlackCanyon => "Black Canyon",
             AO::Liberty => "Liberty",
@@ -264,7 +264,7 @@ impl AO {
             AO::DarkStride => AoType::Running,
             AO::Interceptor => AoType::Bootcamp,
             AO::FreedomPark => AoType::Bootcamp,
-            AO::MallardPark => AoType::Bootcamp,
+            AO::DuckHunt => AoType::Bootcamp,
             AO::BlackCanyon => AoType::Bootcamp,
             AO::Liberty => AoType::WildCard,
             AO::DR => AoType::Bootcamp,
@@ -300,7 +300,7 @@ impl AO {
             AO::DarkStride => const_names::DARK_STRIDE_CHANNEL_ID,
             AO::Interceptor => const_names::INTERCEPTOR_CHANNEL_ID,
             AO::FreedomPark => const_names::FREEDOM_PARK_CHANNEL_ID,
-            AO::MallardPark => const_names::MALLARD_CHANNEL_ID,
+            AO::DuckHunt => const_names::DUCK_HUNT_CHANNEL_ID,
             AO::BlackCanyon => const_names::BLACK_CANYON_CHANNEL_ID,
             AO::Liberty => const_names::LIBERTY_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
@@ -327,7 +327,7 @@ impl AO {
             AO::DarkStride => Some("2887 W Tubac Dr, Meridian, ID  83646"),
             AO::Interceptor => Some("201 W Main St, Kuna, ID 83634"),
             AO::FreedomPark => Some("MGM7+F7, Star, ID 83669"),
-            AO::MallardPark => Some("15200 S 10th Ave, Caldwell, ID 83607"),
+            AO::DuckHunt => Some("15203 S Tenth Ave, Caldwell, ID  83607"),
             AO::BlackCanyon => Some("E Main St, Emmett, ID 83617"),
             AO::Liberty => Some("700 W Jefferson St, Boise, ID 83720"),
             AO::RuckershipEast
@@ -359,7 +359,7 @@ impl AO {
             AO::DarkStride => Some(const_names::DARK_STRIDE_GOOGLE_MAPS),
             AO::Interceptor => Some(const_names::INTERCEPTOR_GOOGLE_MAPS),
             AO::FreedomPark => Some(const_names::FREEDOM_PARK_GOOGLE_MAPS),
-            AO::MallardPark => Some(const_names::MALLARD_PARK_GOOGLE_MAPS),
+            AO::DuckHunt => Some(const_names::DUCK_HUNT_GOOGLE_MAPS),
             AO::BlackCanyon => Some(const_names::BLACK_CANYON_GOOGLE_MAPS),
             AO::Liberty => Some(const_names::LIBERTY_GOOGLE_MAPS),
             AO::RuckershipWest | AO::RuckershipEast => None,
@@ -401,7 +401,7 @@ impl AO {
             const_names::DARK_STRIDE_CHANNEL_ID => AO::DarkStride,
             const_names::INTERCEPTOR_CHANNEL_ID => AO::Interceptor,
             const_names::FREEDOM_PARK_CHANNEL_ID => AO::FreedomPark,
-            const_names::MALLARD_CHANNEL_ID => AO::MallardPark,
+            const_names::DUCK_HUNT_CHANNEL_ID => AO::DuckHunt,
             const_names::BLACK_CANYON_CHANNEL_ID => AO::BlackCanyon,
             const_names::LIBERTY_CHANNEL_ID => AO::Liberty,
             const_names::DR_CHANNEL_ID => AO::DR,
@@ -435,7 +435,7 @@ impl Clone for AO {
             AO::DarkStride => AO::DarkStride,
             AO::Interceptor => AO::Interceptor,
             AO::FreedomPark => AO::FreedomPark,
-            AO::MallardPark => AO::MallardPark,
+            AO::DuckHunt => AO::DuckHunt,
             AO::BlackCanyon => AO::BlackCanyon,
             AO::Liberty => AO::Liberty,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
@@ -467,7 +467,7 @@ impl Display for AO {
             AO::DarkStride => const_names::DARK_STRIDE,
             AO::Interceptor => const_names::INTERCEPTOR,
             AO::FreedomPark => const_names::FREEDOM_PARK,
-            AO::MallardPark => const_names::MALLARD_PARK,
+            AO::DuckHunt => const_names::DUCK_HUNT,
             AO::BlackCanyon => const_names::BLACK_CANYON,
             AO::Liberty => const_names::LIBERTY,
             AO::DR => "",
@@ -513,7 +513,7 @@ impl From<String> for AO {
             const_names::DARK_STRIDE => AO::DarkStride,
             const_names::INTERCEPTOR => AO::Interceptor,
             const_names::FREEDOM_PARK => AO::FreedomPark,
-            const_names::MALLARD_PARK => AO::MallardPark,
+            const_names::DUCK_HUNT => AO::DuckHunt,
             const_names::BLACK_CANYON => AO::BlackCanyon,
             const_names::LIBERTY => AO::Liberty,
             const_names::DR => AO::DR,
@@ -558,7 +558,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::DarkStride => AO::DarkStride,
         PublicChannels::Interceptor => AO::Interceptor,
         PublicChannels::FreedomPark => AO::FreedomPark,
-        PublicChannels::MallardPark => AO::MallardPark,
+        PublicChannels::DuckHunt => AO::DuckHunt,
         PublicChannels::BlackCanyon => AO::BlackCanyon,
         PublicChannels::Liberty => AO::Liberty,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
@@ -663,9 +663,9 @@ pub mod const_names {
     pub const FREEDOM_PARK_CHANNEL_ID: &str = "C08QR6U5W2V";
     pub const FREEDOM_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/vsHikgE7J5Qk6hgE7";
 
-    pub const MALLARD_PARK: &str = "otb-mallard-park";
-    pub const MALLARD_CHANNEL_ID: &str = "C07A9KYGG9X";
-    pub const MALLARD_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/2P7oDYGVA6yWo4Gj7";
+    pub const DUCK_HUNT: &str = "duck-hunt";
+    pub const DUCK_HUNT_CHANNEL_ID: &str = "C07A9KYGG9X";
+    pub const DUCK_HUNT_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/YjztYdsTbpnjYmoJA";
 
     pub const BLACK_CANYON: &str = "black-canyon";
     pub const BLACK_CANYON_CHANNEL_ID: &str = "C07H4CVU5LH";
@@ -696,7 +696,7 @@ pub mod const_names {
         AO::Rise,
         AO::Tower,
         AO::WarHorse,
-        AO::MallardPark,
+        AO::DuckHunt,
         AO::FreedomPark,
     ];
 }
