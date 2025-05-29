@@ -127,7 +127,7 @@ impl AO {
             AO::DarkStride => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::Interceptor => HashSet::from([Weekday::Mon, Weekday::Thu]),
             AO::DuckHunt => HashSet::from([Weekday::Wed, Weekday::Fri]),
-            AO::FreedomPark => HashSet::from([Weekday::Wed]),
+            AO::FreedomPark => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Liberty => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
