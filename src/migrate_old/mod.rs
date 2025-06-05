@@ -13,7 +13,7 @@ use crate::shared::time::local_boise_time;
 use crate::slack_api::channels::history::request::ChannelHistoryRequest;
 use crate::slack_api::channels::kick::request::KickFromChannelRequest;
 use crate::web_api_routes::sync::extract_back_blasts;
-use crate::web_api_run::init_web_state;
+//use crate::web_api_run::init_web_state;
 use crate::web_api_state::MutableWebState;
 use chrono::{Months, NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
@@ -97,7 +97,7 @@ pub async fn cleanup_pax_in_channels(
 ) -> Result<(), AppError> {
     let pax = get_slack_id_map(db_pool).await?;
     let now = local_boise_time().date_naive();
-    let ninety_days_ago = now.sub(Months::new(3));
+    let ninety_days_ago = now.sub(Months::new(12));
     let (start, end) = (ninety_days_ago, now);
 
     let bds = get_all_within_date_range(db_pool, &start, &end)
