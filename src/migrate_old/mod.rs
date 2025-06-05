@@ -84,11 +84,141 @@ pub async fn sync_prod_db(db_pool: &PgPool) -> Result<(), AppError> {
 pub async fn cleanup_pax_route(
     db: actix_web::web::Data<PgPool>,
     web_state: actix_web::web::Data<MutableWebState>,
+    path: actix_web::web::Path<(String,)>,
 ) -> impl actix_web::Responder {
-    match cleanup_pax_in_channels(&db, &web_state).await {
+    match cleanup_pax_in_channel(&db, &web_state, &path.into_inner().0).await {
         Ok(_) => actix_web::HttpResponse::Ok().body("Done"),
         Err(err) => actix_web::HttpResponse::BadRequest().body(err.to_string()),
     }
+}
+
+pub async fn cleanup_pax_in_channel(
+    db_pool: &PgPool,
+    web_state: &MutableWebState,
+    channel_id: &str,
+) -> Result<(), AppError> {
+    let pax = get_slack_id_map(db_pool).await?;
+    let now = local_boise_time().date_naive();
+    let three_six_five_days_ago = now.sub(Months::new(12));
+    let (start, end) = (three_six_five_days_ago, now);
+
+    let bds = get_all_within_date_range(db_pool, &start, &end)
+        .await
+        .unwrap_or_default();
+    let dd = get_all_dd_within_date_range(db_pool, &start, &end)
+        .await
+        .unwrap_or_default();
+
+    let days_ago_ts = NaiveDateTime::new(three_six_five_days_ago, NaiveTime::default());
+    println!("ts ago: {:?}", days_ago_ts);
+
+    println!("Checking {}", channel_id);
+
+    let users_in_channel = web_state
+        .get_channel_members(channel_id)
+        .await
+        .unwrap_or_default();
+
+    if users_in_channel.is_empty() {
+        println!("======");
+        println!("NO users!!!");
+        println!("======");
+    }
+
+    let request = ChannelHistoryRequest::new(channel_id)
+        .with_limit(1000)
+        .with_oldest(days_ago_ts);
+
+    let ao = AO::from_channel_id(channel_id);
+
+    match web_state.get_history(request).await {
+        Ok(history) => {
+            if let Some(messages) = history.messages {
+                let mut active_users = HashSet::<String>::new();
+
+                for message in messages {
+                    if let Some(user) = message.user {
+                        active_users.insert(user.to_string());
+                    }
+                }
+
+                println!("active messages: {}", active_users.len());
+
+                for pax_id in users_in_channel {
+                    if active_users.contains(&pax_id) {
+                        // they messaged, so continue to next pax.
+                        // println!("====");
+                        // println!("{} has messaged to {}", pax_id, ao.to_string());
+                        // println!("====");
+                        continue;
+                    }
+
+                    // now check if they posted at bd or dd.
+                    if let Some(pax_name) = pax.get(&pax_id) {
+                        let pax_name = pax_name.to_lowercase();
+                        let most_recent_bd = get_recent_bd_for_pax(db_pool, &pax_name)
+                            .await
+                            .unwrap_or_default();
+                        if let Some(most_recent_bd) = most_recent_bd {
+                            let bd = BackBlastData::from(most_recent_bd);
+                            if bd.ao == ao {
+                                println!("This is {pax_name}'s most recent bd at {}", ao);
+                                continue;
+                            }
+                        }
+                        // bd
+                        let attended_bds = bds
+                            .iter()
+                            .filter(|bd| {
+                                let bd = BackBlastData::from(*bd);
+
+                                bd.ao == ao && bd.includes_pax(&pax_name)
+                            })
+                            .count();
+
+                        // dd
+                        let attended_dds = dd
+                            .iter()
+                            .filter(|data| {
+                                let dd_data = BackBlastData::from(*data);
+                                dd_data.ao == ao && dd_data.includes_pax(&pax_name)
+                            })
+                            .count();
+
+                        if attended_bds == 0 && attended_dds == 0 {
+                            // kick them out.
+                            let request = KickFromChannelRequest::new(pax_id.as_str(), channel_id);
+                            println!("{} - {:?}", pax_name, request);
+                            match web_state.kick_user_from_channel(request).await {
+                                Ok(_) => {
+                                    // println!()
+                                }
+                                Err(err) => {
+                                    println!("Error kicking: {:?}", err);
+                                }
+                            }
+                        } else {
+                            println!("====");
+                            println!("{} has been to {}", pax_name, channel_id);
+                            println!("====");
+                        }
+                    } else {
+                        println!("Unknown pax: {}", pax_id);
+                    }
+                    tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+                }
+            } else {
+                println!("======");
+                println!("NO MESSAGES!!!");
+                println!("======");
+            }
+        }
+        Err(err) => {
+            println!("{:?}", err);
+        }
+    }
+
+    Ok(())
 }
 
 pub async fn cleanup_pax_in_channels(
@@ -97,7 +227,7 @@ pub async fn cleanup_pax_in_channels(
 ) -> Result<(), AppError> {
     let pax = get_slack_id_map(db_pool).await?;
     let now = local_boise_time().date_naive();
-    let ninety_days_ago = now.sub(Months::new(12));
+    let ninety_days_ago = now.sub(Months::new(3));
     let (start, end) = (ninety_days_ago, now);
 
     let bds = get_all_within_date_range(db_pool, &start, &end)

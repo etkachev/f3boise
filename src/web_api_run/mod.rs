@@ -142,7 +142,10 @@ pub fn run(
                 "/slash-commands",
                 web::post().to(slack_slash_commands_route),
             )
-            .route("/kick-old-pax", web::get().to(cleanup_pax_route))
+            .route(
+                "/kick-old-pax/{channel_id}",
+                web::get().to(cleanup_pax_route),
+            )
             .service(pax::service())
             .service(back_blasts::service())
             .service(pre_blasts::service())
