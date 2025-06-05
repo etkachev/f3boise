@@ -14,6 +14,7 @@ use crate::slack_api::channels::history::request::ChannelHistoryRequest;
 use crate::slack_api::channels::kick::request::KickFromChannelRequest;
 use crate::web_api_routes::sync::extract_back_blasts;
 use crate::web_api_run::init_web_state;
+use crate::web_api_state::MutableWebState;
 use chrono::{Months, NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
@@ -80,14 +81,20 @@ pub async fn sync_prod_db(db_pool: &PgPool) -> Result<(), AppError> {
     Ok(())
 }
 
-pub async fn cleanup_pax_route(db: actix_web::web::Data<PgPool>) -> impl actix_web::Responder {
-    match cleanup_pax_in_channels(&db).await {
+pub async fn cleanup_pax_route(
+    db: actix_web::web::Data<PgPool>,
+    web_state: actix_web::web::Data<MutableWebState>,
+) -> impl actix_web::Responder {
+    match cleanup_pax_in_channels(&db, &web_state).await {
         Ok(_) => actix_web::HttpResponse::Ok().body("Done"),
         Err(err) => actix_web::HttpResponse::BadRequest().body(err.to_string()),
     }
 }
 
-pub async fn cleanup_pax_in_channels(db_pool: &PgPool) -> Result<(), AppError> {
+pub async fn cleanup_pax_in_channels(
+    db_pool: &PgPool,
+    web_state: &MutableWebState,
+) -> Result<(), AppError> {
     let pax = get_slack_id_map(db_pool).await?;
     let now = local_boise_time().date_naive();
     let ninety_days_ago = now.sub(Months::new(3));
@@ -101,14 +108,14 @@ pub async fn cleanup_pax_in_channels(db_pool: &PgPool) -> Result<(), AppError> {
         .unwrap_or_default();
 
     dotenvy::dotenv().ok();
-    let api = init_web_state();
+    //let api = init_web_state();
 
     let ninety_days_ts = NaiveDateTime::new(ninety_days_ago, NaiveTime::default());
     println!("90 days: {:?}", ninety_days_ts);
     for ao in AO_LIST {
         println!("Checking {}", ao);
 
-        let users_in_channel = api
+        let users_in_channel = web_state
             .get_channel_members(ao.channel_id())
             .await
             .unwrap_or_default();
@@ -123,7 +130,7 @@ pub async fn cleanup_pax_in_channels(db_pool: &PgPool) -> Result<(), AppError> {
             .with_limit(1000)
             .with_oldest(ninety_days_ts);
 
-        match api.get_history(request).await {
+        match web_state.get_history(request).await {
             Ok(history) => {
                 if let Some(messages) = history.messages {
                     let mut active_users = HashSet::<String>::new();
@@ -182,7 +189,7 @@ pub async fn cleanup_pax_in_channels(db_pool: &PgPool) -> Result<(), AppError> {
                                 let request =
                                     KickFromChannelRequest::new(pax_id.as_str(), ao.channel_id());
                                 println!("{} - {:?}", pax_name, request);
-                                match api.kick_user_from_channel(request).await {
+                                match web_state.kick_user_from_channel(request).await {
                                     Ok(_) => {
                                         // println!()
                                     }
