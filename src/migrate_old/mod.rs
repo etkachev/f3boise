@@ -80,6 +80,13 @@ pub async fn sync_prod_db(db_pool: &PgPool) -> Result<(), AppError> {
     Ok(())
 }
 
+pub async fn cleanup_pax_route(db: actix_web::web::Data<PgPool>) -> actix_web::Responder {
+    match cleanup_pax_in_channels(&db).await {
+        Ok(_) => actix_web::HttpResponse::Ok().body("Done"),
+        Err(err) => actix_web::HttpResponse::BadRequest().body(err.to_string()),
+    }
+}
+
 pub async fn cleanup_pax_in_channels(db_pool: &PgPool) -> Result<(), AppError> {
     let pax = get_slack_id_map(db_pool).await?;
     let now = local_boise_time().date_naive();

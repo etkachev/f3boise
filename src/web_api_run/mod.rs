@@ -120,6 +120,8 @@ pub fn run(
     let db_pool = web::Data::new(db_pool);
     let app_state_data = web::Data::new(app_state);
 
+    use super::migrate_old::cleanup_pax_route;
+
     let server = HttpServer::new(move || {
         App::new()
             .wrap(middleware::Compress::default())
@@ -140,6 +142,7 @@ pub fn run(
                 "/slash-commands",
                 web::post().to(slack_slash_commands_route),
             )
+            .route("/kick-old-pax", web::get().to(cleanup_pax_route))
             .service(pax::service())
             .service(back_blasts::service())
             .service(pre_blasts::service())
