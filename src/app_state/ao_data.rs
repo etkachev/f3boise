@@ -28,7 +28,7 @@ pub enum AO {
     DarkStride,
     Interceptor,
     DuckHunt,
-    FreedomPark,
+    Sentinels,
     EmmettGemIsland,
     BlackCanyon,
     Liberty,
@@ -128,7 +128,7 @@ impl AO {
             AO::DarkStride => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::Interceptor => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
             AO::DuckHunt => HashSet::from([Weekday::Wed, Weekday::Fri]),
-            AO::FreedomPark => HashSet::from([Weekday::Mon, Weekday::Wed]),
+            AO::Sentinels => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::EmmettGemIsland => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Liberty => HashSet::from([Weekday::Tue, Weekday::Thu]),
@@ -159,7 +159,7 @@ impl AO {
             AO::DarkStride => "Dark Stride",
             AO::Interceptor => "Interceptor",
             AO::DuckHunt => "Duck Hunt",
-            AO::FreedomPark => "Freedom Park",
+            AO::Sentinels => "Sentinels",
             AO::EmmettGemIsland => "Emmett Gem Island",
             AO::BlackCanyon => "Black Canyon",
             AO::Liberty => "Liberty",
@@ -268,7 +268,7 @@ impl AO {
             AO::GooseDynasty => AoType::Bootcamp,
             AO::DarkStride => AoType::Running,
             AO::Interceptor => AoType::Heavy,
-            AO::FreedomPark => AoType::Bootcamp,
+            AO::Sentinels => AoType::Bootcamp,
             AO::EmmettGemIsland => AoType::Bootcamp,
             AO::DuckHunt => AoType::Bootcamp,
             AO::BlackCanyon => AoType::Bootcamp,
@@ -305,7 +305,7 @@ impl AO {
             AO::GooseDynasty => const_names::GOOSE_DYNASTY_CHANNEL_ID,
             AO::DarkStride => const_names::DARK_STRIDE_CHANNEL_ID,
             AO::Interceptor => const_names::INTERCEPTOR_CHANNEL_ID,
-            AO::FreedomPark => const_names::FREEDOM_PARK_CHANNEL_ID,
+            AO::Sentinels => const_names::SENTINELS_CHANNEL_ID,
             AO::EmmettGemIsland => const_names::EMMETT_GEM_ISLAND_CHANNEL_ID,
             AO::DuckHunt => const_names::DUCK_HUNT_CHANNEL_ID,
             AO::BlackCanyon => const_names::BLACK_CANYON_CHANNEL_ID,
@@ -333,7 +333,7 @@ impl AO {
             AO::GooseDynasty => Some("2815 S Maple Grove Rd, Boise, ID 83709"),
             AO::DarkStride => Some("2887 W Tubac Dr, Meridian, ID  83646"),
             AO::Interceptor => Some("201 W Main St, Kuna, ID 83634"),
-            AO::FreedomPark => Some("MGM7+F7, Star, ID 83669"),
+            AO::Sentinels => Some("MGM7+F7, Star, ID 83669"),
             AO::EmmettGemIsland => Some("VFGV+CJP Emmett, ID 83617"),
             AO::DuckHunt => Some("15203 S Tenth Ave, Caldwell, ID  83607"),
             AO::BlackCanyon => Some("E Main St, Emmett, ID 83617"),
@@ -366,7 +366,7 @@ impl AO {
             AO::GooseDynasty => Some(const_names::GOOSE_DYNASTY_GOOGLE_MAPS),
             AO::DarkStride => Some(const_names::DARK_STRIDE_GOOGLE_MAPS),
             AO::Interceptor => Some(const_names::INTERCEPTOR_GOOGLE_MAPS),
-            AO::FreedomPark => Some(const_names::FREEDOM_PARK_GOOGLE_MAPS),
+            AO::Sentinels => Some(const_names::SENTINELS_GOOGLE_MAPS),
             AO::EmmettGemIsland => Some(const_names::EMMETT_GEM_ISLAND_GOOGLE_MAPS),
             AO::DuckHunt => Some(const_names::DUCK_HUNT_GOOGLE_MAPS),
             AO::BlackCanyon => Some(const_names::BLACK_CANYON_GOOGLE_MAPS),
@@ -409,7 +409,7 @@ impl AO {
             const_names::GOOSE_DYNASTY_CHANNEL_ID => AO::GooseDynasty,
             const_names::DARK_STRIDE_CHANNEL_ID => AO::DarkStride,
             const_names::INTERCEPTOR_CHANNEL_ID => AO::Interceptor,
-            const_names::FREEDOM_PARK_CHANNEL_ID => AO::FreedomPark,
+            const_names::SENTINELS_CHANNEL_ID => AO::Sentinels,
             const_names::EMMETT_GEM_ISLAND_CHANNEL_ID => AO::EmmettGemIsland,
             const_names::DUCK_HUNT_CHANNEL_ID => AO::DuckHunt,
             const_names::BLACK_CANYON_CHANNEL_ID => AO::BlackCanyon,
@@ -444,7 +444,7 @@ impl Clone for AO {
             AO::GooseDynasty => AO::GooseDynasty,
             AO::DarkStride => AO::DarkStride,
             AO::Interceptor => AO::Interceptor,
-            AO::FreedomPark => AO::FreedomPark,
+            AO::Sentinels => AO::Sentinels,
             AO::EmmettGemIsland => AO::EmmettGemIsland,
             AO::DuckHunt => AO::DuckHunt,
             AO::BlackCanyon => AO::BlackCanyon,
@@ -477,7 +477,7 @@ impl Display for AO {
             AO::GooseDynasty => const_names::GOOSE_DYNASTY,
             AO::DarkStride => const_names::DARK_STRIDE,
             AO::Interceptor => const_names::INTERCEPTOR,
-            AO::FreedomPark => const_names::FREEDOM_PARK,
+            AO::Sentinels => const_names::SENTINELS,
             AO::EmmettGemIsland => const_names::EMMETT_GEM_ISLAND,
             AO::DuckHunt => const_names::DUCK_HUNT,
             AO::BlackCanyon => const_names::BLACK_CANYON,
@@ -524,7 +524,7 @@ impl From<String> for AO {
             const_names::GOOSE_DYNASTY | "otb-goose-dynasty" => AO::GooseDynasty,
             const_names::DARK_STRIDE => AO::DarkStride,
             const_names::INTERCEPTOR => AO::Interceptor,
-            const_names::FREEDOM_PARK => AO::FreedomPark,
+            const_names::SENTINELS => AO::Sentinels,
             const_names::EMMETT_GEM_ISLAND => AO::EmmettGemIsland,
             const_names::DUCK_HUNT => AO::DuckHunt,
             const_names::BLACK_CANYON => AO::BlackCanyon,
@@ -570,7 +570,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::GooseDynasty => AO::GooseDynasty,
         PublicChannels::DarkStride => AO::DarkStride,
         PublicChannels::Interceptor => AO::Interceptor,
-        PublicChannels::FreedomPark => AO::FreedomPark,
+        PublicChannels::Sentinels => AO::Sentinels,
         PublicChannels::EmmettGemIsland => AO::EmmettGemIsland,
         PublicChannels::DuckHunt => AO::DuckHunt,
         PublicChannels::BlackCanyon => AO::BlackCanyon,
@@ -673,9 +673,9 @@ pub mod const_names {
     pub const INTERCEPTOR_CHANNEL_ID: &str = "C077KEU5RQF";
     pub const INTERCEPTOR_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/iYeFcADGnE3hJU3f9";
 
-    pub const FREEDOM_PARK: &str = "otb-freedom-park";
-    pub const FREEDOM_PARK_CHANNEL_ID: &str = "C08QR6U5W2V";
-    pub const FREEDOM_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/vsHikgE7J5Qk6hgE7";
+    pub const SENTINELS: &str = "sentinels";
+    pub const SENTINELS_CHANNEL_ID: &str = "C08QR6U5W2V";
+    pub const SENTINELS_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/vsHikgE7J5Qk6hgE7";
 
     pub const EMMETT_GEM_ISLAND: &str = "otb-emmett-gem-island";
     pub const EMMETT_GEM_ISLAND_CHANNEL_ID: &str = "C09CHL7HL2E";
@@ -715,7 +715,7 @@ pub mod const_names {
         AO::Tower,
         AO::WarHorse,
         AO::DuckHunt,
-        AO::FreedomPark,
+        AO::Sentinels,
         AO::EmmettGemIsland,
     ];
 }
