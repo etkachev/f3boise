@@ -30,6 +30,7 @@ pub enum AO {
     DuckHunt,
     Sentinels,
     EmmettGemIsland,
+    OtbFruitland,
     BlackCanyon,
     Liberty,
     FirstF,
@@ -130,6 +131,7 @@ impl AO {
             AO::DuckHunt => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::Sentinels => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::EmmettGemIsland => HashSet::from([Weekday::Wed, Weekday::Fri]),
+            AO::OtbFruitland => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Sat]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Liberty => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
@@ -161,6 +163,7 @@ impl AO {
             AO::DuckHunt => "Duck Hunt",
             AO::Sentinels => "Sentinels",
             AO::EmmettGemIsland => "Emmett Gem Island",
+            AO::OtbFruitland => "Fruitland",
             AO::BlackCanyon => "Black Canyon",
             AO::Liberty => "Liberty",
             AO::DR => "DR",
@@ -270,6 +273,7 @@ impl AO {
             AO::Interceptor => AoType::Heavy,
             AO::Sentinels => AoType::Bootcamp,
             AO::EmmettGemIsland => AoType::Bootcamp,
+            AO::OtbFruitland => AoType::Bootcamp,
             AO::DuckHunt => AoType::Bootcamp,
             AO::BlackCanyon => AoType::Bootcamp,
             AO::Liberty => AoType::WildCard,
@@ -307,6 +311,7 @@ impl AO {
             AO::Interceptor => const_names::INTERCEPTOR_CHANNEL_ID,
             AO::Sentinels => const_names::SENTINELS_CHANNEL_ID,
             AO::EmmettGemIsland => const_names::EMMETT_GEM_ISLAND_CHANNEL_ID,
+            AO::OtbFruitland => const_names::FRUIT_LAND_CHANNEL_ID,
             AO::DuckHunt => const_names::DUCK_HUNT_CHANNEL_ID,
             AO::BlackCanyon => const_names::BLACK_CANYON_CHANNEL_ID,
             AO::Liberty => const_names::LIBERTY_CHANNEL_ID,
@@ -335,6 +340,7 @@ impl AO {
             AO::Interceptor => Some("201 W Main St, Kuna, ID 83634"),
             AO::Sentinels => Some("MGM7+F7, Star, ID 83669"),
             AO::EmmettGemIsland => Some("VFGV+CJP Emmett, ID 83617"),
+            AO::OtbFruitland => Some("501 S Iowa Ave, Fruitland, ID 83619"),
             AO::DuckHunt => Some("15203 S Tenth Ave, Caldwell, ID  83607"),
             AO::BlackCanyon => Some("E Main St, Emmett, ID 83617"),
             AO::Liberty => Some("700 W Jefferson St, Boise, ID 83720"),
@@ -368,6 +374,7 @@ impl AO {
             AO::Interceptor => Some(const_names::INTERCEPTOR_GOOGLE_MAPS),
             AO::Sentinels => Some(const_names::SENTINELS_GOOGLE_MAPS),
             AO::EmmettGemIsland => Some(const_names::EMMETT_GEM_ISLAND_GOOGLE_MAPS),
+            AO::OtbFruitland => Some(const_names::FRUIT_LAND_GOOGLE_MAPS),
             AO::DuckHunt => Some(const_names::DUCK_HUNT_GOOGLE_MAPS),
             AO::BlackCanyon => Some(const_names::BLACK_CANYON_GOOGLE_MAPS),
             AO::Liberty => Some(const_names::LIBERTY_GOOGLE_MAPS),
@@ -411,6 +418,7 @@ impl AO {
             const_names::INTERCEPTOR_CHANNEL_ID => AO::Interceptor,
             const_names::SENTINELS_CHANNEL_ID => AO::Sentinels,
             const_names::EMMETT_GEM_ISLAND_CHANNEL_ID => AO::EmmettGemIsland,
+            const_names::FRUIT_LAND_CHANNEL_ID => AO::OtbFruitland,
             const_names::DUCK_HUNT_CHANNEL_ID => AO::DuckHunt,
             const_names::BLACK_CANYON_CHANNEL_ID => AO::BlackCanyon,
             const_names::LIBERTY_CHANNEL_ID => AO::Liberty,
@@ -446,6 +454,7 @@ impl Clone for AO {
             AO::Interceptor => AO::Interceptor,
             AO::Sentinels => AO::Sentinels,
             AO::EmmettGemIsland => AO::EmmettGemIsland,
+            AO::OtbFruitland => AO::OtbFruitland,
             AO::DuckHunt => AO::DuckHunt,
             AO::BlackCanyon => AO::BlackCanyon,
             AO::Liberty => AO::Liberty,
@@ -479,6 +488,7 @@ impl Display for AO {
             AO::Interceptor => const_names::INTERCEPTOR,
             AO::Sentinels => const_names::SENTINELS,
             AO::EmmettGemIsland => const_names::EMMETT_GEM_ISLAND,
+            AO::OtbFruitland => const_names::FRUIT_LAND,
             AO::DuckHunt => const_names::DUCK_HUNT,
             AO::BlackCanyon => const_names::BLACK_CANYON,
             AO::Liberty => const_names::LIBERTY,
@@ -526,6 +536,7 @@ impl From<String> for AO {
             const_names::INTERCEPTOR => AO::Interceptor,
             const_names::SENTINELS => AO::Sentinels,
             const_names::EMMETT_GEM_ISLAND => AO::EmmettGemIsland,
+            const_names::FRUIT_LAND => AO::OtbFruitland,
             const_names::DUCK_HUNT => AO::DuckHunt,
             const_names::BLACK_CANYON => AO::BlackCanyon,
             const_names::LIBERTY => AO::Liberty,
@@ -572,6 +583,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::Interceptor => AO::Interceptor,
         PublicChannels::Sentinels => AO::Sentinels,
         PublicChannels::EmmettGemIsland => AO::EmmettGemIsland,
+        PublicChannels::OtbFruitland => AO::OtbFruitland,
         PublicChannels::DuckHunt => AO::DuckHunt,
         PublicChannels::BlackCanyon => AO::BlackCanyon,
         PublicChannels::Liberty => AO::Liberty,
@@ -681,6 +693,10 @@ pub mod const_names {
     pub const EMMETT_GEM_ISLAND_CHANNEL_ID: &str = "C09CHL7HL2E";
     pub const EMMETT_GEM_ISLAND_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/FmBjinpKFZECmwcp9";
 
+    pub const FRUIT_LAND: &str = "otb-fruitland";
+    pub const FRUIT_LAND_CHANNEL_ID: &str = "C09GCA1QHFB";
+    pub const FRUIT_LAND_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/78ZNXUUz91YsbhTh6";
+
     pub const DUCK_HUNT: &str = "duck-hunt";
     pub const DUCK_HUNT_CHANNEL_ID: &str = "C07A9KYGG9X";
     pub const DUCK_HUNT_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/YjztYdsTbpnjYmoJA";
@@ -693,7 +709,7 @@ pub mod const_names {
     pub const LIBERTY_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/UsWagimUy1huJdsPA";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 23] = [
+    pub const AO_LIST: [AO; 24] = [
         AO::Backyard,
         AO::Bellagio,
         AO::Interceptor,
@@ -717,6 +733,7 @@ pub mod const_names {
         AO::DuckHunt,
         AO::Sentinels,
         AO::EmmettGemIsland,
+        AO::OtbFruitland,
     ];
 }
 
