@@ -5,39 +5,45 @@
 #
 
 app = 'f3-scraper-rs'
-primary_region = 'sea'
+primary_region = 'sjc'
 
 [build]
 
 [http_service]
-  internal_port = 8080
-  force_https = true
-  auto_stop_machines = true
-  auto_start_machines = true
-  min_machines_running = 1
-  processes = ['app']
+internal_port = 8080
+force_https = true
+auto_stop_machines = "stop"
+auto_start_machines = true
+min_machines_running = 1
+processes = ['app']
 
 [http_service.tls_options]
-  alpn = ["h2", "http/1.1"]
-  versions = ["TLSv1.2", "TLSv1.3"]
-  default_self_signed = true
+alpn = ["h2", "http/1.1"]
+versions = ["TLSv1.2", "TLSv1.3"]
+default_self_signed = true
 
 [[http_service.checks]]
-  grace_period = "4s"
-  interval = "30s"
-  method = "GET"
-  timeout = "2s"
-  path = "/health_check"
+grace_period = "4s"
+interval = "30s"
+method = "GET"
+timeout = "2s"
+path = "/health_check"
 
 [[services.ports]]
-  handlers = ["tls", "http"]
-  port = 443
-  tls_options = { "alpn" = ["h2", "http/1.1"], "versions" = ["TLSv1.2", "TLSv1.3"] }
+handlers = ["tls", "http"]
+port = 443
+tls_options = { "alpn" = [
+    "h2",
+    "http/1.1",
+], "versions" = [
+    "TLSv1.2",
+    "TLSv1.3",
+] }
 
 [[vm]]
-  memory = '512mb'
-  cpu_kind = 'shared'
-  cpus = 1
+memory = '512mb'
+cpu_kind = 'shared'
+cpus = 1
 
 [env]
-  APP_ENVIRONMENT = "production"
+APP_ENVIRONMENT = "production"
