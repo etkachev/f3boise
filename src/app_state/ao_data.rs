@@ -381,7 +381,7 @@ impl AO {
             AO::Sentinels => Some(const_names::SENTINELS_GOOGLE_MAPS),
             AO::EmmettGemIsland => Some(const_names::EMMETT_GEM_ISLAND_GOOGLE_MAPS),
             AO::OtbFruitland => Some(const_names::FRUIT_LAND_GOOGLE_MAPS),
-            AO::OtbCynthiaMann => Some(const_name::CYNTHIA_MANN_GOOGLE_MAPS),
+            AO::OtbCynthiaMann => Some(const_names::CYNTHIA_MANN_GOOGLE_MAPS),
             AO::DuckHunt => Some(const_names::DUCK_HUNT_GOOGLE_MAPS),
             AO::BlackCanyon => Some(const_names::BLACK_CANYON_GOOGLE_MAPS),
             AO::Liberty => Some(const_names::LIBERTY_GOOGLE_MAPS),
