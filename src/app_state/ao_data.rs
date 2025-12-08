@@ -30,7 +30,7 @@ pub enum AO {
     DuckHunt,
     Sentinels,
     EmmettGemIsland,
-    OtbFruitland,
+    TheEdge,
     OtbCynthiaMann,
     OtbLibertyPark,
     BlackCanyon,
@@ -133,7 +133,7 @@ impl AO {
             AO::DuckHunt => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::Sentinels => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::EmmettGemIsland => HashSet::from([Weekday::Wed, Weekday::Fri]),
-            AO::OtbFruitland => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Sat]),
+            AO::TheEdge => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Sat]),
             AO::OtbCynthiaMann => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::OtbLibertyPark => HashSet::from([Weekday::Sat]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
@@ -167,7 +167,7 @@ impl AO {
             AO::DuckHunt => "Duck Hunt",
             AO::Sentinels => "Sentinels",
             AO::EmmettGemIsland => "Emmett Gem Island",
-            AO::OtbFruitland => "Fruitland",
+            AO::TheEdge => "The Edge",
             AO::OtbCynthiaMann => "Cynthia Mann",
             AO::OtbLibertyPark => "Liberty Park",
             AO::BlackCanyon => "Black Canyon",
@@ -279,7 +279,7 @@ impl AO {
             AO::Interceptor => AoType::Heavy,
             AO::Sentinels => AoType::Bootcamp,
             AO::EmmettGemIsland => AoType::Bootcamp,
-            AO::OtbFruitland => AoType::Bootcamp,
+            AO::TheEdge => AoType::Bootcamp,
             AO::OtbCynthiaMann => AoType::Bootcamp,
             AO::OtbLibertyPark => AoType::Bootcamp,
             AO::DuckHunt => AoType::Bootcamp,
@@ -319,7 +319,7 @@ impl AO {
             AO::Interceptor => const_names::INTERCEPTOR_CHANNEL_ID,
             AO::Sentinels => const_names::SENTINELS_CHANNEL_ID,
             AO::EmmettGemIsland => const_names::EMMETT_GEM_ISLAND_CHANNEL_ID,
-            AO::OtbFruitland => const_names::FRUIT_LAND_CHANNEL_ID,
+            AO::TheEdge => const_names::THE_EDGE_CHANNEL_ID,
             AO::OtbCynthiaMann => const_names::CYNTHIA_MANN_CHANNEL_ID,
             AO::OtbLibertyPark => const_names::OTB_LIBERTY_PARK_CHANNEL_ID,
             AO::DuckHunt => const_names::DUCK_HUNT_CHANNEL_ID,
@@ -350,7 +350,7 @@ impl AO {
             AO::Interceptor => Some("201 W Main St, Kuna, ID 83634"),
             AO::Sentinels => Some("MGM7+F7, Star, ID 83669"),
             AO::EmmettGemIsland => Some("VFGV+CJP Emmett, ID 83617"),
-            AO::OtbFruitland => Some("501 S Iowa Ave, Fruitland, ID 83619"),
+            AO::TheEdge => Some("501 S Iowa Ave, Fruitland, ID 83619"),
             AO::OtbCynthiaMann => Some("5401 W Castle Dr, Boise, ID 83703"),
             AO::OtbLibertyPark => Some("600 Constitution Way, Nampa, ID 83687"),
             AO::DuckHunt => Some("15203 S Tenth Ave, Caldwell, ID  83607"),
@@ -386,7 +386,7 @@ impl AO {
             AO::Interceptor => Some(const_names::INTERCEPTOR_GOOGLE_MAPS),
             AO::Sentinels => Some(const_names::SENTINELS_GOOGLE_MAPS),
             AO::EmmettGemIsland => Some(const_names::EMMETT_GEM_ISLAND_GOOGLE_MAPS),
-            AO::OtbFruitland => Some(const_names::FRUIT_LAND_GOOGLE_MAPS),
+            AO::TheEdge => Some(const_names::THE_EDGE_GOOGLE_MAPS),
             AO::OtbCynthiaMann => Some(const_names::CYNTHIA_MANN_GOOGLE_MAPS),
             AO::OtbLibertyPark => Some(const_names::OTB_LIBERTY_PARK_GOOGLE_MAPS),
             AO::DuckHunt => Some(const_names::DUCK_HUNT_GOOGLE_MAPS),
@@ -432,7 +432,7 @@ impl AO {
             const_names::INTERCEPTOR_CHANNEL_ID => AO::Interceptor,
             const_names::SENTINELS_CHANNEL_ID => AO::Sentinels,
             const_names::EMMETT_GEM_ISLAND_CHANNEL_ID => AO::EmmettGemIsland,
-            const_names::FRUIT_LAND_CHANNEL_ID => AO::OtbFruitland,
+            const_names::THE_EDGE_CHANNEL_ID => AO::TheEdge,
             const_names::CYNTHIA_MANN_CHANNEL_ID => AO::OtbCynthiaMann,
             const_names::OTB_LIBERTY_PARK_CHANNEL_ID => AO::OtbLibertyPark,
             const_names::DUCK_HUNT_CHANNEL_ID => AO::DuckHunt,
@@ -470,7 +470,7 @@ impl Clone for AO {
             AO::Interceptor => AO::Interceptor,
             AO::Sentinels => AO::Sentinels,
             AO::EmmettGemIsland => AO::EmmettGemIsland,
-            AO::OtbFruitland => AO::OtbFruitland,
+            AO::TheEdge => AO::TheEdge,
             AO::OtbCynthiaMann => AO::OtbCynthiaMann,
             AO::OtbLibertyPark => AO::OtbLibertyPark,
             AO::DuckHunt => AO::DuckHunt,
@@ -506,7 +506,7 @@ impl Display for AO {
             AO::Interceptor => const_names::INTERCEPTOR,
             AO::Sentinels => const_names::SENTINELS,
             AO::EmmettGemIsland => const_names::EMMETT_GEM_ISLAND,
-            AO::OtbFruitland => const_names::FRUIT_LAND,
+            AO::TheEdge => const_names::THE_EDGE,
             AO::OtbCynthiaMann => const_names::CYNTHIA_MANN,
             AO::OtbLibertyPark => const_names::OTB_LIBERTY_PARK,
             AO::DuckHunt => const_names::DUCK_HUNT,
@@ -556,7 +556,7 @@ impl From<String> for AO {
             const_names::INTERCEPTOR => AO::Interceptor,
             const_names::SENTINELS => AO::Sentinels,
             const_names::EMMETT_GEM_ISLAND => AO::EmmettGemIsland,
-            const_names::FRUIT_LAND => AO::OtbFruitland,
+            const_names::THE_EDGE => AO::TheEdge,
             const_names::CYNTHIA_MANN => AO::OtbCynthiaMann,
             const_names::OTB_LIBERTY_PARK => AO::OtbLibertyPark,
             const_names::DUCK_HUNT => AO::DuckHunt,
@@ -605,7 +605,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::Interceptor => AO::Interceptor,
         PublicChannels::Sentinels => AO::Sentinels,
         PublicChannels::EmmettGemIsland => AO::EmmettGemIsland,
-        PublicChannels::OtbFruitland => AO::OtbFruitland,
+        PublicChannels::TheEdge => AO::TheEdge,
         PublicChannels::OtbCynthiaMann => AO::OtbCynthiaMann,
         PublicChannels::OtbLibertyPark => AO::OtbLibertyPark,
         PublicChannels::DuckHunt => AO::DuckHunt,
@@ -717,9 +717,9 @@ pub mod const_names {
     pub const EMMETT_GEM_ISLAND_CHANNEL_ID: &str = "C09CHL7HL2E";
     pub const EMMETT_GEM_ISLAND_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/FmBjinpKFZECmwcp9";
 
-    pub const FRUIT_LAND: &str = "otb-fruitland";
-    pub const FRUIT_LAND_CHANNEL_ID: &str = "C09GCA1QHFB";
-    pub const FRUIT_LAND_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/78ZNXUUz91YsbhTh6";
+    pub const THE_EDGE: &str = "the-edge";
+    pub const THE_EDGE_CHANNEL_ID: &str = "C09GCA1QHFB";
+    pub const THE_EDGE_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/78ZNXUUz91YsbhTh6";
 
     pub const CYNTHIA_MANN: &str = "otb-cynthia-mann";
     pub const CYNTHIA_MANN_CHANNEL_ID: &str = "C09Q3HXVC1M";
@@ -765,7 +765,7 @@ pub mod const_names {
         AO::DuckHunt,
         AO::Sentinels,
         AO::EmmettGemIsland,
-        AO::OtbFruitland,
+        AO::TheEdge,
         AO::OtbCynthiaMann,
         AO::OtbLibertyPark,
     ];
