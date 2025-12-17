@@ -174,5 +174,10 @@ mod cors {
             .allowed_origin("http://localhost:8100")
             .allowed_origin("https://f3boise.com")
             .allowed_origin("https://f3-boise.web.app")
+            .allowed_origin_fn(|origin, _req_head| {
+                // Allow Firebase preview URLs (f3-platform-* patterns)
+                origin.as_bytes().starts_with(b"https://f3-platform-")
+                    && origin.as_bytes().ends_with(b".web.app")
+            })
     }
 }

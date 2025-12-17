@@ -132,7 +132,7 @@ impl AO {
             AO::Interceptor => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
             AO::DuckHunt => HashSet::from([Weekday::Wed, Weekday::Fri]),
             AO::Sentinels => HashSet::from([Weekday::Mon, Weekday::Wed]),
-            AO::EmmettGemIsland => HashSet::from([Weekday::Wed, Weekday::Fri]),
+            AO::EmmettGemIsland => HashSet::from([Weekday::Wed]),
             AO::TheEdge => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Sat]),
             AO::OtbCynthiaMann => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::OtbLibertyPark => HashSet::from([Weekday::Sat]),
