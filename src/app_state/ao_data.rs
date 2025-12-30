@@ -33,6 +33,7 @@ pub enum AO {
     TheEdge,
     OtbCynthiaMann,
     OtbLibertyPark,
+    OtbGordonHarrisPark,
     BlackCanyon,
     Liberty,
     FirstF,
@@ -136,6 +137,7 @@ impl AO {
             AO::TheEdge => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Sat]),
             AO::OtbCynthiaMann => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::OtbLibertyPark => HashSet::from([Weekday::Sat]),
+            AO::OtbGordonHarrisPark => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Liberty => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
@@ -170,6 +172,7 @@ impl AO {
             AO::TheEdge => "The Edge",
             AO::OtbCynthiaMann => "Cynthia Mann",
             AO::OtbLibertyPark => "Liberty Park",
+            AO::OtbGordonHarrisPark => "Gordon Harris Park",
             AO::BlackCanyon => "Black Canyon",
             AO::Liberty => "Liberty",
             AO::DR => "DR",
@@ -283,6 +286,7 @@ impl AO {
             AO::TheEdge => AoType::Bootcamp,
             AO::OtbCynthiaMann => AoType::Bootcamp,
             AO::OtbLibertyPark => AoType::Bootcamp,
+            AO::OtbGordonHarrisPark => AoType::Bootcamp,
             AO::DuckHunt => AoType::Bootcamp,
             AO::BlackCanyon => AoType::Bootcamp,
             AO::Liberty => AoType::WildCard,
@@ -323,6 +327,7 @@ impl AO {
             AO::TheEdge => const_names::THE_EDGE_CHANNEL_ID,
             AO::OtbCynthiaMann => const_names::CYNTHIA_MANN_CHANNEL_ID,
             AO::OtbLibertyPark => const_names::OTB_LIBERTY_PARK_CHANNEL_ID,
+            AO::OtbGordonHarrisPark => const_names::OTB_GORDON_HARRIS_PARK_CHANNEL_ID,
             AO::DuckHunt => const_names::DUCK_HUNT_CHANNEL_ID,
             AO::BlackCanyon => const_names::BLACK_CANYON_CHANNEL_ID,
             AO::Liberty => const_names::LIBERTY_CHANNEL_ID,
@@ -354,6 +359,7 @@ impl AO {
             AO::TheEdge => Some("501 S Iowa Ave, Fruitland, ID 83619"),
             AO::OtbCynthiaMann => Some("5401 W Castle Dr, Boise, ID 83703"),
             AO::OtbLibertyPark => Some("600 Constitution Way, Nampa, ID 83687"),
+            AO::OtbGordonHarrisPark => Some("2388 E Three Bars Dr, Meridian, ID 83642"),
             AO::DuckHunt => Some("15203 S Tenth Ave, Caldwell, ID  83607"),
             AO::BlackCanyon => Some("E Main St, Emmett, ID 83617"),
             AO::Liberty => Some("700 W Jefferson St, Boise, ID 83720"),
@@ -390,6 +396,7 @@ impl AO {
             AO::TheEdge => Some(const_names::THE_EDGE_GOOGLE_MAPS),
             AO::OtbCynthiaMann => Some(const_names::CYNTHIA_MANN_GOOGLE_MAPS),
             AO::OtbLibertyPark => Some(const_names::OTB_LIBERTY_PARK_GOOGLE_MAPS),
+            AO::OtbGordonHarrisPark => Some(const_names::OTB_GORDON_HARRIS_PARK_GOOGLE_MAPS),
             AO::DuckHunt => Some(const_names::DUCK_HUNT_GOOGLE_MAPS),
             AO::BlackCanyon => Some(const_names::BLACK_CANYON_GOOGLE_MAPS),
             AO::Liberty => Some(const_names::LIBERTY_GOOGLE_MAPS),
@@ -436,6 +443,7 @@ impl AO {
             const_names::THE_EDGE_CHANNEL_ID => AO::TheEdge,
             const_names::CYNTHIA_MANN_CHANNEL_ID => AO::OtbCynthiaMann,
             const_names::OTB_LIBERTY_PARK_CHANNEL_ID => AO::OtbLibertyPark,
+            const_names::OTB_GORDON_HARRIS_PARK_CHANNEL_ID => AO::OtbGordonHarrisPark,
             const_names::DUCK_HUNT_CHANNEL_ID => AO::DuckHunt,
             const_names::BLACK_CANYON_CHANNEL_ID => AO::BlackCanyon,
             const_names::LIBERTY_CHANNEL_ID => AO::Liberty,
@@ -474,6 +482,7 @@ impl Clone for AO {
             AO::TheEdge => AO::TheEdge,
             AO::OtbCynthiaMann => AO::OtbCynthiaMann,
             AO::OtbLibertyPark => AO::OtbLibertyPark,
+            AO::OtbGordonHarrisPark => AO::OtbGordonHarrisPark,
             AO::DuckHunt => AO::DuckHunt,
             AO::BlackCanyon => AO::BlackCanyon,
             AO::Liberty => AO::Liberty,
@@ -510,6 +519,7 @@ impl Display for AO {
             AO::TheEdge => const_names::THE_EDGE,
             AO::OtbCynthiaMann => const_names::CYNTHIA_MANN,
             AO::OtbLibertyPark => const_names::OTB_LIBERTY_PARK,
+            AO::OtbGordonHarrisPark => const_names::OTB_GORDON_HARRIS_PARK,
             AO::DuckHunt => const_names::DUCK_HUNT,
             AO::BlackCanyon => const_names::BLACK_CANYON,
             AO::Liberty => const_names::LIBERTY,
@@ -560,6 +570,7 @@ impl From<String> for AO {
             const_names::THE_EDGE => AO::TheEdge,
             const_names::CYNTHIA_MANN => AO::OtbCynthiaMann,
             const_names::OTB_LIBERTY_PARK => AO::OtbLibertyPark,
+            const_names::OTB_GORDON_HARRIS_PARK => AO::OtbGordonHarrisPark,
             const_names::DUCK_HUNT => AO::DuckHunt,
             const_names::BLACK_CANYON => AO::BlackCanyon,
             const_names::LIBERTY => AO::Liberty,
@@ -609,6 +620,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::TheEdge => AO::TheEdge,
         PublicChannels::OtbCynthiaMann => AO::OtbCynthiaMann,
         PublicChannels::OtbLibertyPark => AO::OtbLibertyPark,
+        PublicChannels::OtbGordonHarrisPark => AO::OtbGordonHarrisPark,
         PublicChannels::DuckHunt => AO::DuckHunt,
         PublicChannels::BlackCanyon => AO::BlackCanyon,
         PublicChannels::Liberty => AO::Liberty,
@@ -730,6 +742,11 @@ pub mod const_names {
     pub const OTB_LIBERTY_PARK_CHANNEL_ID: &str = "C0A0Z9PB6TE";
     pub const OTB_LIBERTY_PARK_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/NYEGVjwSBH56924y8";
 
+    pub const OTB_GORDON_HARRIS_PARK: &str = "otb-gordon-harris-park";
+    pub const OTB_GORDON_HARRIS_PARK_CHANNEL_ID: &str = "C0A5ZDLFLH4";
+    pub const OTB_GORDON_HARRIS_PARK_GOOGLE_MAPS: &str =
+        "https://maps.app.goo.gl/md3RNyR5eQcWEtdf6";
+
     pub const DUCK_HUNT: &str = "duck-hunt";
     pub const DUCK_HUNT_CHANNEL_ID: &str = "C07A9KYGG9X";
     pub const DUCK_HUNT_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/YjztYdsTbpnjYmoJA";
@@ -742,7 +759,7 @@ pub mod const_names {
     pub const LIBERTY_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/UsWagimUy1huJdsPA";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 26] = [
+    pub const AO_LIST: [AO; 27] = [
         AO::Backyard,
         AO::Bellagio,
         AO::Interceptor,
@@ -769,6 +786,7 @@ pub mod const_names {
         AO::TheEdge,
         AO::OtbCynthiaMann,
         AO::OtbLibertyPark,
+        AO::OtbGordonHarrisPark,
     ];
 }
 
