@@ -80,6 +80,6 @@ impl F3Parent {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ParentPax {
-    name: String,
-    slack_id: Option<String>,
+    pub name: String,
+    pub slack_id: Option<String>,
 }

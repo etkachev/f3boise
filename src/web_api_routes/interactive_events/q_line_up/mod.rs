@@ -68,11 +68,17 @@ pub async fn process_q_line_up_event(
     users: Vec<String>,
     channel_id: String,
 ) -> Result<(), AppError> {
+    use crate::shared::f3_api_sync::sync_q_signup;
+
     let action = map_from_action(action, users, channel_id)?;
     let already_exists = get_single_q_line_up(db_pool, &action.date, &action.channel_id).await?;
     if already_exists.is_some() {
         return Err(AppError::General("Spot already taken".to_string()));
     }
+
+    // sync to F3 API
+    sync_q_signup(&action).await;
+
     let list = vec![action];
     save_list(db_pool, &list).await?;
     Ok(())
@@ -134,7 +140,15 @@ async fn process_closing_existing_q_line_up(
     action: &QSheetActionComboData,
     channel_id: &str,
 ) -> Result<(), AppError> {
+    use crate::db::save_q_line_up::NewQLineUpDbEntry;
+    use crate::shared::f3_api_sync::sync_q_signup;
+
     close_q_line_up_entry(db_pool, &action.ao, channel_id, &action.date).await?;
+
+    // sync closed status to F3 API
+    let closed_entry = NewQLineUpDbEntry::new_closed(&action.ao, &action.date, channel_id);
+    sync_q_signup(&closed_entry).await;
+
     Ok(())
 }
 

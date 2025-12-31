@@ -22,10 +22,15 @@ pub async fn handle_new_user(
     app_state: &MutableAppState,
     web_app: &MutableWebState,
 ) {
+    use crate::shared::f3_api_sync::sync_user;
+
     let mapped_user = F3User::from(user);
     if let Err(err) = add_user_to_db(&mapped_user, db_pool).await {
         println!("Error handling new user: {:?}", err);
     }
+
+    // sync to F3 API
+    sync_user(&mapped_user).await;
     let channel_id = {
         let app = app_state.app.lock().unwrap();
         app.get_channel_data(PublicChannels::Welcome)

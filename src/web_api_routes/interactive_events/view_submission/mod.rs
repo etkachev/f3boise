@@ -70,6 +70,7 @@ async fn handle_edit_pre_blast_submission(
 ) -> Result<(), AppError> {
     use crate::db::queries::pre_blasts;
     use crate::db::save_pre_blast;
+    use crate::shared::f3_api_sync::sync_preblast;
 
     let form_values = modal.state.get_values();
     let post = pre_blast_post::PreBlastPost::from(form_values);
@@ -78,6 +79,10 @@ async fn handle_edit_pre_blast_submission(
     if let Some(id) = &modal.private_metadata {
         // save to backend
         save_pre_blast::update_pre_blast(db_pool, id, &db_data).await?;
+
+        // sync to F3 API
+        sync_preblast(&db_data, id).await;
+
         // fetch latest
         let updated_pb = pre_blasts::get_pre_blast_by_id(db_pool, id).await?;
         if let Some(ts) = updated_pb.map(|pb| pb.ts).unwrap_or_default() {
@@ -94,7 +99,6 @@ async fn handle_edit_pre_blast_submission(
             }
         }
     }
-    // todo
     Ok(())
 }
 
@@ -107,11 +111,18 @@ async fn handle_edit_back_blast_submission(
     use crate::db::save_back_blast;
     use crate::shared::f3_api_sync::sync_backblast;
 
+    println!("handle_edit_back_blast_submission called");
     let form_values = modal.state.get_values();
     let post = back_blast_post::BackBlastPost::from(form_values);
     let users = get_slack_id_map(db_pool).await?;
     let db_data = back_blast_post::convert_to_bb_data(&post, users);
     let is_valid = db_data.is_valid_back_blast();
+    println!(
+        "Edit backblast - is_valid: {}, has_metadata: {}, event_times: {:?}",
+        is_valid,
+        modal.private_metadata.is_some(),
+        db_data.event_times
+    );
     if is_valid {
         if let Some(id) = &modal.private_metadata {
             // save to backend
@@ -183,12 +194,17 @@ async fn handle_pre_blast_submission(
     user: &ActionUser,
 ) -> Result<(), AppError> {
     use crate::db::save_pre_blast;
+    use crate::shared::f3_api_sync::sync_preblast;
 
     let form_values = modal.state.get_values();
     let post = pre_blast_post::PreBlastPost::from(form_values);
     let users = get_slack_id_map(db_pool).await?;
     let db_data = PreBlastData::from(&post).with_qs(&post.qs, users);
     let saved_id = save_pre_blast::save_single(db_pool, &db_data).await?;
+
+    // sync to F3 API
+    sync_preblast(&db_data, &saved_id).await;
+
     let message = pre_blast_post::convert_to_message(db_pool, post, &saved_id, &user.id).await;
     // post message to slack
     let ts = web_state.post_message(message).await?;
