@@ -131,7 +131,7 @@ impl AO {
             AO::GooseDynasty => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
             AO::DarkStride => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::Interceptor => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
-            AO::DuckHunt => HashSet::from([Weekday::Wed, Weekday::Fri]),
+            AO::DuckHunt => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Fri]),
             AO::Sentinels => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::EmmettGemIsland => HashSet::from([Weekday::Wed]),
             AO::TheEdge => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Sat]),
