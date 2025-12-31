@@ -105,6 +105,7 @@ async fn handle_edit_back_blast_submission(
 ) -> Result<(), AppError> {
     use crate::db::queries::all_back_blasts;
     use crate::db::save_back_blast;
+    use crate::shared::f3_api_sync::sync_backblast;
 
     let form_values = modal.state.get_values();
     let post = back_blast_post::BackBlastPost::from(form_values);
@@ -115,6 +116,10 @@ async fn handle_edit_back_blast_submission(
         if let Some(id) = &modal.private_metadata {
             // save to backend
             save_back_blast::update_back_blast(db_pool, id, &db_data).await?;
+
+            // sync to F3 API
+            sync_backblast(&db_data, id).await;
+
             // fetch latest update
             let updated_bb = all_back_blasts::get_back_blast_by_id(db_pool, id).await?;
             if let Some(ts) = updated_bb.map(|bb| bb.ts).unwrap_or_default() {
@@ -143,6 +148,7 @@ async fn handle_back_blast_submission(
     user: &ActionUser,
 ) -> Result<(), AppError> {
     use crate::db::save_back_blast;
+    use crate::shared::f3_api_sync::sync_backblast;
 
     let form_values = modal.state.get_values();
     let post = back_blast_post::BackBlastPost::from(form_values);
@@ -153,7 +159,10 @@ async fn handle_back_blast_submission(
     if is_valid {
         // save single back blast
         let saved_id = save_back_blast::save_single(db_pool, &db_data).await?;
-        id = Some(saved_id);
+        id = Some(saved_id.clone());
+
+        // sync to F3 API
+        sync_backblast(&db_data, &saved_id).await;
     }
     let message =
         back_blast_post::convert_to_message(post, db_pool, is_valid, id.clone(), &user.id).await;
