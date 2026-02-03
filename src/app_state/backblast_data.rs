@@ -13,7 +13,7 @@ pub const BACK_BLAST_TAG: &str = "#backblast";
 pub const SLACK_BLAST_TAG: &str = "*slackblast*:";
 
 /// General data of a backblast
-#[derive(Debug, PartialEq, Serialize, Deserialize, Eq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Eq)]
 pub struct BackBlastData {
     /// possible id of backblast if saved in db
     pub id: Option<String>,

@@ -8,6 +8,7 @@ use chrono::{NaiveDate, NaiveTime};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
+#[derive(Clone)]
 pub struct PreBlastData {
     /// possible id of preblast if saved in db
     pub id: Option<String>,

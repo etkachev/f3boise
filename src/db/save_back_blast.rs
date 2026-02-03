@@ -49,7 +49,7 @@ pub async fn save_multiple(db_pool: &PgPool, list: &[BackBlastData]) -> Result<(
     let mut transaction = db_pool.begin().await.expect("Failed to begin transaction");
     for back_blast in list {
         let db_bb = BackBlastDbEntry::from(back_blast);
-        save_back_blast(&mut transaction, &db_bb).await?;
+        let _ = save_back_blast(&mut transaction, &db_bb).await?;
     }
 
     transaction
@@ -74,16 +74,28 @@ pub async fn sync_multiple(db_pool: &PgPool, list: &[BackBlastData]) -> Result<(
     Ok(())
 }
 
-pub async fn save_single(db_pool: &PgPool, data: &BackBlastData) -> Result<String, AppError> {
+/// Result of saving a backblast - indicates whether it was newly inserted or already existed
+pub enum SaveResult {
+    /// Backblast was inserted, contains the new ID
+    Inserted(String),
+    /// Backblast already exists for this AO/date/type combination
+    AlreadyExists,
+}
+
+pub async fn save_single(db_pool: &PgPool, data: &BackBlastData) -> Result<SaveResult, AppError> {
     let db_bb = BackBlastDbEntry::from(data);
     let id = db_bb.id.to_string();
     let mut transaction = db_pool.begin().await.expect("Failed to begin transaction");
-    save_back_blast(&mut transaction, &db_bb).await?;
+    let inserted = save_back_blast(&mut transaction, &db_bb).await?;
     transaction
         .commit()
         .await
         .expect("Could not commit transaction");
-    Ok(id)
+    if inserted {
+        Ok(SaveResult::Inserted(id))
+    } else {
+        Ok(SaveResult::AlreadyExists)
+    }
 }
 
 /// update timestamp for backblast, to be able to edit most recent message post.
@@ -147,11 +159,12 @@ pub async fn update_back_blast(
 }
 
 /// insert backblast if not constraint on ao, date, and bb_type
+/// Returns true if the backblast was inserted, false if it already existed
 async fn save_back_blast(
     transaction: &mut Transaction<'_, Postgres>,
     db_bb: &BackBlastDbEntry,
-) -> Result<(), AppError> {
-    sqlx::query!(
+) -> Result<bool, AppError> {
+    let result = sqlx::query!(
         r#"
     INSERT INTO back_blasts (id, ao, q, pax, date, bb_type, channel_id, active, title, moleskine, fngs)
     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
@@ -173,7 +186,7 @@ async fn save_back_blast(
     .execute(&mut **transaction)
     .await?;
 
-    Ok(())
+    Ok(result.rows_affected() > 0)
 }
 
 /// update backblast with expectation on sync from other db

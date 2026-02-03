@@ -80,8 +80,12 @@ async fn handle_edit_pre_blast_submission(
         // save to backend
         save_pre_blast::update_pre_blast(db_pool, id, &db_data).await?;
 
-        // sync to F3 API
-        sync_preblast(&db_data, id).await;
+        // sync to F3 API in background (don't block Slack response)
+        let sync_data = db_data.clone();
+        let sync_id = id.clone();
+        actix_rt::spawn(async move {
+            sync_preblast(&sync_data, &sync_id).await;
+        });
 
         // fetch latest
         let updated_pb = pre_blasts::get_pre_blast_by_id(db_pool, id).await?;
@@ -128,8 +132,12 @@ async fn handle_edit_back_blast_submission(
             // save to backend
             save_back_blast::update_back_blast(db_pool, id, &db_data).await?;
 
-            // sync to F3 API
-            sync_backblast(&db_data, id).await;
+            // sync to F3 API in background (don't block Slack response)
+            let sync_data = db_data.clone();
+            let sync_id = id.clone();
+            actix_rt::spawn(async move {
+                sync_backblast(&sync_data, &sync_id).await;
+            });
 
             // fetch latest update
             let updated_bb = all_back_blasts::get_back_blast_by_id(db_pool, id).await?;
@@ -158,7 +166,7 @@ async fn handle_back_blast_submission(
     db_pool: &PgPool,
     user: &ActionUser,
 ) -> Result<(), AppError> {
-    use crate::db::save_back_blast;
+    use crate::db::save_back_blast::{self, SaveResult};
     use crate::shared::f3_api_sync::sync_backblast;
 
     let form_values = modal.state.get_values();
@@ -169,11 +177,21 @@ async fn handle_back_blast_submission(
     let mut id: Option<String> = None;
     if is_valid {
         // save single back blast
-        let saved_id = save_back_blast::save_single(db_pool, &db_data).await?;
-        id = Some(saved_id.clone());
-
-        // sync to F3 API
-        sync_backblast(&db_data, &saved_id).await;
+        match save_back_blast::save_single(db_pool, &db_data).await? {
+            SaveResult::Inserted(saved_id) => {
+                id = Some(saved_id.clone());
+                // sync to F3 API in background (don't block Slack response)
+                let sync_data = db_data.clone();
+                let sync_id = saved_id.clone();
+                actix_rt::spawn(async move {
+                    sync_backblast(&sync_data, &sync_id).await;
+                });
+            }
+            SaveResult::AlreadyExists => {
+                // Backblast already exists for this AO/date/type, don't post to Slack again
+                return Ok(());
+            }
+        }
     }
     let message =
         back_blast_post::convert_to_message(post, db_pool, is_valid, id.clone(), &user.id).await;
@@ -202,8 +220,12 @@ async fn handle_pre_blast_submission(
     let db_data = PreBlastData::from(&post).with_qs(&post.qs, users);
     let saved_id = save_pre_blast::save_single(db_pool, &db_data).await?;
 
-    // sync to F3 API
-    sync_preblast(&db_data, &saved_id).await;
+    // sync to F3 API in background (don't block Slack response)
+    let sync_data = db_data.clone();
+    let sync_id = saved_id.clone();
+    actix_rt::spawn(async move {
+        sync_preblast(&sync_data, &sync_id).await;
+    });
 
     let message = pre_blast_post::convert_to_message(db_pool, post, &saved_id, &user.id).await;
     // post message to slack
