@@ -11,6 +11,7 @@ pub struct AOMonthlyStatsGraphCommand {
 impl AOMonthlyStatsGraphCommand {
     /// new command wrapper with passed in date from form. If invalid or empty, then defaults to local time
     pub fn new(form_text: &str) -> Self {
+        let form_text = form_text.trim();
         let date = NaiveDate::parse_from_str(format!("{}/1", form_text).as_str(), "%Y/%m/%d")
             .unwrap_or_else(|_| local_boise_time().date_naive());
         let next_month = date.add(Months::new(1));
@@ -33,5 +34,11 @@ mod tests {
     fn date_format_works() {
         let command = AOMonthlyStatsGraphCommand::new("2022/08");
         assert_eq!(command.month, NaiveDate::from_ymd_opt(2022, 8, 31).unwrap());
+    }
+
+    #[test]
+    fn date_format_with_trailing_space() {
+        let command = AOMonthlyStatsGraphCommand::new("2026/01 ");
+        assert_eq!(command.month, NaiveDate::from_ymd_opt(2026, 1, 31).unwrap());
     }
 }
