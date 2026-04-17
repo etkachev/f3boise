@@ -1,3 +1,5 @@
+pub mod external;
+
 use crate::db::queries::pre_blasts;
 use crate::db::queries::pre_blasts::PreBlastJsonFullData;
 use actix_web::{web, HttpResponse, Responder};

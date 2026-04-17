@@ -9,4 +9,8 @@ pub fn service() -> Scope {
             web::get().to(pre_blast_data::download_pre_blast_data_csv),
         )
         .route("/sync-db-via-url", web::get().to(sync_prod_pre_blasts))
+        .route(
+            "/from-external",
+            web::post().to(pre_blast_data::external::create_pre_blast_from_external),
+        )
 }
