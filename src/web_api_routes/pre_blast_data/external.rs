@@ -4,7 +4,6 @@ use crate::app_state::pre_blast_data::PreBlastData;
 use crate::db::queries::users::get_slack_id_map;
 use crate::db::save_pre_blast;
 use crate::shared::f3_api_sync::sync_preblast;
-use crate::web_api_routes::slash_commands::pre_blast::pre_blast_post;
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
 use chrono::{NaiveDate, NaiveTime};
@@ -95,11 +94,8 @@ pub async fn create_pre_blast_from_external(
         .equipment
         .iter()
         .map(|name| {
-            // Try to parse as known equipment, otherwise treat as "Other"
-            match AoEquipment::try_from(name.as_str()) {
-                Ok(eq) => eq,
-                Err(_) => AoEquipment::Other(name.clone()),
-            }
+            // Parse as known equipment or treat as "Other" (FromStr never fails)
+            name.parse().unwrap_or_else(|_| AoEquipment::Other(name.clone()))
         })
         .collect();
 
@@ -189,7 +185,7 @@ pub async fn create_pre_blast_from_external(
 }
 
 async fn create_slack_message(
-    db_pool: &PgPool,
+    _db_pool: &PgPool,
     data: &PreBlastData,
     id: &str,
     qs_slack_format: &HashSet<String>,
