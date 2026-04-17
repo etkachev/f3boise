@@ -1,4 +1,4 @@
-use crate::web_api_routes::q_line_up::q_line_up_route;
+use crate::web_api_routes::q_line_up::{external, q_line_up_route};
 use crate::web_api_routes::sync::db_sync::sync_q_line_up_db;
 use crate::web_api_routes::sync::download_q_line_up_csv;
 use actix_web::{web, Scope};
@@ -9,4 +9,8 @@ pub fn service() -> Scope {
         .route("/list", web::get().to(q_line_up_route))
         .route("/download-csv", web::get().to(download_q_line_up_csv))
         .route("/sync-items-via-url", web::get().to(sync_q_line_up_db))
+        .route(
+            "/from-external",
+            web::post().to(external::create_q_signup_from_external),
+        )
 }

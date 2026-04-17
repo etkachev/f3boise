@@ -206,6 +206,62 @@ Create a preblast from an external source (F3 API) and post to Slack.
   }
   ```
 
+### `POST /q_line_up/from-external`
+
+Create a Q signup from an external source (F3 API). This does NOT sync back to F3 API to avoid loops.
+
+**Request Body**:
+```typescript
+{
+  ao_name: string;       // AO name (e.g., "Bleach", "Gem")
+  date: string;          // YYYY-MM-DD format
+  q_slack_id?: string;   // Slack user ID (required if not closing)
+  closed: boolean;       // Whether to mark the slot as closed
+}
+```
+
+**Success Response** (200 OK):
+```json
+{
+  "success": true,
+  "message": "Q signup saved successfully"
+}
+```
+
+**Error Responses**:
+
+- `400 Bad Request` - Unknown AO:
+  ```json
+  {
+    "success": false,
+    "message": "Unknown AO: XYZ"
+  }
+  ```
+
+- `400 Bad Request` - Spot already taken:
+  ```json
+  {
+    "success": false,
+    "message": "Spot already taken"
+  }
+  ```
+
+- `400 Bad Request` - Missing q_slack_id when not closing:
+  ```json
+  {
+    "success": false,
+    "message": "q_slack_id required when not closing slot"
+  }
+  ```
+
+- `500 Internal Server Error` - Database error:
+  ```json
+  {
+    "success": false,
+    "message": "Failed to save Q signup: ..."
+  }
+  ```
+
 ## Testing
 
 ### 1. Set up Environment
@@ -375,11 +431,14 @@ src/
 
 ### New Files
 - `src/web_api_routes/pre_blast_data/external.rs` - External preblast endpoint
+- `src/web_api_routes/q_line_up/external.rs` - External Q signup endpoint
 - `INTEGRATION_GUIDE.md` - This file
 
 ### Modified Files
 - `src/web_api_routes/pre_blast_data/mod.rs` - Export external module
 - `src/web_api_run/pre_blasts.rs` - Register `/from-external` route
+- `src/web_api_routes/q_line_up/mod.rs` - Export external module
+- `src/web_api_run/q_line_up.rs` - Register `/from-external` route
 
 ## Troubleshooting
 
