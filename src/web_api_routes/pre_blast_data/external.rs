@@ -23,6 +23,7 @@ pub struct ExternalPreBlastRequest {
     pub equipment: Vec<String>,
     pub fng_message: Option<String>,
     pub description: Option<String>,
+    pub location_url: Option<String>,  // Optional Google Maps URL
 }
 
 #[derive(Serialize)]
@@ -135,6 +136,7 @@ pub async fn create_pre_blast_from_external(
         fng_message: payload.fng_message.clone(),
         mole_skin: payload.description.clone(),
         img_ids: HashSet::new(),
+        location_url: payload.location_url.clone(),
     };
 
     // 7. Save to DB
@@ -219,11 +221,18 @@ async fn create_slack_message(
             .join(", ")
     };
 
+    let where_text = match &data.location_url {
+        Some(url) if !url.is_empty() => {
+            format!("*Where*: <#{}> - <{}|View on Map>", data.ao.channel_id(), url)
+        }
+        _ => format!("*Where*: <#{}>", data.ao.channel_id()),
+    };
+
     let mut block_builder = BlockBuilder::new()
         .section_markdown(&format!("*Preblast: {}*", data.title))
         .section_markdown(&format!("*Date*: {}", data.date))
         .section_markdown(&format!("*Time*: {}", data.start_time.format("%H:%M")))
-        .section_markdown(&format!("*Where*: <#{}>", data.ao.channel_id()))
+        .section_markdown(&where_text)
         .section_markdown(&format!("*Q(s)*: {}", qs_list))
         .divider()
         .section_markdown(&format!("*Why*: {}", data.why))

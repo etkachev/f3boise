@@ -29,6 +29,8 @@ pub struct PreBlastData {
     pub fng_message: Option<String>,
     pub mole_skin: Option<String>,
     pub img_ids: HashSet<String>,
+    /// optional Google Maps URL for workout location
+    pub location_url: Option<String>,
 }
 
 impl PreBlastData {
@@ -85,6 +87,7 @@ impl From<&PreBlastPost> for PreBlastData {
             fng_message: value.fng_message.clone(),
             mole_skin: value.mole_skin.clone(),
             img_ids: value.img_ids.clone(),
+            location_url: value.location_url.clone(),
         }
     }
 }
@@ -115,6 +118,7 @@ impl From<PreBlastJsonFullData> for PreBlastData {
             fng_message: value.fng_message.clone(),
             mole_skin: value.mole_skin.clone(),
             img_ids,
+            location_url: value.location_url.clone(),
         }
     }
 }

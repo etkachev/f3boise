@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n     UPDATE pre_blasts\n     SET ao = $2,\n         channel_id = $3,\n         title = $4,\n         qs = $5,\n         date = $6,\n         start_time = $7,\n         why = $8,\n         equipment = $9,\n         fng_message = $10,\n         mole_skin = $11,\n         img_ids = COALESCE($12, img_ids),\n         location_url = $13\n     WHERE id = $1\n     ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Date",
+        "Time",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0401a720cc635c5f8bb675107f1e3fe0447b8784a727b7aa3fd414bb346c7084"
+}

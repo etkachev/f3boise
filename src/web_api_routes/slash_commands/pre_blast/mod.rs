@@ -106,6 +106,13 @@ fn create_pre_blast_modal(channel_id: &str, user_id: &str) -> ViewModal {
             Some("Always".to_string()),
             true,
         )
+        .plain_input(
+            "Location (Google Maps URL)",
+            pre_blast_post::pre_blast_action_ids::LOCATION_URL,
+            Some("Paste Google Maps link here".to_string()),
+            ao.real_map_url().map(|url| url.to_string()),
+            true,
+        )
         .divider()
         .text_box(
             "The Moleskine",

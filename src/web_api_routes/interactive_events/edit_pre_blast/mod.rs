@@ -145,6 +145,13 @@ pub fn create_edit_modal(
             pre_blast.fng_message.clone(),
             true,
         )
+        .plain_input(
+            "Location (Google Maps URL)",
+            pre_blast_post::pre_blast_action_ids::LOCATION_URL,
+            Some("Paste Google Maps link here".to_string()),
+            pre_blast.location_url.clone(),
+            true,
+        )
         .divider()
         .text_box(
             "The Moleskine",

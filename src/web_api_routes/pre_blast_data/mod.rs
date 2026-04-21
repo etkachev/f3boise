@@ -24,6 +24,8 @@ pub struct PreBlastRow {
     /// comma separated
     pub img_ids: String,
     pub ts: String,
+    /// optional Google Maps URL for workout location
+    pub location_url: String,
 }
 
 impl From<PreBlastJsonFullData> for PreBlastRow {
@@ -44,6 +46,7 @@ impl From<PreBlastJsonFullData> for PreBlastRow {
                 .map(|img_ids| img_ids.join(","))
                 .unwrap_or_default(),
             ts: value.ts.unwrap_or_default(),
+            location_url: value.location_url.unwrap_or_default(),
         }
     }
 }

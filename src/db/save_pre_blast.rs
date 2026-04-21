@@ -22,6 +22,7 @@ pub struct PreBlastDbEntry {
     pub mole_skin: Option<String>,
     pub img_ids: Option<String>,
     pub ts: Option<String>,
+    pub location_url: Option<String>,
 }
 
 impl From<&PreBlastData> for PreBlastDbEntry {
@@ -69,6 +70,7 @@ impl From<&PreBlastData> for PreBlastDbEntry {
             mole_skin: value.mole_skin.clone(),
             img_ids,
             ts: None,
+            location_url: value.location_url.clone(),
         }
     }
 }
@@ -109,6 +111,11 @@ impl From<&PreBlastRow> for PreBlastDbEntry {
                 None
             } else {
                 Some(value.ts.to_string())
+            },
+            location_url: if value.location_url.is_empty() {
+                None
+            } else {
+                Some(value.location_url.to_string())
             },
         }
     }
@@ -191,7 +198,8 @@ pub async fn update_pre_blast(
          equipment = $9,
          fng_message = $10,
          mole_skin = $11,
-         img_ids = COALESCE($12, img_ids)
+         img_ids = COALESCE($12, img_ids),
+         location_url = $13
      WHERE id = $1
      "#,
         uuid,
@@ -206,6 +214,7 @@ pub async fn update_pre_blast(
         db_entry.fng_message,
         db_entry.mole_skin,
         db_entry.img_ids,
+        db_entry.location_url,
     )
     .execute(db_pool)
     .await?;
@@ -219,8 +228,8 @@ async fn save_pre_blast(
 ) -> Result<(), AppError> {
     sqlx::query!(
         r#"
-        INSERT INTO pre_blasts (id, ao, channel_id, title, qs, date, start_time, why, equipment, fng_message, mole_skin, img_ids)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        INSERT INTO pre_blasts (id, ao, channel_id, title, qs, date, start_time, why, equipment, fng_message, mole_skin, img_ids, location_url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         ON CONFLICT (id)
             DO NOTHING;
         "#,
@@ -235,7 +244,8 @@ async fn save_pre_blast(
         entry.equipment,
         entry.fng_message,
         entry.mole_skin,
-        entry.img_ids
+        entry.img_ids,
+        entry.location_url
     )
         .execute(&mut **transaction)
         .await?;

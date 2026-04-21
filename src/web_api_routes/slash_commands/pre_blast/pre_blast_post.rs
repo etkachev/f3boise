@@ -25,6 +25,7 @@ pub struct PreBlastPost {
     pub mole_skin: Option<String>,
     pub post_where: BlastWhere,
     pub img_ids: HashSet<String>,
+    pub location_url: Option<String>,
 }
 
 impl PreBlastPost {
@@ -136,6 +137,10 @@ impl From<HashMap<String, BasicValue>> for PreBlastPost {
             .map(value_utils::get_blast_where_value)
             .unwrap_or_default();
 
+        let location_url = value
+            .get(pre_blast_action_ids::LOCATION_URL)
+            .map(value_utils::get_single_string);
+
         PreBlastPost {
             title,
             date,
@@ -148,6 +153,7 @@ impl From<HashMap<String, BasicValue>> for PreBlastPost {
             mole_skin,
             post_where,
             img_ids,
+            location_url,
         }
     }
 }
@@ -165,6 +171,7 @@ pub mod pre_blast_action_ids {
     pub const MOLE_SKINE: &str = "moleskin.textbox";
     pub const WHERE_POST: &str = "where_to_post.select";
     pub const FILE: &str = "file.input";
+    pub const LOCATION_URL: &str = "location_url.input";
 }
 
 pub async fn convert_to_message(
@@ -194,11 +201,17 @@ pub async fn convert_to_message(
 
 fn get_block_builder(post: PreBlastPost, id: &str) -> BlockBuilder {
     let img_ids = post.img_ids();
+    let where_text = match &post.location_url {
+        Some(url) if !url.is_empty() => {
+            format!("*Where*: <#{}> - <{}|View on Map>", post.ao.channel_id(), url)
+        }
+        _ => format!("*Where*: <#{}>", post.ao.channel_id()),
+    };
     let mut block_builder = BlockBuilder::new()
         .section_markdown(&format!("*Preblast: {}*", post.title))
         .section_markdown(&format!("*Date*: {}", post.date))
         .section_markdown(&format!("*Time*: {}", post.start_time.format("%H:%M")))
-        .section_markdown(&format!("*Where*: <#{}>", post.ao.channel_id()))
+        .section_markdown(&where_text)
         .section_markdown(&format!("*Q(s)*: {}", post.qs_list()))
         .divider()
         .section_markdown(&format!("*Why*: {}", post.why))

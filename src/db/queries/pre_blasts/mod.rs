@@ -19,6 +19,7 @@ pub struct PreBlastJsonFullData {
     pub mole_skin: Option<String>,
     pub img_ids: Option<Vec<String>>,
     pub ts: Option<String>,
+    pub location_url: Option<String>,
 }
 
 /// get all pre_blasts from db. mainly for syncing database
@@ -40,7 +41,8 @@ pub async fn get_all_pre_blasts(db: &PgPool) -> Result<Vec<PreBlastJsonFullData>
             pb.fng_message,
             pb.mole_skin,
             string_to_array(COALESCE(pb.img_ids, ''), ',') as img_ids,
-            pb.ts
+            pb.ts,
+            pb.location_url
         FROM pre_blasts pb
         INNER JOIN ao_list al on pb.channel_id = al.channel_id
     )
@@ -58,7 +60,8 @@ pub async fn get_all_pre_blasts(db: &PgPool) -> Result<Vec<PreBlastJsonFullData>
         fng_message,
         mole_skin,
         img_ids as "img_ids!",
-        ts
+        ts,
+        location_url
     FROM list_view
     ORDER BY date DESC;
     "#
@@ -92,7 +95,8 @@ pub async fn get_pre_blast_by_id(
             pb.fng_message,
             pb.mole_skin,
             string_to_array(COALESCE(pb.img_ids, ''), ',') as img_ids,
-            pb.ts
+            pb.ts,
+            pb.location_url
         FROM pre_blasts pb
         INNER JOIN ao_list al on pb.channel_id = al.channel_id
     )
@@ -110,7 +114,8 @@ pub async fn get_pre_blast_by_id(
         fng_message,
         mole_skin,
         img_ids as "img_ids!",
-        ts
+        ts,
+        location_url
     FROM list_view
     WHERE id = $1
     ORDER BY date DESC;
