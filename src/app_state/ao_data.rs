@@ -780,7 +780,7 @@ pub mod const_names {
     pub const RUCK_AROUND_CHANNEL_ID: &str = "C0ATRN16E2U";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 28] = [
+    pub const AO_LIST: [AO; 27] = [
         AO::Backyard,
         AO::Bellagio,
         AO::Interceptor,
@@ -805,7 +805,7 @@ pub mod const_names {
         AO::Sentinels,
         AO::EmmettGemIsland,
         AO::TheEdge,
-        AO::Rafo,
+        // AO::Rafo,
         AO::OtbCynthiaMann,
         AO::OtbLibertyPark,
         AO::OtbGordonHarrisPark,
