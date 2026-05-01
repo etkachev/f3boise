@@ -1,6 +1,7 @@
 use crate::app_state::ao_data::AO;
 use crate::db::queries::q_line_up::get_single_q_line_up;
-use crate::db::save_q_line_up::{save_list, NewQLineUpDbEntry};
+use crate::db::queries::users::get_slack_id_map;
+use crate::db::save_q_line_up::{delete_q_line_up_entry, save_list, NewQLineUpDbEntry};
 use actix_web::{web, HttpResponse, Responder};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
@@ -12,6 +13,8 @@ pub struct ExternalQSignupRequest {
     pub date: String, // YYYY-MM-DD
     pub q_slack_id: Option<String>,
     pub closed: bool,
+    // whether we should clear this date
+    pub clear: bool,
 }
 
 #[derive(Serialize)]
@@ -63,19 +66,53 @@ pub async fn create_q_signup_from_external(
         }
     };
 
-    if already_exists.is_some() {
+    if already_exists.is_some() && !payload.clear {
         return HttpResponse::BadRequest().json(ExternalQSignupResponse {
             success: false,
             message: "Spot already taken".to_string(),
         });
     }
 
+    if payload.clear {
+        match delete_q_line_up_entry(&db_pool, &channel_id, &date).await {
+            Ok(_) => {
+                return HttpResponse::Ok().json(ExternalQSignupResponse {
+                    success: true,
+                    message: "Q signup cleared successfully".to_string(),
+                });
+            }
+            Err(err) => {
+                return HttpResponse::InternalServerError().json(ExternalQSignupResponse {
+                    success: false,
+                    message: format!("Database error: {}", err),
+                });
+            }
+        }
+    }
+
+    let users = get_slack_id_map(&db_pool).await.unwrap_or_default();
+
     // 5. Build DB entry
     let db_entry = if payload.closed {
         NewQLineUpDbEntry::new_closed(&ao, &date, &channel_id)
     } else {
         let q_name = match &payload.q_slack_id {
-            Some(slack_id) => slack_id.clone(),
+            Some(slack_id) => {
+                // f3 name
+                let user = users
+                    .get(slack_id)
+                    .map(|name| name.to_string())
+                    .unwrap_or_else(String::new);
+
+                if user.is_empty() {
+                    return HttpResponse::BadRequest().json(ExternalQSignupResponse {
+                        success: false,
+                        message: "Could not find user".to_string(),
+                    });
+                }
+
+                user
+            }
             None => {
                 return HttpResponse::BadRequest().json(ExternalQSignupResponse {
                     success: false,
@@ -94,7 +131,10 @@ pub async fn create_q_signup_from_external(
         });
     }
 
-    println!("Successfully saved external Q signup for {} on {}", ao, date);
+    println!(
+        "Successfully saved external Q signup for {} on {}",
+        ao, date
+    );
 
     HttpResponse::Ok().json(ExternalQSignupResponse {
         success: true,
