@@ -172,8 +172,11 @@ mod cors {
             .allow_any_header()
             .allow_any_method()
             .allowed_origin("http://localhost:8100")
+            .allowed_origin("http://localhost:3000")  // f3 backend dev
+            .allowed_origin("http://localhost:4200")  // Angular dev server
             .allowed_origin("https://f3boise.com")
             .allowed_origin("https://f3-boise.web.app")
+            .allowed_origin("https://f3-web-api.fly.dev")  // f3 backend production
             .allowed_origin_fn(|origin, _req_head| {
                 // Allow Firebase preview URLs (f3-platform-* patterns)
                 origin.as_bytes().starts_with(b"https://f3-platform-")
