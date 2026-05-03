@@ -3,7 +3,6 @@ use crate::app_state::equipment::AoEquipment;
 use crate::app_state::pre_blast_data::PreBlastData;
 use crate::db::queries::users::get_slack_id_map;
 use crate::db::save_pre_blast;
-use crate::shared::f3_api_sync::sync_preblast;
 use crate::web_api_state::MutableWebState;
 use actix_web::{web, HttpResponse, Responder};
 use chrono::{NaiveDate, NaiveTime};
@@ -39,7 +38,10 @@ pub async fn create_pre_blast_from_external(
     web_state: web::Data<MutableWebState>,
     payload: web::Json<ExternalPreBlastRequest>,
 ) -> impl Responder {
-    println!("Received external preblast request: {:?}", payload);
+    println!("🔍 [Preblast External] Received request: ao_name={}, date={}, time={}, title={}",
+        payload.ao_name, payload.date, payload.time, payload.title);
+    println!("📦 [Preblast External] Q Slack IDs: {:?}, Q Names: {:?}",
+        payload.q_slack_ids, payload.q_names_without_slack);
 
     // 1. Parse AO from name (case-insensitive matching)
     let ao = AO::from(payload.ao_name.clone());
@@ -141,8 +143,12 @@ pub async fn create_pre_blast_from_external(
 
     // 7. Save to DB
     let saved_id = match save_pre_blast::save_single(&db_pool, &db_data).await {
-        Ok(id) => id,
+        Ok(id) => {
+            println!("✅ [Preblast External] Saved to DB with ID: {}", id);
+            id
+        }
         Err(e) => {
+            eprintln!("❌ [Preblast External] Failed to save: {}", e);
             return HttpResponse::InternalServerError().json(ExternalPreBlastResponse {
                 id: String::new(),
                 success: false,
@@ -151,20 +157,18 @@ pub async fn create_pre_blast_from_external(
         }
     };
 
-    // 8. Sync to F3 API in background
-    let sync_data = db_data.clone();
-    let sync_id = saved_id.clone();
-    actix_rt::spawn(async move {
-        sync_preblast(&sync_data, &sync_id).await;
-    });
-
-    // 9. Post to Slack (using the original Slack IDs for mentions)
+    // 8. Post to Slack (using the original Slack IDs for mentions)
+    // NOTE: We do NOT sync back to F3 API to avoid infinite loops
+    println!("🚀 [Preblast External] Posting to Slack channel: {}", ao.channel_id());
     let message = create_slack_message(&db_pool, &db_data, &saved_id, &all_qs).await;
 
     let ts = match web_state.post_message(message).await {
-        Ok(ts) => ts,
+        Ok(ts) => {
+            println!("✅ [Preblast External] Successfully posted to Slack");
+            ts
+        }
         Err(e) => {
-            eprintln!("Failed to post to Slack: {}", e);
+            eprintln!("❌ [Preblast External] Failed to post to Slack: {}", e);
             return HttpResponse::InternalServerError().json(ExternalPreBlastResponse {
                 id: saved_id,
                 success: false,
