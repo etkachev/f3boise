@@ -1,7 +1,7 @@
 use crate::app_state::ao_data::AO;
 use crate::db::queries::q_line_up::get_single_q_line_up;
 use crate::db::queries::users::get_slack_id_map;
-use crate::db::save_q_line_up::{delete_q_line_up_entry, save_list, NewQLineUpDbEntry};
+use crate::db::save_q_line_up::{close_q_line_up_entry, delete_q_line_up_entry, save_list, NewQLineUpDbEntry};
 use actix_web::{web, HttpResponse, Responder};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
@@ -66,7 +66,8 @@ pub async fn create_q_signup_from_external(
         }
     };
 
-    if already_exists.is_some() && !payload.clear {
+    // Allow overwriting if clearing or closing, otherwise check if spot is taken
+    if already_exists.is_some() && !payload.clear && !payload.closed {
         return HttpResponse::BadRequest().json(ExternalQSignupResponse {
             success: false,
             message: "Spot already taken".to_string(),
@@ -90,12 +91,19 @@ pub async fn create_q_signup_from_external(
         }
     }
 
-    let users = get_slack_id_map(&db_pool).await.unwrap_or_default();
-
-    // 5. Build DB entry
-    let db_entry = if payload.closed {
-        NewQLineUpDbEntry::new_closed(&ao, &date, &channel_id)
+    // 5. Handle closed vs regular Q signup
+    if payload.closed {
+        // Use the same method as Slack bot for closing
+        if let Err(e) = close_q_line_up_entry(&db_pool, &ao, &channel_id, &date).await {
+            return HttpResponse::InternalServerError().json(ExternalQSignupResponse {
+                success: false,
+                message: format!("Failed to close Q signup: {}", e),
+            });
+        }
     } else {
+        // Regular Q signup - need slack_id
+        let users = get_slack_id_map(&db_pool).await.unwrap_or_default();
+
         let q_name = match &payload.q_slack_id {
             Some(slack_id) => {
                 // f3 name
@@ -120,15 +128,16 @@ pub async fn create_q_signup_from_external(
                 });
             }
         };
-        NewQLineUpDbEntry::new(vec![q_name], &ao, &date, &channel_id)
-    };
 
-    // 6. Save to DB (no sync to F3 API)
-    if let Err(e) = save_list(&db_pool, &[db_entry]).await {
-        return HttpResponse::InternalServerError().json(ExternalQSignupResponse {
-            success: false,
-            message: format!("Failed to save Q signup: {}", e),
-        });
+        let db_entry = NewQLineUpDbEntry::new(vec![q_name], &ao, &date, &channel_id);
+
+        // 6. Save to DB (no sync to F3 API)
+        if let Err(e) = save_list(&db_pool, &[db_entry]).await {
+            return HttpResponse::InternalServerError().json(ExternalQSignupResponse {
+                success: false,
+                message: format!("Failed to save Q signup: {}", e),
+            });
+        }
     }
 
     println!(
