@@ -421,7 +421,7 @@ impl AO {
     /// get google maps link for ao (returns generic text if not available)
     pub fn google_maps_link(&self) -> &str {
         self.real_map_url().unwrap_or(match self {
-            AO::RuckershipWest | AO::RuckershipEast | AO::Rafo => "Location Varies",
+            AO::RuckershipWest | AO::RuckershipEast | AO::SundayRuck => "Location Varies",
             AO::DR | AO::BlackOps | AO::FirstF => "Location Varies",
             AO::Unknown(_) => "Unknown",
             _ => "",
