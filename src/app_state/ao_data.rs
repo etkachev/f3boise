@@ -36,7 +36,7 @@ pub enum AO {
     OtbGordonHarrisPark,
     BlackCanyon,
     Liberty,
-    Rafo,
+    SundayRuck,
     FirstF,
     DR,
     Unknown(String),
@@ -141,7 +141,7 @@ impl AO {
             AO::OtbGordonHarrisPark => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Liberty => HashSet::from([Weekday::Tue, Weekday::Thu]),
-            AO::Rafo => HashSet::from([Weekday::Fri, Weekday::Sun]),
+            AO::SundayRuck => HashSet::from([Weekday::Sun]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
@@ -177,7 +177,7 @@ impl AO {
             AO::OtbGordonHarrisPark => "Gordon Harris Park",
             AO::BlackCanyon => "Black Canyon",
             AO::Liberty => "Liberty",
-            AO::Rafo => "RAFO",
+            AO::SundayRuck => "Sunday Ruck",
             AO::DR => "DR",
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -200,12 +200,11 @@ impl AO {
                 AO::Backyard => Some(45),
                 AO::RuckershipWest | AO::RuckershipEast => Some(60),
                 AO::OldGlory => Some(60),
-                AO::Rafo => Some(60),
                 _ => Some(45),
             },
             Weekday::Sat => Some(60),
             Weekday::Sun => match self {
-                AO::Rafo => Some(60),
+                AO::SundayRuck => Some(60),
                 _ => None,
             },
         }
@@ -264,7 +263,7 @@ impl AO {
                 _ => None,
             },
             Weekday::Sun => match self {
-                AO::Rafo => Some(five_thirty),
+                AO::SundayRuck => Some(five_thirty),
                 _ => None,
             },
         }
@@ -300,7 +299,7 @@ impl AO {
             AO::DuckHunt => AoType::Bootcamp,
             AO::BlackCanyon => AoType::Bootcamp,
             AO::Liberty => AoType::WildCard,
-            AO::Rafo => AoType::Rucking,
+            AO::SundayRuck => AoType::Rucking,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
         }
@@ -342,7 +341,7 @@ impl AO {
             AO::DuckHunt => const_names::DUCK_HUNT_CHANNEL_ID,
             AO::BlackCanyon => const_names::BLACK_CANYON_CHANNEL_ID,
             AO::Liberty => const_names::LIBERTY_CHANNEL_ID,
-            AO::Rafo => const_names::RUCK_AROUND_CHANNEL_ID,
+            AO::SundayRuck => const_names::SUNDAY_RUCK_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -378,7 +377,7 @@ impl AO {
             AO::RuckershipEast
             | AO::RuckershipWest
             | AO::BlackOps
-            | AO::Rafo
+            | AO::SundayRuck
             | AO::FirstF
             | AO::DR
             | AO::Unknown(_) => None,
@@ -413,7 +412,7 @@ impl AO {
             AO::DuckHunt => Some(const_names::DUCK_HUNT_GOOGLE_MAPS),
             AO::BlackCanyon => Some(const_names::BLACK_CANYON_GOOGLE_MAPS),
             AO::Liberty => Some(const_names::LIBERTY_GOOGLE_MAPS),
-            AO::RuckershipWest | AO::RuckershipEast | AO::Rafo => None,
+            AO::RuckershipWest | AO::RuckershipEast | AO::SundayRuck => None,
             AO::DR | AO::BlackOps | AO::FirstF => None,
             AO::Unknown(_) => None,
         }
@@ -460,7 +459,7 @@ impl AO {
             const_names::DUCK_HUNT_CHANNEL_ID => AO::DuckHunt,
             const_names::BLACK_CANYON_CHANNEL_ID => AO::BlackCanyon,
             const_names::LIBERTY_CHANNEL_ID => AO::Liberty,
-            const_names::RUCK_AROUND_CHANNEL_ID => AO::Rafo,
+            const_names::SUNDAY_RUCK_CHANNEL_ID => AO::SundayRuck,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
         }
@@ -500,7 +499,7 @@ impl Clone for AO {
             AO::DuckHunt => AO::DuckHunt,
             AO::BlackCanyon => AO::BlackCanyon,
             AO::Liberty => AO::Liberty,
-            AO::Rafo => AO::Rafo,
+            AO::SundayRuck => AO::SundayRuck,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
     }
@@ -538,7 +537,7 @@ impl Display for AO {
             AO::DuckHunt => const_names::DUCK_HUNT,
             AO::BlackCanyon => const_names::BLACK_CANYON,
             AO::Liberty => const_names::LIBERTY,
-            AO::Rafo => const_names::RUCK_AROUND,
+            AO::SundayRuck => const_names::SUNDAY_RUCK,
             AO::DR => "",
             AO::Unknown(_) => "",
         };
@@ -590,7 +589,7 @@ impl From<String> for AO {
             const_names::DUCK_HUNT => AO::DuckHunt,
             const_names::BLACK_CANYON => AO::BlackCanyon,
             const_names::LIBERTY => AO::Liberty,
-            const_names::RUCK_AROUND => AO::Rafo,
+            const_names::SUNDAY_RUCK => AO::SundayRuck,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
         }
@@ -641,7 +640,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::DuckHunt => AO::DuckHunt,
         PublicChannels::BlackCanyon => AO::BlackCanyon,
         PublicChannels::Liberty => AO::Liberty,
-        PublicChannels::Rafo => AO::Rafo,
+        PublicChannels::SundayRuck => AO::SundayRuck,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
@@ -776,11 +775,11 @@ pub mod const_names {
     pub const LIBERTY_CHANNEL_ID: &str = "C07LQPM4X37";
     pub const LIBERTY_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/UsWagimUy1huJdsPA";
 
-    pub const RUCK_AROUND: &str = "rafo";
-    pub const RUCK_AROUND_CHANNEL_ID: &str = "C0ATRN16E2U";
+    pub const SUNDAY_RUCK: &str = "sunday-ruck";
+    pub const SUNDAY_RUCK_CHANNEL_ID: &str = "C0ATRN16E2U";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 27] = [
+    pub const AO_LIST: [AO; 28] = [
         AO::Backyard,
         AO::Bellagio,
         AO::Interceptor,
@@ -805,7 +804,7 @@ pub mod const_names {
         AO::Sentinels,
         AO::EmmettGemIsland,
         AO::TheEdge,
-        // AO::Rafo,
+        AO::SundayRuck,
         AO::OtbCynthiaMann,
         AO::OtbLibertyPark,
         AO::OtbGordonHarrisPark,
