@@ -57,7 +57,8 @@ impl MutableWebState {
     pub async fn get_public_channels(
         &self,
     ) -> Result<HashMap<PublicChannels, ChannelData>, AppError> {
-        let request = ConversationListRequest::with_types(vec![ChannelTypes::Public]);
+        let mut request = ConversationListRequest::with_types(vec![ChannelTypes::Public]);
+        request.limit = Some(1000);
         let url = request.get_url_request(&self.base_api_url);
         println!("Calling: {:?}", url.as_str());
         let response = self.make_get_url_request(url).await;
