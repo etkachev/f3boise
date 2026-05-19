@@ -32,6 +32,7 @@ pub enum PublicChannels {
     BlackCanyon,
     Liberty,
     SundayRuck,
+    Rafo,
     FirstF,
     DR,
     Welcome,
@@ -87,6 +88,7 @@ impl From<&AO> for PublicChannels {
             AO::BlackCanyon => PublicChannels::BlackCanyon,
             AO::Liberty => PublicChannels::Liberty,
             AO::SundayRuck => PublicChannels::SundayRuck,
+            AO::Rafo => PublicChannels::Rafo,
             AO::DR => PublicChannels::DR,
             AO::Unknown(name) => PublicChannels::Unknown(name.to_string()),
         }

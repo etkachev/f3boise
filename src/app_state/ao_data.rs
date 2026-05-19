@@ -37,6 +37,7 @@ pub enum AO {
     BlackCanyon,
     Liberty,
     SundayRuck,
+    Rafo,
     FirstF,
     DR,
     Unknown(String),
@@ -142,6 +143,7 @@ impl AO {
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Liberty => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::SundayRuck => HashSet::from([Weekday::Sun]),
+            AO::Rafo => HashSet::from([Weekday::Fri]),
             AO::DR | AO::Unknown(_) => HashSet::new(),
         }
     }
@@ -178,6 +180,7 @@ impl AO {
             AO::BlackCanyon => "Black Canyon",
             AO::Liberty => "Liberty",
             AO::SundayRuck => "Sunday Ruck",
+            AO::Rafo => "RAFO",
             AO::DR => "DR",
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -300,6 +303,7 @@ impl AO {
             AO::BlackCanyon => AoType::Bootcamp,
             AO::Liberty => AoType::WildCard,
             AO::SundayRuck => AoType::Rucking,
+            AO::Rafo => AoType::Rucking,
             AO::DR => AoType::Bootcamp,
             AO::Unknown(_) => AoType::Bootcamp,
         }
@@ -342,6 +346,7 @@ impl AO {
             AO::BlackCanyon => const_names::BLACK_CANYON_CHANNEL_ID,
             AO::Liberty => const_names::LIBERTY_CHANNEL_ID,
             AO::SundayRuck => const_names::SUNDAY_RUCK_CHANNEL_ID,
+            AO::Rafo => const_names::RAFO_CHANNEL_ID,
             AO::DR => const_names::DR_CHANNEL_ID,
             AO::Unknown(_) => "UNKNOWN",
         }
@@ -374,6 +379,7 @@ impl AO {
             AO::DuckHunt => Some("15203 S Tenth Ave, Caldwell, ID  83607"),
             AO::BlackCanyon => Some("E Main St, Emmett, ID 83617"),
             AO::Liberty => Some("700 W Jefferson St, Boise, ID 83720"),
+            AO::Rafo => Some("QG2W+3H6 Eagle, Idaho"),
             AO::RuckershipEast
             | AO::RuckershipWest
             | AO::BlackOps
@@ -412,6 +418,7 @@ impl AO {
             AO::DuckHunt => Some(const_names::DUCK_HUNT_GOOGLE_MAPS),
             AO::BlackCanyon => Some(const_names::BLACK_CANYON_GOOGLE_MAPS),
             AO::Liberty => Some(const_names::LIBERTY_GOOGLE_MAPS),
+            AO::Rafo => Some(const_names::RAFO_GOOGLE_MAPS),
             AO::RuckershipWest | AO::RuckershipEast | AO::SundayRuck => None,
             AO::DR | AO::BlackOps | AO::FirstF => None,
             AO::Unknown(_) => None,
@@ -460,6 +467,7 @@ impl AO {
             const_names::BLACK_CANYON_CHANNEL_ID => AO::BlackCanyon,
             const_names::LIBERTY_CHANNEL_ID => AO::Liberty,
             const_names::SUNDAY_RUCK_CHANNEL_ID => AO::SundayRuck,
+            const_names::RAFO_CHANNEL_ID => AO::Rafo,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
         }
@@ -500,6 +508,7 @@ impl Clone for AO {
             AO::BlackCanyon => AO::BlackCanyon,
             AO::Liberty => AO::Liberty,
             AO::SundayRuck => AO::SundayRuck,
+            AO::Rafo => AO::Rafo,
             AO::Unknown(name) => AO::Unknown(name.to_string()),
         }
     }
@@ -538,6 +547,7 @@ impl Display for AO {
             AO::BlackCanyon => const_names::BLACK_CANYON,
             AO::Liberty => const_names::LIBERTY,
             AO::SundayRuck => const_names::SUNDAY_RUCK,
+            AO::Rafo => const_names::RAFO,
             AO::DR => "",
             AO::Unknown(_) => "",
         };
@@ -590,6 +600,7 @@ impl From<String> for AO {
             const_names::BLACK_CANYON => AO::BlackCanyon,
             const_names::LIBERTY => AO::Liberty,
             const_names::SUNDAY_RUCK => AO::SundayRuck,
+            const_names::RAFO => AO::Rafo,
             const_names::DR => AO::DR,
             _ => AO::Unknown(ao.to_string()),
         }
@@ -641,6 +652,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::BlackCanyon => AO::BlackCanyon,
         PublicChannels::Liberty => AO::Liberty,
         PublicChannels::SundayRuck => AO::SundayRuck,
+        PublicChannels::Rafo => AO::Rafo,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
         PublicChannels::Welcome => AO::Unknown("Welcome".to_string()),
@@ -778,8 +790,12 @@ pub mod const_names {
     pub const SUNDAY_RUCK: &str = "sunday-ruck";
     pub const SUNDAY_RUCK_CHANNEL_ID: &str = "C0ATRN16E2U";
 
+    pub const RAFO: &str = "rafo";
+    pub const RAFO_CHANNEL_ID: &str = "C0B4YPPG0LR";
+    pub const RAFO_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/cqsq2EAmJf1wXff67";
+
     /// full list of active aos
-    pub const AO_LIST: [AO; 28] = [
+    pub const AO_LIST: [AO; 29] = [
         AO::Backyard,
         AO::Bellagio,
         AO::Interceptor,
@@ -805,6 +821,7 @@ pub mod const_names {
         AO::EmmettGemIsland,
         AO::TheEdge,
         AO::SundayRuck,
+        AO::Rafo,
         AO::OtbCynthiaMann,
         AO::OtbLibertyPark,
         AO::OtbGordonHarrisPark,
