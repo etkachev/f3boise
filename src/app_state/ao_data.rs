@@ -195,7 +195,6 @@ impl AO {
             Weekday::Tue => Some(45),
             Weekday::Wed => match self {
                 AO::BlackDiamond => Some(60),
-                AO::Bleach => Some(60),
                 _ => Some(45),
             },
             Weekday::Thu => Some(45),
@@ -244,7 +243,7 @@ impl AO {
             },
             Weekday::Wed => match self {
                 AO::OldGlory => Some(six),
-                AO::BlackDiamond | AO::Bleach => Some(five),
+                AO::BlackDiamond => Some(five),
                 AO::EmmettGemIsland => Some(five_thirty),
                 ao if ao.week_days().contains(week_day) => Some(five_fifteen),
                 _ => None,
