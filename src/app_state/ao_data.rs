@@ -137,7 +137,7 @@ impl AO {
             AO::Sentinels => HashSet::from([Weekday::Mon, Weekday::Wed]),
             AO::EmmettGemIsland => HashSet::from([Weekday::Wed]),
             AO::TheEdge => HashSet::from([Weekday::Mon, Weekday::Wed, Weekday::Sat]),
-            AO::OtbCynthiaMann => HashSet::from([Weekday::Tue, Weekday::Thu]),
+            AO::OtbCynthiaMann => HashSet::from([Weekday::Thu]),
             AO::OtbLibertyPark => HashSet::from([Weekday::Sat]),
             AO::OtbGordonHarrisPark => HashSet::from([Weekday::Tue, Weekday::Sat]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
@@ -794,7 +794,7 @@ pub mod const_names {
     pub const RAFO_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/cqsq2EAmJf1wXff67";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 29] = [
+    pub const AO_LIST: [AO; 28] = [
         AO::Backyard,
         AO::Bellagio,
         AO::Interceptor,
@@ -823,7 +823,7 @@ pub mod const_names {
         AO::Rafo,
         AO::OtbCynthiaMann,
         AO::OtbLibertyPark,
-        AO::OtbGordonHarrisPark,
+        // AO::OtbGordonHarrisPark,
     ];
 }
 
