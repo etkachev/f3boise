@@ -34,6 +34,7 @@ pub enum AO {
     OtbCynthiaMann,
     OtbLibertyPark,
     OtbGordonHarrisPark,
+    OtbRuckershipCanyon,
     BlackCanyon,
     Liberty,
     SundayRuck,
@@ -140,6 +141,7 @@ impl AO {
             AO::OtbCynthiaMann => HashSet::from([Weekday::Thu]),
             AO::OtbLibertyPark => HashSet::from([Weekday::Sat]),
             AO::OtbGordonHarrisPark => HashSet::from([Weekday::Tue, Weekday::Sat]),
+            AO::OtbRuckershipCanyon => HashSet::from([Weekday::Fri]),
             AO::BlackCanyon => HashSet::from([Weekday::Tue, Weekday::Thu, Weekday::Sat]),
             AO::Liberty => HashSet::from([Weekday::Tue, Weekday::Thu]),
             AO::SundayRuck => HashSet::from([Weekday::Sun]),
@@ -177,6 +179,7 @@ impl AO {
             AO::OtbCynthiaMann => "Cynthia Mann",
             AO::OtbLibertyPark => "Liberty Park",
             AO::OtbGordonHarrisPark => "Gordon Harris Park",
+            AO::OtbRuckershipCanyon => "Ruckership Canyon",
             AO::BlackCanyon => "Black Canyon",
             AO::Liberty => "Liberty",
             AO::SundayRuck => "Sunday Ruck",
@@ -298,6 +301,7 @@ impl AO {
             AO::OtbCynthiaMann => AoType::Bootcamp,
             AO::OtbLibertyPark => AoType::Bootcamp,
             AO::OtbGordonHarrisPark => AoType::Bootcamp,
+            AO::OtbRuckershipCanyon => AoType::Rucking,
             AO::DuckHunt => AoType::Bootcamp,
             AO::BlackCanyon => AoType::Bootcamp,
             AO::Liberty => AoType::WildCard,
@@ -341,6 +345,7 @@ impl AO {
             AO::OtbCynthiaMann => const_names::CYNTHIA_MANN_CHANNEL_ID,
             AO::OtbLibertyPark => const_names::OTB_LIBERTY_PARK_CHANNEL_ID,
             AO::OtbGordonHarrisPark => const_names::OTB_GORDON_HARRIS_PARK_CHANNEL_ID,
+            AO::OtbRuckershipCanyon => const_names::RUCKERSHIP_CANYON_CHANNEL_ID,
             AO::DuckHunt => const_names::DUCK_HUNT_CHANNEL_ID,
             AO::BlackCanyon => const_names::BLACK_CANYON_CHANNEL_ID,
             AO::Liberty => const_names::LIBERTY_CHANNEL_ID,
@@ -381,6 +386,7 @@ impl AO {
             AO::Rafo => Some("QG2W+3H6 Eagle, Idaho"),
             AO::RuckershipEast
             | AO::RuckershipWest
+            | AO::OtbRuckershipCanyon
             | AO::BlackOps
             | AO::SundayRuck
             | AO::FirstF
@@ -418,7 +424,9 @@ impl AO {
             AO::BlackCanyon => Some(const_names::BLACK_CANYON_GOOGLE_MAPS),
             AO::Liberty => Some(const_names::LIBERTY_GOOGLE_MAPS),
             AO::Rafo => Some(const_names::RAFO_GOOGLE_MAPS),
-            AO::RuckershipWest | AO::RuckershipEast | AO::SundayRuck => None,
+            AO::RuckershipWest | AO::RuckershipEast | AO::SundayRuck | AO::OtbRuckershipCanyon => {
+                None
+            }
             AO::DR | AO::BlackOps | AO::FirstF => None,
             AO::Unknown(_) => None,
         }
@@ -427,7 +435,9 @@ impl AO {
     /// get google maps link for ao (returns generic text if not available)
     pub fn google_maps_link(&self) -> &str {
         self.real_map_url().unwrap_or(match self {
-            AO::RuckershipWest | AO::RuckershipEast | AO::SundayRuck => "Location Varies",
+            AO::RuckershipWest | AO::RuckershipEast | AO::SundayRuck | AO::OtbRuckershipCanyon => {
+                "Location Varies"
+            }
             AO::DR | AO::BlackOps | AO::FirstF => "Location Varies",
             AO::Unknown(_) => "Unknown",
             _ => "",
@@ -466,6 +476,7 @@ impl AO {
             const_names::BLACK_CANYON_CHANNEL_ID => AO::BlackCanyon,
             const_names::LIBERTY_CHANNEL_ID => AO::Liberty,
             const_names::SUNDAY_RUCK_CHANNEL_ID => AO::SundayRuck,
+            const_names::RUCKERSHIP_CANYON_CHANNEL_ID => AO::OtbRuckershipCanyon,
             const_names::RAFO_CHANNEL_ID => AO::Rafo,
             const_names::DR_CHANNEL_ID => AO::DR,
             _ => AO::Unknown("UNKNOWN".to_string()),
@@ -503,6 +514,7 @@ impl Clone for AO {
             AO::OtbCynthiaMann => AO::OtbCynthiaMann,
             AO::OtbLibertyPark => AO::OtbLibertyPark,
             AO::OtbGordonHarrisPark => AO::OtbGordonHarrisPark,
+            AO::OtbRuckershipCanyon => AO::OtbRuckershipCanyon,
             AO::DuckHunt => AO::DuckHunt,
             AO::BlackCanyon => AO::BlackCanyon,
             AO::Liberty => AO::Liberty,
@@ -542,6 +554,7 @@ impl Display for AO {
             AO::OtbCynthiaMann => const_names::CYNTHIA_MANN,
             AO::OtbLibertyPark => const_names::OTB_LIBERTY_PARK,
             AO::OtbGordonHarrisPark => const_names::OTB_GORDON_HARRIS_PARK,
+            AO::OtbRuckershipCanyon => const_names::RUCKERSHIP_CANYON,
             AO::DuckHunt => const_names::DUCK_HUNT,
             AO::BlackCanyon => const_names::BLACK_CANYON,
             AO::Liberty => const_names::LIBERTY,
@@ -595,6 +608,7 @@ impl From<String> for AO {
             const_names::CYNTHIA_MANN => AO::OtbCynthiaMann,
             const_names::OTB_LIBERTY_PARK => AO::OtbLibertyPark,
             const_names::OTB_GORDON_HARRIS_PARK => AO::OtbGordonHarrisPark,
+            const_names::RUCKERSHIP_CANYON => AO::OtbRuckershipCanyon,
             const_names::DUCK_HUNT => AO::DuckHunt,
             const_names::BLACK_CANYON => AO::BlackCanyon,
             const_names::LIBERTY => AO::Liberty,
@@ -651,6 +665,7 @@ fn channel_to_ao_mapper(channel: &PublicChannels) -> AO {
         PublicChannels::BlackCanyon => AO::BlackCanyon,
         PublicChannels::Liberty => AO::Liberty,
         PublicChannels::SundayRuck => AO::SundayRuck,
+        PublicChannels::OtbRuckershipCanyon => AO::OtbRuckershipCanyon,
         PublicChannels::Rafo => AO::Rafo,
         PublicChannels::BotPlayground => AO::Unknown("BotPlayground".to_string()),
         PublicChannels::DR => AO::DR,
@@ -789,12 +804,15 @@ pub mod const_names {
     pub const SUNDAY_RUCK: &str = "sunday-ruck";
     pub const SUNDAY_RUCK_CHANNEL_ID: &str = "C0ATRN16E2U";
 
+    pub const RUCKERSHIP_CANYON: &str = "otb-ruckership-canyon";
+    pub const RUCKERSHIP_CANYON_CHANNEL_ID: &str = "C0B903KCR8T";
+
     pub const RAFO: &str = "rafo";
     pub const RAFO_CHANNEL_ID: &str = "C0B4YPPG0LR";
     pub const RAFO_GOOGLE_MAPS: &str = "https://maps.app.goo.gl/cqsq2EAmJf1wXff67";
 
     /// full list of active aos
-    pub const AO_LIST: [AO; 28] = [
+    pub const AO_LIST: [AO; 29] = [
         AO::Backyard,
         AO::Bellagio,
         AO::Interceptor,
@@ -820,6 +838,7 @@ pub mod const_names {
         AO::EmmettGemIsland,
         AO::TheEdge,
         AO::SundayRuck,
+        AO::OtbRuckershipCanyon,
         AO::Rafo,
         AO::OtbCynthiaMann,
         AO::OtbLibertyPark,
