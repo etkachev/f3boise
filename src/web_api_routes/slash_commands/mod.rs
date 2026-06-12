@@ -63,7 +63,7 @@ pub async fn slack_slash_commands_route(
             Err(err) => HttpResponse::BadRequest().body(err.to_string()),
         },
         "/q-sheet" | "/post-q-sheet" => match QLineUpCommand::from(form.text.as_str()) {
-            QLineUpCommand { ao: None, month } => {
+            QLineUpCommand { ao: None, month, weeks } => {
                 let users = get_user_name_map(&db_pool).await.unwrap_or_default();
                 let start_date = month
                     .map(|date| date.pred_opt().unwrap())
@@ -88,6 +88,7 @@ pub async fn slack_slash_commands_route(
                                 &users,
                                 form.channel_id.as_str(),
                                 &web_state,
+                                weeks,
                             )
                             .await
                             {
@@ -101,6 +102,7 @@ pub async fn slack_slash_commands_route(
                                 &users,
                                 form.channel_id.as_str(),
                                 &web_state,
+                                weeks,
                             )
                             .await
                             {
@@ -112,12 +114,12 @@ pub async fn slack_slash_commands_route(
                     // this will be the silent response where only the requester will see.
                     "/q-sheet" => {
                         if let Some(ao) = possible_ao {
-                            match get_q_line_up_for_ao(&db_pool, ao, &start_date, &users).await {
+                            match get_q_line_up_for_ao(&db_pool, ao, &start_date, &users, weeks).await {
                                 Ok(builder) => HttpResponse::Ok().json(builder),
                                 Err(err) => HttpResponse::BadRequest().body(err.to_string()),
                             }
                         } else {
-                            match get_q_line_up_message_all(&db_pool, &start_date, &users).await {
+                            match get_q_line_up_message_all(&db_pool, &start_date, &users, weeks).await {
                                 Ok(builder) => HttpResponse::Ok().json(builder),
                                 Err(err) => HttpResponse::BadRequest().body(err.to_string()),
                             }
@@ -129,6 +131,7 @@ pub async fn slack_slash_commands_route(
             QLineUpCommand {
                 ao: Some(ao),
                 month,
+                weeks,
             } => {
                 let users = get_user_name_map(&db_pool).await.unwrap_or_default();
                 let start_date = month
@@ -141,6 +144,7 @@ pub async fn slack_slash_commands_route(
                     &users,
                     form.channel_id.as_str(),
                     &web_state,
+                    weeks,
                 )
                 .await
                 {

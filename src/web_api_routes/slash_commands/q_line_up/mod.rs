@@ -23,21 +23,69 @@ use std::str::FromStr;
 pub struct QLineUpCommand {
     pub ao: Option<AO>,
     pub month: Option<NaiveDate>,
+    pub weeks: Option<u32>,
 }
 
 impl From<&str> for QLineUpCommand {
     fn from(text: &str) -> Self {
-        let (ao, month) = text.split_once(' ').unwrap_or((text, ""));
+        let (first, second) = text.split_once(' ').unwrap_or((text, ""));
         let now = local_boise_time().date_naive();
-        let month = map_month_str_to_future_date(month, &now);
-        let possible_ao = AO::from(ao.to_string());
+
+        // Try to parse the first part as an AO
+        let possible_ao = AO::from(first.to_string());
+
+        // If we have a second parameter, it could be weeks (integer) or month (string)
+        if !second.is_empty() {
+            // Try to parse second parameter as weeks (integer)
+            if let Ok(weeks_num) = second.parse::<u32>() {
+                let ao = if let AO::Unknown(_) = possible_ao {
+                    None
+                } else {
+                    Some(possible_ao)
+                };
+                return QLineUpCommand {
+                    ao,
+                    month: None,
+                    weeks: Some(weeks_num),
+                };
+            }
+
+            // Otherwise, treat it as a month string
+            let month = map_month_str_to_future_date(second, &now);
+            let ao = if let AO::Unknown(_) = possible_ao {
+                None
+            } else {
+                Some(possible_ao)
+            };
+            return QLineUpCommand {
+                ao,
+                month,
+                weeks: None,
+            };
+        }
+
+        // Only one parameter - could be weeks (integer) or AO
+        if let Ok(weeks_num) = first.parse::<u32>() {
+            // It's just a number, treat as weeks
+            return QLineUpCommand {
+                ao: None,
+                month: None,
+                weeks: Some(weeks_num),
+            };
+        }
+
+        // It's an AO without weeks or month
         let ao = if let AO::Unknown(_) = possible_ao {
             None
         } else {
             Some(possible_ao)
         };
 
-        QLineUpCommand { ao, month }
+        QLineUpCommand {
+            ao,
+            month: None,
+            weeks: None,
+        }
     }
 }
 
@@ -48,8 +96,9 @@ pub async fn send_all_q_line_up_message(
     users: &HashMap<String, String>,
     channel_id: &str,
     web_app: &MutableWebState,
+    weeks: Option<u32>,
 ) -> Result<(), AppError> {
-    let message = get_q_line_up_message_all(db_pool, month_to_check, users).await?;
+    let message = get_q_line_up_message_all(db_pool, month_to_check, users, weeks).await?;
     let request = PostMessageRequest::new(channel_id, message.blocks);
     web_app.post_message(request).await?;
     Ok(())
@@ -60,9 +109,15 @@ pub async fn get_q_line_up_message_all(
     db_pool: &PgPool,
     month_to_check: &NaiveDate,
     users: &HashMap<String, String>,
+    weeks: Option<u32>,
 ) -> Result<BlockBuilder, AppError> {
+    let days = if let Some(weeks_num) = weeks {
+        (weeks_num * 7) as i64
+    } else {
+        5
+    };
     let end_date = (*month_to_check)
-        .checked_add_signed(Duration::days(5))
+        .checked_add_signed(Duration::days(days))
         .unwrap_or_else(|| (*month_to_check).succ_opt().unwrap());
     let result = get_q_line_up_for_range(db_pool, month_to_check, end_date, users).await?;
     Ok(result)
@@ -76,8 +131,9 @@ pub async fn send_ao_q_line_up_message(
     users: &HashMap<String, String>,
     channel_id: &str,
     web_app: &MutableWebState,
+    weeks: Option<u32>,
 ) -> Result<(), AppError> {
-    let message = get_q_line_up_for_ao(db_pool, ao, start_date, users).await?;
+    let message = get_q_line_up_for_ao(db_pool, ao, start_date, users, weeks).await?;
     let request = PostMessageRequest::new(channel_id, message.blocks);
     web_app.post_message(request).await?;
     Ok(())
@@ -89,10 +145,15 @@ pub async fn get_q_line_up_for_ao(
     ao: AO,
     start_date: &NaiveDate,
     users: &HashMap<String, String>,
+    weeks: Option<u32>,
 ) -> Result<BlockBuilder, AppError> {
-    let days_ahead: i64 = match ao {
-        AO::RuckershipEast | AO::RuckershipWest => 30,
-        _ => 20,
+    let days_ahead: i64 = if let Some(weeks_num) = weeks {
+        (weeks_num * 7) as i64
+    } else {
+        match ao {
+            AO::RuckershipEast | AO::RuckershipWest => 30,
+            _ => 20,
+        }
     };
     let end_date = (*start_date)
         .checked_add_signed(Duration::days(days_ahead))
