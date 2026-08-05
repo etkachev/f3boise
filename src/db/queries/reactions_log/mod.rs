@@ -84,3 +84,31 @@ ORDER BY rs.entity_id, rs.slack_user, rs.reaction;
 
     Ok(results)
 }
+
+/// Get current HC list for a specific preblast (users who have HCs and haven't removed them)
+pub async fn get_preblast_hc_users(
+    db: &PgPool,
+    preblast_id: Uuid,
+) -> Result<Vec<String>, AppError> {
+    let results = sqlx::query_scalar!(
+        r#"
+        SELECT slack_user
+        FROM (
+            SELECT slack_user,
+                   SUM(CASE WHEN reaction_added THEN 1 ELSE -1 END) AS net_hcs
+            FROM reactions_log
+            WHERE entity_type = 'pre_blast'
+              AND entity_id = $1
+              AND reaction = 'hc'
+            GROUP BY slack_user
+        ) AS hc_counts
+        WHERE net_hcs > 0
+        ORDER BY slack_user
+        "#,
+        preblast_id
+    )
+    .fetch_all(db)
+    .await?;
+
+    Ok(results)
+}

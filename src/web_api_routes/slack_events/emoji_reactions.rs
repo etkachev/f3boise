@@ -81,9 +81,73 @@ async fn get_related_entity(
                     let reaction_log_item =
                         ReactionLogDbItem::new(reaction, &id, adding).for_pre_blast();
                     save_reaction_item(db, reaction_log_item).await?;
+
+                    // If this is an HC reaction, notify F3
+                    if reaction.reaction == "hc" {
+                        if let Err(e) = notify_f3_hc(&id, &reaction.user, adding).await {
+                            eprintln!("⚠️ Failed to notify F3 about HC: {}", e);
+                            // Don't fail the whole operation if F3 notification fails
+                        }
+                    }
                 }
             }
         }
+    }
+
+    Ok(())
+}
+
+/// Notify F3 when an HC reaction is added/removed on Slack
+async fn notify_f3_hc(
+    preblast_id: &str,
+    slack_user_id: &str,
+    adding: bool,
+) -> Result<(), Box<dyn std::error::Error>> {
+    // Get F3 webhook URL from environment variable
+    let f3_webhook_url = std::env::var("F3_WEBHOOK_URL")
+        .unwrap_or_else(|_| {
+            eprintln!("⚠️ F3_WEBHOOK_URL not set, skipping F3 notification");
+            String::new()
+        });
+
+    if f3_webhook_url.is_empty() {
+        return Ok(());
+    }
+
+    let action = if adding { "add" } else { "remove" };
+    let url = format!("{}/webhook/preblast/{}/hc", f3_webhook_url, preblast_id);
+
+    println!(
+        "🔔 [HC] Notifying F3: preblast={}, user={}, action={}",
+        preblast_id, slack_user_id, action
+    );
+
+    #[derive(serde::Serialize)]
+    struct HcWebhookPayload {
+        slack_user_id: String,
+        action: String,
+    }
+
+    let payload = HcWebhookPayload {
+        slack_user_id: slack_user_id.to_string(),
+        action: action.to_string(),
+    };
+
+    let client = reqwest::Client::new();
+    let response = client
+        .post(&url)
+        .json(&payload)
+        .send()
+        .await?;
+
+    if response.status().is_success() {
+        println!("✅ [HC] Successfully notified F3");
+    } else {
+        eprintln!(
+            "❌ [HC] F3 webhook failed: status={}, body={:?}",
+            response.status(),
+            response.text().await
+        );
     }
 
     Ok(())

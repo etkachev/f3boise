@@ -1,4 +1,5 @@
 pub mod external;
+pub mod hc;
 
 use crate::db::queries::pre_blasts;
 use crate::db::queries::pre_blasts::PreBlastJsonFullData;

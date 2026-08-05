@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT slack_user\n        FROM (\n            SELECT slack_user,\n                   SUM(CASE WHEN reaction_added THEN 1 ELSE -1 END) AS net_hcs\n            FROM reactions_log\n            WHERE entity_type = 'pre_blast'\n              AND entity_id = $1\n              AND reaction = 'hc'\n            GROUP BY slack_user\n        ) AS hc_counts\n        WHERE net_hcs > 0\n        ORDER BY slack_user\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "slack_user",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "6ebce625a6a4b3bcdde3c3d359448a1617de747fc853cbd49751b18cc54b34f4"
+}

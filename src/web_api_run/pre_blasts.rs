@@ -13,4 +13,8 @@ pub fn service() -> Scope {
             "/from-external",
             web::post().to(pre_blast_data::external::create_pre_blast_from_external),
         )
+        .route(
+            "/{uuid}/hc",
+            web::post().to(pre_blast_data::hc::receive_hc_from_f3),
+        )
 }
