@@ -41,6 +41,7 @@ pub struct SyncPreblastRequest {
     pub why: Option<String>,
     pub fng_message: Option<String>,
     pub mole_skin: Option<String>,
+    pub location_url: Option<String>,
 }
 
 /// Request payload for syncing a Q signup to F3 API
@@ -125,6 +126,7 @@ impl SyncPreblastRequest {
             why: Some(data.why.clone()),
             fng_message: data.fng_message.clone(),
             mole_skin: data.mole_skin.clone(),
+            location_url: data.location_url.clone(),
         }
     }
 }
