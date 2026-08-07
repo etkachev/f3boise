@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO slack_view_submissions (view_id, result_id, view_type)\n        VALUES ($1, $2, $3)\n        ON CONFLICT (view_id) DO NOTHING\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "06aa644446c8264d85ce6c4b90b01a6b5322d6472eb9a582cb88edac4082396b"
+}

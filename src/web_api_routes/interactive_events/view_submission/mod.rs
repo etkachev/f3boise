@@ -167,7 +167,18 @@ async fn handle_back_blast_submission(
     user: &ActionUser,
 ) -> Result<(), AppError> {
     use crate::db::save_back_blast::{self, SaveResult};
+    use crate::db::slack_view_tracking;
     use crate::shared::f3_api_sync::sync_backblast;
+
+    // Idempotency check: prevent duplicate processing from Slack webhook retries
+    let view_id = &modal.id;
+    if let Some(existing_id) = slack_view_tracking::check_view_processed(db_pool, view_id).await? {
+        println!(
+            "[BackBlast] View {} already processed with ID {}. Skipping (Slack retry).",
+            view_id, existing_id
+        );
+        return Ok(());
+    }
 
     let form_values = modal.state.get_values();
     let post = back_blast_post::BackBlastPost::from(form_values);
@@ -180,6 +191,10 @@ async fn handle_back_blast_submission(
         match save_back_blast::save_single(db_pool, &db_data).await? {
             SaveResult::Inserted(saved_id) => {
                 id = Some(saved_id.clone());
+
+                // Mark view as processed immediately to prevent retries from creating duplicates
+                slack_view_tracking::mark_view_processed(db_pool, view_id, &saved_id, "backblast").await?;
+
                 // sync to F3 API in background (don't block Slack response)
                 let sync_data = db_data.clone();
                 let sync_id = saved_id.clone();
@@ -212,13 +227,27 @@ async fn handle_pre_blast_submission(
     user: &ActionUser,
 ) -> Result<(), AppError> {
     use crate::db::save_pre_blast;
+    use crate::db::slack_view_tracking;
     use crate::shared::f3_api_sync::sync_preblast;
+
+    // Idempotency check: prevent duplicate processing from Slack webhook retries
+    let view_id = &modal.id;
+    if let Some(existing_id) = slack_view_tracking::check_view_processed(db_pool, view_id).await? {
+        println!(
+            "[PreBlast] View {} already processed with ID {}. Skipping (Slack retry).",
+            view_id, existing_id
+        );
+        return Ok(());
+    }
 
     let form_values = modal.state.get_values();
     let post = pre_blast_post::PreBlastPost::from(form_values);
     let users = get_slack_id_map(db_pool).await?;
     let db_data = PreBlastData::from(&post).with_qs(&post.qs, users);
     let saved_id = save_pre_blast::save_single(db_pool, &db_data).await?;
+
+    // Mark view as processed immediately to prevent retries from creating duplicates
+    slack_view_tracking::mark_view_processed(db_pool, view_id, &saved_id, "preblast").await?;
 
     // sync to F3 API in background (don't block Slack response)
     let sync_data = db_data.clone();
