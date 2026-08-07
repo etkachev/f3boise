@@ -103,19 +103,19 @@ async fn notify_f3_hc(
     slack_user_id: &str,
     adding: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // Get F3 webhook URL from environment variable
-    let f3_webhook_url = std::env::var("F3_WEBHOOK_URL")
+    // Get F3 API base URL from environment variable (same as used for sync)
+    let f3_api_base_url = std::env::var("F3_API_BASE_URL")
         .unwrap_or_else(|_| {
-            eprintln!("⚠️ F3_WEBHOOK_URL not set, skipping F3 notification");
+            eprintln!("⚠️ F3_API_BASE_URL not set, skipping F3 notification");
             String::new()
         });
 
-    if f3_webhook_url.is_empty() {
+    if f3_api_base_url.is_empty() {
         return Ok(());
     }
 
     let action = if adding { "add" } else { "remove" };
-    let url = format!("{}/webhook/preblast/{}/hc", f3_webhook_url, preblast_id);
+    let url = format!("{}/webhook/preblast/{}/hc", f3_api_base_url, preblast_id);
 
     println!(
         "🔔 [HC] Notifying F3: preblast={}, user={}, action={}",
