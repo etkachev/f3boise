@@ -14,6 +14,7 @@ pub mod ao_monthly_leaderboard;
 pub mod back_blast_single;
 pub mod csv_download_all;
 pub mod double_downs;
+pub mod external;
 pub mod pax_leaderboard_graph;
 pub mod remind_missing_back_blasts;
 pub mod test_png;

@@ -4,6 +4,7 @@ use crate::web_api_routes::back_blast_data::back_blast_single::get_single_back_b
 use crate::web_api_routes::back_blast_data::csv_download_all::{
     back_blasts_csv_html, download_back_blasts_csv_route,
 };
+use crate::web_api_routes::back_blast_data::external::create_back_blast_from_external;
 use crate::web_api_routes::back_blast_data::pax_leaderboard_graph::pax_leaderboard_route;
 use crate::web_api_routes::back_blast_data::remind_missing_back_blasts::remind_missing_back_blasts;
 use crate::web_api_routes::back_blast_data::test_png::test_png_route;
@@ -38,6 +39,7 @@ pub fn service() -> Scope {
             web::get().to(download_back_blasts_csv_route),
         )
         .route("/sync-via-url", web::get().to(sync_prod_back_blasts))
+        .route("/from-external", web::post().to(create_back_blast_from_external))
         .route("/single/{id}", web::get().to(get_single_back_blast_data))
         .route("/{ao_name}", web::get().to(get_back_blast_stats_by_ao))
 }

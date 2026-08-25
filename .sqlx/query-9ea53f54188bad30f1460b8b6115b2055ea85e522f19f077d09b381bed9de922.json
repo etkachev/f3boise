@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    SELECT id\n    FROM back_blasts\n    WHERE channel_id = $1 AND date = $2 AND bb_type = $3\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Date",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9ea53f54188bad30f1460b8b6115b2055ea85e522f19f077d09b381bed9de922"
+}

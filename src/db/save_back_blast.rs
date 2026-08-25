@@ -98,6 +98,29 @@ pub async fn save_single(db_pool: &PgPool, data: &BackBlastData) -> Result<SaveR
     }
 }
 
+/// get backblast id by ao channel, date, and bb_type
+pub async fn get_id_by_ao_date_type(
+    db_pool: &PgPool,
+    channel_id: &str,
+    date: &NaiveDate,
+    bb_type: &str,
+) -> Result<Option<String>, AppError> {
+    let result = sqlx::query!(
+        r#"
+    SELECT id
+    FROM back_blasts
+    WHERE channel_id = $1 AND date = $2 AND bb_type = $3
+    "#,
+        channel_id,
+        date,
+        bb_type
+    )
+    .fetch_optional(db_pool)
+    .await?;
+
+    Ok(result.map(|r| r.id.to_string()))
+}
+
 /// update timestamp for backblast, to be able to edit most recent message post.
 pub async fn update_back_blast_ts(db_pool: &PgPool, id: &str, ts: String) -> Result<(), AppError> {
     let mut transaction = db_pool.begin().await.expect("Failed to begin transaction");
