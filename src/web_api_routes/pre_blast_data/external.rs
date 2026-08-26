@@ -78,19 +78,7 @@ pub async fn create_pre_blast_from_external(
         }
     };
 
-    // 3. Combine Q Slack IDs and fallback names
-    let mut all_qs = HashSet::new();
-
-    // Add users with Slack IDs (already in Slack format)
-    for slack_id in &payload.q_slack_ids {
-        all_qs.insert(slack_id.clone());
-    }
-
-    // Add users without Slack IDs (use their F3 names)
-    // These will be displayed as plain text in Slack
-    for name in &payload.q_names_without_slack {
-        all_qs.insert(name.clone());
-    }
+    // 3. Keep Q Slack IDs and names separate (don't combine them)
 
     // 4. Parse equipment
     let equipment: HashSet<AoEquipment> = payload
@@ -102,7 +90,7 @@ pub async fn create_pre_blast_from_external(
         })
         .collect();
 
-    // 5. Get slack_id to name mapping (for display purposes)
+    // 4. Get slack_id to name mapping for storage
     let users_map = match get_slack_id_map(&db_pool).await {
         Ok(map) => map,
         Err(e) => {
@@ -111,21 +99,21 @@ pub async fn create_pre_blast_from_external(
         }
     };
 
-    // Convert Slack IDs to names for storage
-    let qs_for_storage: HashSet<String> = all_qs
-        .iter()
-        .map(|q| {
-            // If it's a Slack ID (starts with U), try to map to name
-            if q.starts_with('U') {
-                users_map.get(q).cloned().unwrap_or_else(|| q.clone())
-            } else {
-                // Already a name
-                q.clone()
-            }
-        })
-        .collect();
+    // Convert Slack IDs to names for storage, combine with names
+    let mut qs_for_storage = HashSet::new();
 
-    // 6. Create PreBlastData
+    // Convert Slack IDs to names
+    for slack_id in &payload.q_slack_ids {
+        let name = users_map.get(slack_id).cloned().unwrap_or_else(|| slack_id.clone());
+        qs_for_storage.insert(name);
+    }
+
+    // Add names without Slack IDs
+    for name in &payload.q_names_without_slack {
+        qs_for_storage.insert(name.clone());
+    }
+
+    // 5. Create PreBlastData
     let db_data = PreBlastData {
         id: None,
         ao: ao.clone(),
@@ -141,7 +129,7 @@ pub async fn create_pre_blast_from_external(
         location_url: payload.location_url.clone(),
     };
 
-    // 7. Save to DB
+    // 6. Save to DB
     let saved_id = match save_pre_blast::save_single(&db_pool, &db_data).await {
         Ok(id) => {
             println!("✅ [Preblast External] Saved to DB with ID: {}", id);
@@ -157,10 +145,17 @@ pub async fn create_pre_blast_from_external(
         }
     };
 
-    // 8. Post to Slack (using the original Slack IDs for mentions)
+    // 7. Post to Slack (using the original Slack IDs for mentions)
     // NOTE: We do NOT sync back to F3 API to avoid infinite loops
     println!("🚀 [Preblast External] Posting to Slack channel: {}", ao.channel_id());
-    let message = create_slack_message(&db_pool, &db_data, &saved_id, &all_qs).await;
+    let message = create_slack_message(
+        &db_pool,
+        &db_data,
+        &saved_id,
+        &payload.q_slack_ids,
+        &payload.q_names_without_slack,
+    )
+    .await;
 
     let ts = match web_state.post_message(message).await {
         Ok(ts) => {
@@ -194,7 +189,8 @@ async fn create_slack_message(
     _db_pool: &PgPool,
     data: &PreBlastData,
     id: &str,
-    qs_slack_format: &HashSet<String>,
+    q_slack_ids: &[String],
+    q_names_without_slack: &[String],
 ) -> crate::slack_api::chat::post_message::request::PostMessageRequest {
     use crate::slack_api::block_kit::BlockBuilder;
     use crate::slack_api::chat::post_message::request::PostMessageRequest;
@@ -202,17 +198,19 @@ async fn create_slack_message(
 
     let channel_id = data.ao.channel_id().to_string();
 
-    // Format Qs for display (with @ mentions for Slack IDs)
-    let qs_display: Vec<String> = qs_slack_format
-        .iter()
-        .map(|q| {
-            if q.starts_with('U') {
-                format!("<@{}>", q)
-            } else {
-                q.clone()
-            }
-        })
-        .collect();
+    // Format Qs for display (Slack IDs as @mentions, names as plain text)
+    let mut qs_display = Vec::new();
+
+    // Add Slack IDs as mentions
+    for slack_id in q_slack_ids {
+        qs_display.push(format!("<@{}>", slack_id));
+    }
+
+    // Add names without Slack IDs as plain text
+    for name in q_names_without_slack {
+        qs_display.push(name.clone());
+    }
+
     let qs_list = qs_display.join(" ");
 
     let equipment_list = if data.equipment.is_empty() {
